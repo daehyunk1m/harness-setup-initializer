@@ -39,6 +39,25 @@
 - 스키마를 바꾸면 SKILL.md § 프리셋 스키마 + § 커스텀 프리셋 작성 가이드도 업데이트
 - 모든 기존 프리셋이 새 스키마와 호환되는지 확인
 
+## Git 워크플로
+
+### 커밋 규칙
+- 형식: `type(scope): 설명`
+- 타입: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`
+- 스코프: `skill`, `templates`, `presets`, `tracking`, `refs`, `docs`, `config`, `repo`
+- 첫 줄 72자 이내, 설명은 한국어
+
+### 커맨드
+- `/gc [힌트]` — 변경사항 분석 → 커밋 메시지 생성 → CHANGELOG 업데이트 → 커밋
+- `/gs status` — 현재 git 상태 요약
+- `/gs push` — 원격에 push
+- `/gs branch <name>` — 브랜치 생성 (`feature/`, `fix/`, `docs/` 등 접두사)
+- `/gs checkpoint` — 세션 종료 시 트래킹 파일 포함 커밋 + push
+
+### 브랜치 규칙
+- `main`: 유일한 장기 브랜치
+- 기능 개발: `feature/<name>`, 버그 수정: `fix/<name>`, 문서: `docs/<name>`
+
 ## 테스트
 
 ```bash
@@ -60,6 +79,7 @@ cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup
 2. **`.tracking/CHANGELOG.md`** — 변경 사항 기록 (Added/Changed/Fixed 분류)
 3. **`references/project-context.md`** — 새 설계 결정이 있으면 § 설계 결정 사항에 추가, 버전 히스토리 갱신
 4. **`.tracking/TODO.md`** — 완료 항목 체크, 새로 발견한 이슈 추가
+5. **`/gs checkpoint`** — 트래킹 파일 포함 커밋 + push
 
 ## 핵심 원칙
 

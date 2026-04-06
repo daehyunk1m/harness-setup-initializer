@@ -145,7 +145,12 @@ harness-setup/
 │   ├── harness-guide.md              # 하네스 엔지니어링 이론 (P1~P10)
 │   └── project-context.md            # 설계 결정 기록 + 버전 히스토리
 ├── .claude/
-│   └── settings.local.json           # 권한 설정 (WebSearch, WebFetch)
+│   ├── commands/
+│   │   ├── gc.md                     # /gc — git commit 커맨드
+│   │   └── gs.md                     # /gs — git sync 커맨드
+│   ├── rules/
+│   │   └── git-workflow.md           # Git 워크플로 규칙 (패시브)
+│   └── settings.local.json           # 권한 설정 (WebSearch, WebFetch, git)
 └── .tracking/
     ├── CHANGELOG.md                  # 변경 이력
     ├── TODO.md                       # 작업 추적 (TODO-01~35)
