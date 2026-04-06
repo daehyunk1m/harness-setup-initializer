@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 TODO
 
-> 마지막 업데이트: 2026-04-06
+> 마지막 업데이트: 2026-04-07
 > 분석 기반: SKILL.md(~1100줄), presets/ 2개, references/ 2개, templates/ 2개
 
 ---
@@ -225,3 +225,21 @@
 - **파일**: `presets/react-next.json`, `presets/react-router-fsd.json`
 - **문제**: SKILL.md 스키마에 `docFreshnessDays` 정의했으나 실제 프리셋 파일에 없음
 - **해결**: 두 프리셋에 `"docFreshnessDays": 14` 추가
+
+---
+
+## Session 7: 템플릿 완비 + 트래킹 정리 (2026-04-07)
+
+> 미생성 템플릿 4개 추가, 트래킹 문서 현행화, P10 범위 확정.
+
+### TODO-39: 트래킹 문서 현행화
+- **상태**: [x] 완료 (2026-04-07)
+- **파일**: `.tracking/HANDOFF.md`, `references/project-context.md`
+- **문제**: HANDOFF 섹션 5가 이미 완료된 작업을 남은 작업으로 기술, P10이 "미완"으로 표시
+- **해결**: P10을 "범위 밖"으로 확정, 섹션 5를 실제 향후 작업으로 업데이트, 파일 트리 현행화
+
+### TODO-40: 미생성 템플릿 4개 추가
+- **상태**: [x] 완료 (2026-04-07)
+- **파일**: `templates/init.sh`, `templates/doc-freshness.ts`, `templates/QUALITY_SCORE.md`, `templates/TECH_DEBT.md`, `SKILL.md`
+- **문제**: SKILL.md 5.6~5.9에 상세 생성 규칙이 있으나 대응하는 템플릿 파일이 없어 출력 일관성 부족
+- **해결**: 4개 템플릿 생성, SKILL.md에 템플릿 참조 + 플레이스홀더 치환 규칙 추가, Phase 3 검증 6.11 범위 확장, 참고자료 테이블 업데이트

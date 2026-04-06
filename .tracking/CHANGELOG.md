@@ -7,6 +7,22 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 7 (2026-04-07): 템플릿 완비
+- templates/init.sh: 환경 초기화 스크립트 템플릿 — 패키지 매니저 자동 감지, devServer 플레이스홀더 (DEV_SERVER_COMMAND, READY_CHECK_COMMAND, DEV_SERVER_PORT)
+- templates/doc-freshness.ts: 문서 최신성 검사 스크립트 템플릿 — DOC_FRESHNESS_DAYS, DOC_CHECK_TARGETS 플레이스홀더
+- templates/QUALITY_SCORE.md: 품질 점수표 템플릿 — 6개 카테고리 고정 (플레이스홀더 없음)
+- templates/TECH_DEBT.md: 기술 부채 문서 템플릿 — CREATED_DATE 플레이스홀더
+
+### 수정 (Changed) — Session 7 (2026-04-07)
+- SKILL.md 5.6: init.sh 생성 규칙에 템플릿 참조 + 3개 플레이스홀더 치환 규칙 추가
+- SKILL.md 5.7: doc-freshness.ts 생성 규칙에 템플릿 참조 + 2개 플레이스홀더 치환 규칙 추가
+- SKILL.md 5.8: QUALITY_SCORE.md 생성 규칙에 템플릿 복사 방식 명시
+- SKILL.md 5.9: TECH_DEBT.md 생성 규칙에 템플릿 참조 + CREATED_DATE 치환 규칙 추가
+- SKILL.md 6.11: 미치환 플레이스홀더 검사 범위를 init.sh, scripts/doc-freshness.ts, docs/TECH_DEBT.md로 확장
+- SKILL.md 13: 스캐폴딩 참조 테이블을 1차 소스(템플릿) + 2차 참조(guide) 구조로 개편, QUALITY_SCORE.md/TECH_DEBT.md 행 추가
+- .tracking/HANDOFF.md: P10 상태를 "범위 밖"으로 확정, 섹션 5 향후 작업 전면 업데이트, 파일 트리에 templates/ 하위 전체 반영
+- references/project-context.md: v3.2 버전 추가, 섹션 5/6 업데이트
+
 ### 추가 (Added) — Session 6 (2026-04-06): Stop Hook
 - .claude/hooks/auto-gc.sh: Stop hook 스크립트 — 미커밋 변경 감지 시 /gc 실행 지시 후 push, 60초 guard로 무한루프 방지
 

@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-06 (v3.1 — 모델 최적화)
+> 마지막 업데이트: 2026-04-07 (v3.2 — 템플릿 완비 + 트래킹 정리)
 
 ---
 
@@ -109,28 +109,31 @@
 - claude-progress.txt에 TDD STATE 블록 포맷 추가 (세션 간 사이클 이어받기)
 - oh-my-claudecode 참조 — 에이전트 전문화 패턴, 에스컬레이션 패턴 채용
 
+### v3.2 (템플릿 완비 + 트래킹 정리)
+- 미생성 템플릿 4개 추가: init.sh, doc-freshness.ts, QUALITY_SCORE.md, TECH_DEBT.md
+- SKILL.md 5.6~5.9절에 템플릿 참조 + 플레이스홀더 치환 규칙 추가
+- Phase 3 검증 6.11에 새 템플릿 파일 포함
+- P10 엔트로피 관리를 "범위 밖"으로 확정 (별도 cleanup 스킬로 분리)
+- 트래킹 문서(HANDOFF, project-context, TODO) 현행화
+
 ---
 
-## 5. 아직 만들지 않은 것
+## 5. 향후 확장 가능 항목
 
-| 파일 | 역할 | 우선순위 |
+| 항목 | 역할 | 우선순위 |
 |------|------|---------|
-| templates/doc-freshness.ts | 문서 최신성 검사 스크립트 템플릿 | 보통 |
-| templates/init.sh | 환경 초기화 스크립트 템플릿 | 보통 |
-| templates/QUALITY_SCORE.md | 품질 점수표 템플릿 | 낮음 |
-| templates/TECH_DEBT.md | 기술 부채 문서 템플릿 | 낮음 |
 | Initializer 그룹 subagent | 하네스 셋업 내부의 subagent 분리 (Scanner/Scaffolder) | 낮음 |
-| Cleanup 그룹 subagent | 엔트로피 관리 에이전트 정의 | 보통 |
+| Cleanup 스킬 (별도 프로젝트) | 엔트로피 관리 — 주기적 정리 루프 | 보통 |
+| 추가 프리셋 | react-vite.json, express-api.json 등 | 보통 |
 
 ---
 
 ## 6. 다음 단계
 
-1. **HAJA 프로젝트에 실전 테스트** — TDD subagent 파이프라인 동작 검증
-2. **SKILL.md 프롬프트 조정** — 실전 피드백 반영
-3. **추가 프리셋** — react-vite.json 등
-4. **Initializer/Cleanup 그룹 subagent** — 나머지 2개 그룹 설계
-5. **에이전트 템플릿 실전 조정** — 프롬프트 최적화
+1. **다양한 프로젝트에서 실전 테스트** — TDD subagent 파이프라인 동작 검증, 프롬프트 조정
+2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
+3. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
+4. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 

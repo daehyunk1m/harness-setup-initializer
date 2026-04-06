@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-04-06 (갱신)
+> 작성일: 2026-04-07 (갱신)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
@@ -43,7 +43,7 @@
 | P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가 |
 | P8 아키텍처 자동 검사 | ✅ 완료 | 버전 체크, 동점 해소, 누락 레이어 경고 |
 | P9 품질/부채 관리 | ✅ 완료 | docFreshnessDays 파라미터화 |
-| P10 엔트로피 관리 | **⚠️ 미완** | doc-freshness.ts만 있음, 주기적 정리 루프 없음 |
+| P10 엔트로피 관리 | 📌 범위 밖 | doc-freshness.ts 감지로 충분, 주기적 정리는 별도 cleanup 스킬 영역 |
 
 ---
 
@@ -82,49 +82,13 @@ Architect (설계) → Test Engineer (Red) → Implementer (Green)
 
 ---
 
-## 3. 남은 작업: 엔트로피 관리 (P10)
+## 3. 범위 밖으로 확정된 항목
 
-### 문제
+### P10 엔트로피 관리 → 별도 스킬로 분리
 
-doc-freshness.ts(문서 최신성 검사)만 있고, 주기적 정리 루프가 없다.
-harness-guide.md는 주간/월간 점검을 설명하지만 현재 자동화 수단이 없다.
+**결정 (2026-04-07)**: 하네스 셋업 스킬의 범위는 "초기 환경 구성"이다. 주기적 정리 루프는 운영 영역이므로 별도 cleanup 스킬로 분리한다. 현재 스킬에서는 doc-freshness.ts(감지)로 충분하다.
 
-### oh-my-claudecode에서 배운 패턴
-
-**ai-slop-cleaner 스킬:**
-- 4가지 엔트로피 유형 타겟: 중복, 데드 코드, 추상화, 경계 엔트로피
-- "삭제 우선" 원칙: 추가보다 삭제를 선호
-- 변경된 파일 범위 내에서만 정리 (scope 제한)
-- regression 테스트 필수
-
-**cancel 스킬:**
-- 의존성 인식 정리 (연결된 모드 함께 취소)
-- 상태 보존 (resume 가능)
-
-### 결정 필요
-
-이 부분은 세 가지 접근이 가능:
-
-**A. 최소 접근 — 수동 체크리스트만 생성**
-- SKILL.md가 `docs/CLEANUP_CHECKLIST.md`를 생성
-- 사용자가 주기적으로 수동 실행
-- 장점: 간단, 스킬 복잡도 안 올라감
-- 단점: 자동화 없음
-
-**B. 중간 접근 — doc-freshness.ts 확장**
-- 기존 doc-freshness.ts를 코드 품질 메트릭까지 확장 (any 카운트, 300줄 초과 파일 등)
-- `npm run doc:check`가 문서 + 코드 품질을 함께 검사
-- 장점: 기존 인프라 활용
-- 단점: 정리 "실행"은 안 함 (감지만)
-
-**C. 별도 스킬 — cleanup 스킬 생성**
-- oh-my-claudecode의 ai-slop-cleaner처럼 별도 스킬
-- `/cleanup` 으로 호출하면 정리 루프 실행
-- 장점: 완전한 자동화
-- 단점: harness-setup 스킬 범위를 벗어남, 별도 프로젝트
-
-**권장**: 현 시점에서는 **B**로 시작하고, 필요 시 C로 확장.
-이 결정은 다음 세션에서 확정.
+향후 cleanup 스킬 설계 시 참고할 패턴은 oh-my-claudecode의 ai-slop-cleaner (4유형 엔트로피 타겟, 삭제 우선, scope 제한).
 
 ---
 
@@ -185,41 +149,12 @@ paths:
 
 ---
 
-## 5. 다음 세션 작업 순서 (권장)
+## 5. 향후 작업 (우선순위)
 
-### Step 1: `.claude/rules/` 생성 규칙 추가
-
-SKILL.md에 `.claude/rules/` 파일 생성을 추가한다.
-
-**수정 파일**: `SKILL.md`
-**수정 내용**:
-- Phase 2 생성 순서에 `.claude/rules/` 추가 (CLAUDE.md 다음)
-- 새 섹션 "5.x .claude/rules/ 생성 규칙" 추가
-  - `session-routine.md` — 분기 로직 포함 세션 루틴
-  - `coding-standards.md` — 프로필 기반 코드 규칙
-  - 도메인별 rules (프로필에 추가 항목 있을 때만)
-- CLAUDE.md에서 코드 규칙/세션 루틴 상세를 rules/로 이관
-- Phase 3 검증, Phase 4 보고 업데이트
-
-### Step 2: session-routine.md 내용 정의
-
-harness-guide.md P6의 분기 로직을 session-routine.md 생성 규칙으로 구체화:
-- 버그 우선 수정 분기
-- validate 실패 → 수정 → 재검증 루프
-- 3회 반복 실패 → 접근 전환
-- feature 완료 판정 기준
-
-### Step 3: 엔트로피 관리 방향 확정
-
-위 섹션 3의 A/B/C 중 선택. 권장 B부터 시작.
-
-### Step 4: HAJA 프로젝트에서 실전 테스트
-
-```bash
-cd ~/projects/haja
-claude --add-dir ~/.claude/skills/harness-setup
-> 하네스 셋업해줘
-```
+1. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정
+2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
+3. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
+4. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 
@@ -233,12 +168,18 @@ claude --add-dir ~/.claude/skills/harness-setup
 │   └── react-router-fsd.json         # React Router+FSD 프리셋
 ├── templates/
 │   ├── structural-test-layer.ts      # 레이어 기반 구조 테스트
-│   └── structural-test-fsd.ts        # FSD 구조 테스트
+│   ├── structural-test-fsd.ts        # FSD 구조 테스트
+│   ├── init.sh                       # 환경 초기화 스크립트
+│   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트
+│   ├── QUALITY_SCORE.md              # 품질 점수표
+│   ├── TECH_DEBT.md                  # 기술 부채 문서
+│   ├── agents/                       # TDD subagent 정의 (7개)
+│   └── rules/                        # .claude/rules/ 템플릿 (3개)
 ├── references/
 │   ├── harness-guide.md              # 이론적 기반 (P1-P10)
 │   └── project-context.md            # 설계 결정 기록
 └── .tracking/
-    ├── TODO.md                       # 투두 상태 (01-22 완료)
+    ├── TODO.md                       # 투두 상태 (01-40 완료)
     ├── CHANGELOG.md                  # 변경 이력
     └── HANDOFF.md                    # 이 파일
 ```
