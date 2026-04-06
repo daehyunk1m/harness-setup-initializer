@@ -7,6 +7,18 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 6 (2026-04-06): Git 워크플로
+- templates/rules/git-workflow.md: 대상 프로젝트용 Git 워크플로 템플릿 신규 생성 — Conventional Commits, 체크포인트, 브랜치 정책, 3단계 충돌 해결, 세션 경계
+- SKILL.md 5: Phase 2 생성 순서에 git-workflow.md 추가 (15 → 16 항목)
+- SKILL.md 5.11: git-workflow.md 생성 규칙, 플레이스홀더 치환 테이블(5개), 역할 분리 행 추가
+- SKILL.md 8: 프리셋 스키마에 git 필드 추가 (mainBranch, branchPrefixes, commitLang)
+- SKILL.md 6/7: Phase 3 검증 + Phase 4 보고에 git-workflow.md 반영
+
+### 수정 (Changed) — Session 6 (2026-04-06)
+- templates/rules/session-routine.md: 세션 시작에 git status 추가, 기능 완료/세션 종료에 git-workflow.md 참조 연결
+- SKILL.md 5.1.1: CLAUDE.md 세션 루틴 요약에 git status 단계 추가, 커밋 제안을 git-workflow.md 기반으로 변경
+- CLAUDE.md: 파일 맵에 git-workflow 템플릿 명시
+
 ### 수정 (Changed) — Session 5 (2026-04-06): 모델 최적화
 - SKILL.md 프론트매터: `context: fork` + `model: sonnet` 추가 — 스킬 실행 시 Sonnet 서브에이전트로 자동 전환, 완료 후 기존 모델 복귀
 

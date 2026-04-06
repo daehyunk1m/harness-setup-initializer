@@ -15,7 +15,7 @@
 | `SKILL.md` | **스킬 본체** — 스킬 실행 시 유일하게 로딩되는 사양 | 높음 |
 | `presets/*.json` | 스택별 프리셋 | 가끔 |
 | `templates/agents/*.md` | TDD subagent 정의 템플릿 | 가끔 |
-| `templates/rules/*.md` | .claude/rules/ 템플릿 | 가끔 |
+| `templates/rules/*.md` | .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow) | 가끔 |
 | `templates/structural-test-*.ts` | 아키텍처 검증 템플릿 | 낮음 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
 | `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |

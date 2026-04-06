@@ -34,7 +34,9 @@
 ```
 1. claude-progress.txt를 읽는다
 2. "=== TDD STATE ===" 블록이 있으면 중단된 사이클을 이어받는다
-3. git log --oneline -10으로 최근 커밋을 확인한다
+3. git status로 미커밋 변경 확인 (있으면 사용자에게 알림)
+4. git log --oneline -10으로 최근 커밋을 확인한다
+5. TDD STATE 블록과 git 이력의 정합성 확인
 ```
 
 ### Step 2: 작업 선택
@@ -161,8 +163,9 @@ TDD 사이클이 성공적으로 완료되면:
    - TDD STATE 블록 제거 (사이클 완료)
    - 세션 요약 추가
 
-3. git commit 제안:
-   - "feat({category}): {description} - {featureID}"
+3. git commit 제안 (git-workflow.md 규칙 참조):
+   - "feat({scope}): {description} - {featureID}"
+   - scope는 git-workflow.md의 커밋 스코프에서 선택
 ```
 
 ---
@@ -174,7 +177,10 @@ TDD 사이클이 성공적으로 완료되면:
 2. feature_list.json 상태 확인
 3. claude-progress.txt 세션 요약 작성
 4. 진행 중인 TDD 사이클이 있으면 TDD STATE 블록 저장
-5. git commit 제안
+5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 제안:
+   - TDD 사이클 완료: feat 커밋
+   - 사이클 미완료: checkpoint 커밋 (chore({scope}): checkpoint — {상태})
+   - 코드는 반드시 빌드 가능한 상태여야 한다
 ```
 
 ---
