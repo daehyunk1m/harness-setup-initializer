@@ -7,6 +7,9 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 6 (2026-04-06): Stop Hook
+- .claude/hooks/auto-gc.sh: Stop hook 스크립트 — 미커밋 변경 감지 시 /gc 실행 지시 후 push, 60초 guard로 무한루프 방지
+
 ### 추가 (Added) — Session 6 (2026-04-06): Git 워크플로
 - templates/rules/git-workflow.md: 대상 프로젝트용 Git 워크플로 템플릿 신규 생성 — Conventional Commits, 체크포인트, 브랜치 정책, 3단계 충돌 해결, 세션 경계
 - SKILL.md 5: Phase 2 생성 순서에 git-workflow.md 추가 (15 → 16 항목)
