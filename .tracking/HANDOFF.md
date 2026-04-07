@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-04-07 (갱신)
+> 작성일: 2026-04-07 (갱신 — 업그레이드 시스템 설계)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
@@ -15,6 +15,12 @@
   - Phase B: passes 판정 기준, 문답 종료 조건/우선순위, readyCheck, 동점 해소, mkdir 보장, 누락 레이어 경고
   - Phase C: 프리셋 버전 체크, 다중 pathAlias, docFreshnessDays, 재스캔/재생성 플로우
   - Phase D: 프리셋 작성 가이드, 역할 경계 source of truth, 섹션 재정렬
+- **Session 9 (04-07)**: 업그레이드 시스템 설계 (TODO-43)
+  - `.harness-manifest.json` 매니페스트 스키마 (전체 프로필 + 파일별 해시/카테고리)
+  - 파일 카테고리: managed(13) / custom(4) / data(5)
+  - 업그레이드 Phase U1~U5 + 부트스트랩 마이그레이션 (v0→v3.3)
+  - 마이그레이션 레지스트리 형식 + 체이닝 규칙
+  - 설계 문서: `references/upgrade-system-design.md`
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
@@ -156,10 +162,11 @@ paths:
 
 ## 5. 향후 작업 (우선순위)
 
-1. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정
-2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
-3. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
-4. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+1. **업그레이드 시스템 구현 (TODO-44)** — `references/upgrade-system-design.md` 기반으로 SKILL.md § 14 추가. 구현 순서: manifest 생성 → 카테고리 테이블 → 모드 판별 → 부트스트랩 → Phase U1~U5 → 마이그레이션 레지스트리 → 검증/보고
+2. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정
+3. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
+4. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
+5. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 

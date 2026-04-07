@@ -1,7 +1,7 @@
 # harness-setup 스킬 개선 TODO
 
 > 마지막 업데이트: 2026-04-07
-> 분석 기반: SKILL.md(~1100줄), presets/ 2개, references/ 2개, templates/ 2개
+> 분석 기반: SKILL.md(~1300줄), presets/ 2개, references/ 3개, templates/ 17개
 
 ---
 
@@ -261,3 +261,21 @@
 - **파일**: `companion-skills/harness-feedback/SKILL.md`, `SKILL.md`
 - **문제**: 피드백 분석→Issue 등 운용 스킬을 배치할 구조가 없음
 - **해결**: companion-skills/ 디렉토리 도입, harness-feedback 스킬 스텁 생성, Phase 4 보고에 운용 스킬 안내 추가, 섹션 12 확장 포인트에 반영
+
+---
+
+## Session 9: 업그레이드 시스템 설계 (2026-04-07)
+
+> 이미 셋업된 프로젝트에 스킬 업데이트를 반영하는 업그레이드 메커니즘 설계.
+
+### TODO-43: 업그레이드 시스템 설계 문서 작성
+- **상태**: [x] 완료 (2026-04-07)
+- **파일**: `references/upgrade-system-design.md` (신규)
+- **문제**: 스킬이 발전해도 기존 프로젝트에 변경사항을 반영할 방법이 없음
+- **해결**: A(마이그레이션 레지스트리) + B(파일 카테고리 분리) 조합 설계. `.harness-manifest.json`으로 버전 추적, managed/custom/data 3단계 분류, Phase U1~U5 업그레이드 플로우, 부트스트랩 마이그레이션 (v0→v3.3)
+
+### TODO-44: 업그레이드 시스템 SKILL.md 구현
+- **상태**: [ ] 대기
+- **파일**: `SKILL.md` — 섹션 2, 3, 5, 6, 7 수정 + 새 섹션 14 추가
+- **의존**: TODO-43 완료 (설계 문서 기반 구현)
+- **내용**: 설계 문서(`references/upgrade-system-design.md`) § 7의 구현 순서대로 진행

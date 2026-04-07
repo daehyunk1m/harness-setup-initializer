@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-07 (v3.3 — 피드백 수집 시스템)
+> 마지막 업데이트: 2026-04-07 (v3.3 + 업그레이드 시스템 설계)
 
 ---
 
@@ -77,6 +77,8 @@
 | 실행 모델 | Sonnet (`context: fork` + `model: sonnet`) | 구조화된 작업이라 Sonnet 충분, 비용/속도 최적화 |
 | 피드백 수집 | session-routine 지시 기반 (hook 아님) | TDD 내부 이벤트에 hook 불가, 오케스트레이터 지시로 충분 |
 | 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
+| 업그레이드 시스템 | A(마이그레이션 레지스트리) + B(파일 카테고리 분리) | 사용자 커스터마이징 보존 + managed 파일 자동 갱신. 상세: `references/upgrade-system-design.md` |
+| 버전 추적 | `.harness-manifest.json` (단일 파일) | 파일별 주석 스탬프 대신 하나의 JSON으로 전체 상태 파악. 전체 profile 저장으로 재스캔 없이 재치환 |
 
 ---
 
@@ -124,12 +126,21 @@
 - P10 엔트로피 관리를 "범위 밖"으로 확정 (별도 cleanup 스킬로 분리)
 - 트래킹 문서(HANDOFF, project-context, TODO) 현행화
 
+### v4.0 (예정 — 업그레이드 시스템)
+- `.harness-manifest.json`: 버전 추적 + 전체 프로필 저장 + 파일별 해시/카테고리
+- 파일 카테고리: managed(13개) / custom(4개) / data(5개) 분류
+- 업그레이드 모드: Phase U1~U5 (분석 → 계획 → 실행 → 검증 → 보고)
+- 마이그레이션 레지스트리: 버전 간 변경을 구조화된 지시로 기술, 순차 적용
+- 부트스트랩: manifest 없는 기존 프로젝트를 v3.3으로 간주하여 편입
+- 상세 설계: `references/upgrade-system-design.md`
+
 ---
 
 ## 5. 향후 확장 가능 항목
 
 | 항목 | 역할 | 우선순위 |
 |------|------|---------|
+| **업그레이드 시스템 구현** | SKILL.md § 14 추가 — manifest 생성, 업그레이드 플로우, 마이그레이션 레지스트리 | **높음** |
 | Initializer 그룹 subagent | 하네스 셋업 내부의 subagent 분리 (Scanner/Scaffolder) | 낮음 |
 | Cleanup 스킬 (별도 프로젝트) | 엔트로피 관리 — 주기적 정리 루프 | 보통 |
 | 추가 프리셋 | react-vite.json, express-api.json 등 | 보통 |
@@ -138,10 +149,11 @@
 
 ## 6. 다음 단계
 
-1. **다양한 프로젝트에서 실전 테스트** — TDD subagent 파이프라인 동작 검증, 프롬프트 조정
-2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
-3. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
-4. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+1. **업그레이드 시스템 구현** — SKILL.md § 14 추가, manifest 생성, 업그레이드 플로우 (설계: `references/upgrade-system-design.md`)
+2. **다양한 프로젝트에서 실전 테스트** — TDD subagent 파이프라인 동작 검증, 프롬프트 조정
+3. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
+4. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
+5. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 

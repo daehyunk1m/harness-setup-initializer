@@ -7,6 +7,12 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 9 (2026-04-07): 업그레이드 시스템 설계
+- references/upgrade-system-design.md: 업그레이드 시스템 설계 문서 신규 추가 — 매니페스트 스키마(.harness-manifest.json), 파일 카테고리(managed 13/custom 4/data 5), Phase U1~U5 업그레이드 플로우, 마이그레이션 레지스트리 형식, 부트스트랩 마이그레이션(v0→v3.3), 엣지 케이스 8개
+- references/project-context.md: 업그레이드 시스템 설계 결정 2행, v4.0 버전 히스토리 예고, 확장 항목/다음 단계 업데이트
+- .tracking/TODO.md: Session 9 추가 — TODO-43(설계 완료), TODO-44(구현 대기)
+- .tracking/HANDOFF.md: Session 9 요약, 향후 작업 1번에 업그레이드 시스템 구현 추가
+
 ### 추가 (Added) — Session 8 (2026-04-07): 피드백 수집 시스템
 - templates/HARNESS_FRICTION.md: 마찰 로그 템플릿 — 6개 이벤트 유형, 마크다운 테이블 형식, 기계 파싱 가능
 - companion-skills/harness-feedback/SKILL.md: 피드백 분석→Issue 스킬 스텁 (향후 구현)
