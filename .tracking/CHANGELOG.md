@@ -7,6 +7,20 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 10 (2026-04-07): 업그레이드 시스템 구현
+- SKILL.md § 2: 업그레이드 트리거 3개 추가 (harness upgrade, 최신 버전 업데이트, /harness-setup upgrade)
+- SKILL.md § 3: Step 0 모드 판별 분기 추가 (Setup / Bootstrap+Upgrade / Upgrade)
+- SKILL.md § 5.13: .harness-manifest.json 생성 규칙 신규 섹션 — 스키마, 필드 설명, 해시 계산, 카테고리 할당
+- SKILL.md § 6.12: manifest 검증 항목 추가 (version, profile, files 정합성)
+- SKILL.md § 14: 업그레이드 시스템 전체 신규 섹션 — 14.1 매니페스트 설계 결정, 14.2 파일 카테고리(managed 13/custom 4/data 5), 14.3 Phase U1~U5, 14.4 마이그레이션 레지스트리, 14.5 부트스트랩(v0→v3.3), 14.6 엣지 케이스 6개
+
+### 수정 (Changed) — Session 10 (2026-04-07)
+- SKILL.md frontmatter: description에 업그레이드 기능 추가
+- SKILL.md § 5 생성 순서: 18번 .harness-manifest.json 추가
+- SKILL.md § 7: 보고 포맷에 manifest 행, 검증 결과, 커밋 안내 추가
+- SKILL.md § 12: 프로필 저장 항목 제거(구현 완료), 업그레이드 시스템 구현 완료 표시
+- SKILL.md § 13: references/upgrade-system-design.md 참조 추가
+
 ### 추가 (Added) — Session 9 (2026-04-07): 업그레이드 시스템 설계
 - references/upgrade-system-design.md: 업그레이드 시스템 설계 문서 신규 추가 — 매니페스트 스키마(.harness-manifest.json), 파일 카테고리(managed 13/custom 4/data 5), Phase U1~U5 업그레이드 플로우, 마이그레이션 레지스트리 형식, 부트스트랩 마이그레이션(v0→v3.3), 엣지 케이스 8개
 - references/project-context.md: 업그레이드 시스템 설계 결정 2행, v4.0 버전 히스토리 예고, 확장 항목/다음 단계 업데이트
