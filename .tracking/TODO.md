@@ -243,3 +243,21 @@
 - **파일**: `templates/init.sh`, `templates/doc-freshness.ts`, `templates/QUALITY_SCORE.md`, `templates/TECH_DEBT.md`, `SKILL.md`
 - **문제**: SKILL.md 5.6~5.9에 상세 생성 규칙이 있으나 대응하는 템플릿 파일이 없어 출력 일관성 부족
 - **해결**: 4개 템플릿 생성, SKILL.md에 템플릿 참조 + 플레이스홀더 치환 규칙 추가, Phase 3 검증 6.11 범위 확장, 참고자료 테이블 업데이트
+
+---
+
+## Session 8: 피드백 수집 시스템 (2026-04-07)
+
+> 하네스에 마찰 자동 감지 + 로깅 시스템 추가, 컴패니언 스킬 배치 구조 도입.
+
+### TODO-41: 마찰 로그 템플릿 + session-routine 로깅 지시
+- **상태**: [x] 완료 (2026-04-07)
+- **파일**: `templates/HARNESS_FRICTION.md`, `templates/rules/session-routine.md`, `SKILL.md`
+- **문제**: 하네스 사용 중 발생하는 마찰(에스컬레이션, 검증 실패 등)을 수집하는 메커니즘이 없음
+- **해결**: HARNESS_FRICTION.md 템플릿 생성, session-routine에 6개 마찰 이벤트 로깅 지시 추가, SKILL.md에 5.12절/생성순서/검증/보고/참조테이블 반영
+
+### TODO-42: 컴패니언 스킬 배치 구조
+- **상태**: [x] 완료 (2026-04-07)
+- **파일**: `companion-skills/harness-feedback/SKILL.md`, `SKILL.md`
+- **문제**: 피드백 분석→Issue 등 운용 스킬을 배치할 구조가 없음
+- **해결**: companion-skills/ 디렉토리 도입, harness-feedback 스킬 스텁 생성, Phase 4 보고에 운용 스킬 안내 추가, 섹션 12 확장 포인트에 반영

@@ -21,6 +21,8 @@
 | `templates/doc-freshness.ts` | 문서 최신성 검사 스크립트 템플릿 | 낮음 |
 | `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
 | `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
+| `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
+| `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (스텁) | 향후 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
 | `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |

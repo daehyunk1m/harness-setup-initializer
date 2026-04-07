@@ -7,6 +7,19 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 8 (2026-04-07): 피드백 수집 시스템
+- templates/HARNESS_FRICTION.md: 마찰 로그 템플릿 — 6개 이벤트 유형, 마크다운 테이블 형식, 기계 파싱 가능
+- companion-skills/harness-feedback/SKILL.md: 피드백 분석→Issue 스킬 스텁 (향후 구현)
+- SKILL.md 5.12: HARNESS_FRICTION.md 생성 규칙 신규 섹션
+- SKILL.md 5: Phase 2 생성 순서에 HARNESS_FRICTION.md 추가 (16번)
+- SKILL.md 7: Phase 4 보고에 HARNESS_FRICTION.md 행 + 운용 스킬 안내 섹션 추가
+- SKILL.md 12: 향후 확장 포인트에 피드백 분석 스킬 추가
+- SKILL.md 13: 참조 테이블에 HARNESS_FRICTION.md 행 추가
+
+### 수정 (Changed) — Session 8 (2026-04-07)
+- templates/rules/session-routine.md: 6개 마찰 이벤트 로깅 지시 추가 (GREEN 시도 루프, Debugger 에스컬레이션, 사용자 에스컬레이션, Review NEEDS_FIX, Refactor 롤백, 세션 미완료), 마찰 로그 섹션 신규 추가
+- SKILL.md 6.2: Phase 3 검증에 HARNESS_FRICTION.md 존재 확인 추가
+
 ### 추가 (Added) — Session 7 (2026-04-07): 템플릿 완비
 - templates/init.sh: 환경 초기화 스크립트 템플릿 — 패키지 매니저 자동 감지, devServer 플레이스홀더 (DEV_SERVER_COMMAND, READY_CHECK_COMMAND, DEV_SERVER_PORT)
 - templates/doc-freshness.ts: 문서 최신성 검사 스크립트 템플릿 — DOC_FRESHNESS_DAYS, DOC_CHECK_TARGETS 플레이스홀더

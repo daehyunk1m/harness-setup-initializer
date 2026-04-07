@@ -7,7 +7,7 @@
 
 ## 1. 현재 상태 요약
 
-### 완료된 작업 (TODO-01 ~ TODO-35)
+### 완료된 작업 (TODO-01 ~ TODO-42)
 
 - **Session 1~2 (04-04)**: SKILL.md 사양 갭 메우기, 템플릿 생성, 프리셋 정합성, CLAUDE.md 생성 규칙 (TODO-01~22)
 - **Session 3 (04-05~06)**: 전체 코드베이스 분석 → 20개 이슈 발견 → 4단계(Phase A~D) 수정 (TODO-23~35)
@@ -21,8 +21,13 @@
 
 ### 현재 SKILL.md가 하는 일
 
-프로젝트를 스캔 → 소크라테스 문답 → 승인 → 12개 파일 생성 → 검증 → 보고.
-생성 파일: CLAUDE.md, AGENTS.md, ARCHITECTURE.md, feature_list.json, claude-progress.txt, init.sh, scripts/structural-test.ts, scripts/doc-freshness.ts, docs/QUALITY_SCORE.md, docs/TECH_DEBT.md, docs/ 하위 디렉토리, package.json scripts.
+프로젝트를 스캔 → 소크라테스 문답 → 승인 → 17개 파일 생성 → 검증 → 보고.
+생성 파일: CLAUDE.md, AGENTS.md, ARCHITECTURE.md, agents/*.md (7개), .claude/rules/ (3개), feature_list.json, claude-progress.txt, init.sh, scripts/structural-test.ts, scripts/doc-freshness.ts, docs/QUALITY_SCORE.md, docs/TECH_DEBT.md, docs/HARNESS_FRICTION.md, docs/ 하위 디렉토리, package.json scripts.
+
+### 피드백 수집 시스템 (v3.3)
+- session-routine.md가 6개 마찰 이벤트(에스컬레이션, 검증 실패 등)를 자동 감지하여 `docs/HARNESS_FRICTION.md`에 기록
+- 컴패니언 스킬 구조: `companion-skills/harness-feedback/` (스텁, 향후 구현)
+- Phase 4 보고에서 컴패니언 스킬 `--add-dir` 안내
 
 ### 모델 설정
 - `context: fork` + `model: sonnet` — 스킬 실행 시 Sonnet 서브에이전트로 분리 실행
@@ -173,13 +178,16 @@ paths:
 │   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트
 │   ├── QUALITY_SCORE.md              # 품질 점수표
 │   ├── TECH_DEBT.md                  # 기술 부채 문서
+│   ├── HARNESS_FRICTION.md           # 마찰 로그
 │   ├── agents/                       # TDD subagent 정의 (7개)
 │   └── rules/                        # .claude/rules/ 템플릿 (3개)
+├── companion-skills/
+│   └── harness-feedback/             # 피드백 분석→Issue 스킬 (스텁)
 ├── references/
 │   ├── harness-guide.md              # 이론적 기반 (P1-P10)
 │   └── project-context.md            # 설계 결정 기록
 └── .tracking/
-    ├── TODO.md                       # 투두 상태 (01-40 완료)
+    ├── TODO.md                       # 투두 상태 (01-42 완료)
     ├── CHANGELOG.md                  # 변경 이력
     └── HANDOFF.md                    # 이 파일
 ```

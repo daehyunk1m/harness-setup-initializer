@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-07 (v3.2 — 템플릿 완비 + 트래킹 정리)
+> 마지막 업데이트: 2026-04-07 (v3.3 — 피드백 수집 시스템)
 
 ---
 
@@ -75,6 +75,8 @@
 | TDD 워크플로 | Red → Green → Refactor 강제 | 테스트 없는 기능 완료 방지 |
 | 배포 위치 | `~/.claude/skills/` | 글로벌 스킬, 모든 프로젝트에서 사용 |
 | 실행 모델 | Sonnet (`context: fork` + `model: sonnet`) | 구조화된 작업이라 Sonnet 충분, 비용/속도 최적화 |
+| 피드백 수집 | session-routine 지시 기반 (hook 아님) | TDD 내부 이벤트에 hook 불가, 오케스트레이터 지시로 충분 |
+| 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
 
 ---
 
@@ -108,6 +110,12 @@
 - 에스컬레이션 체인 — Implementer 3회 → Debugger 2회 → 사용자
 - claude-progress.txt에 TDD STATE 블록 포맷 추가 (세션 간 사이클 이어받기)
 - oh-my-claudecode 참조 — 에이전트 전문화 패턴, 에스컬레이션 패턴 채용
+
+### v3.3 (피드백 수집 시스템)
+- 마찰 자동 감지: session-routine.md에 6개 마찰 이벤트 로깅 지시 추가
+- HARNESS_FRICTION.md 템플릿: 기계 파싱 가능한 마크다운 테이블 형식
+- 컴패니언 스킬 구조: companion-skills/ 디렉토리 도입, harness-feedback 스킬 스텁
+- Phase 4 보고에 운용 스킬 안내 추가 (--add-dir opt-in 방식)
 
 ### v3.2 (템플릿 완비 + 트래킹 정리)
 - 미생성 템플릿 4개 추가: init.sh, doc-freshness.ts, QUALITY_SCORE.md, TECH_DEBT.md

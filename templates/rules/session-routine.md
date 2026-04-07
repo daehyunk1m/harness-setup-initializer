@@ -89,9 +89,11 @@ while attempt <= {{MAX_IMPLEMENTER_ATTEMPTS}}:
     Implementer 호출 (이전 에러 컨텍스트 포함)
     {{VALIDATE_COMMAND}} 실행
     if PASS → Review로 진행
+    if attempt >= 2 → 마찰 로그 기록 (implementer-retry)
     attempt += 1
 
 if 실패:
+    마찰 로그 기록 (debugger-escalation)
     Debugger 에스컬레이션
 ```
 
@@ -105,6 +107,7 @@ while debugger_attempt <= {{MAX_DEBUGGER_ATTEMPTS}}:
     debugger_attempt += 1
 
 if 실패:
+    마찰 로그 기록 (user-escalation)
     사용자에게 진단 보고서 제시
     TDD STATE를 claude-progress.txt에 저장
     세션 중단
@@ -119,7 +122,7 @@ if 실패:
 **분기**:
 - PASS → Security 체크 (해당 시) → Complete
 - NEEDS_REFACTOR → Phase 5 (Refactor)
-- NEEDS_FIX → Phase 3 (Green) 재진입 (시도 횟수 누적)
+- NEEDS_FIX → 마찰 로그 기록 (review-fix) → Phase 3 (Green) 재진입 (시도 횟수 누적)
 
 **간소화**: 30줄 이하 단일 파일 변경이면 Reviewer를 스킵 (validate만 의존).
 
@@ -145,7 +148,7 @@ Reviewer가 NEEDS_REFACTOR를 반환했을 때만 실행.
 
 **검증**: `{{VALIDATE_COMMAND}}` 실행
 - PASS → Complete
-- FAIL (2회) → 리팩터링 전부 되돌리고, un-refactored 코드로 Complete
+- FAIL (2회) → 마찰 로그 기록 (refactor-rollback) → 리팩터링 전부 되돌리고, un-refactored 코드로 Complete
 
 ---
 
@@ -176,7 +179,9 @@ TDD 사이클이 성공적으로 완료되면:
 1. {{VALIDATE_COMMAND}} 최종 실행
 2. feature_list.json 상태 확인
 3. claude-progress.txt 세션 요약 작성
-4. 진행 중인 TDD 사이클이 있으면 TDD STATE 블록 저장
+4. 진행 중인 TDD 사이클이 있으면:
+   - TDD STATE 블록 저장
+   - 마찰 로그 기록 (session-incomplete)
 5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 제안:
    - TDD 사이클 완료: feat 커밋
    - 사이클 미완료: checkpoint 커밋 (chore({scope}): checkpoint — {상태})
@@ -201,3 +206,29 @@ plan_ref: {Architect 계획 요약 또는 exec-plan 경로}
 - 사이클 완료 시 이 블록을 제거한다
 - 세션 중단 시 현재 상태를 블록에 저장한다
 - 다음 세션 시작 시 이 블록을 읽고 해당 phase부터 재개한다
+
+---
+
+## 마찰 로그
+
+TDD 사이클 중 마찰 이벤트가 발생하면 `docs/HARNESS_FRICTION.md`의 로그 테이블에 행을 추가한다.
+
+**기록 형식**:
+```
+| {YYYY-MM-DD} | {이벤트} | {심각도} | {feature ID} | {에러 메시지 또는 원인 한 줄} |
+```
+
+**이벤트 유형**:
+| 이벤트 | 기록 시점 | 심각도 |
+|--------|----------|--------|
+| `implementer-retry` | Implementer 2회째 실패 시 | high |
+| `debugger-escalation` | Implementer 한도 초과 → Debugger 호출 시 | critical |
+| `user-escalation` | Debugger도 한도 초과 → 사용자 보고 시 | critical |
+| `review-fix` | Reviewer가 NEEDS_FIX 반환 시 | medium |
+| `refactor-rollback` | Simplifier 2회 실패 → 롤백 시 | high |
+| `session-incomplete` | TDD 사이클 미완료 상태로 세션 종료 시 | low |
+
+**규칙**:
+- 파일이 없으면 기록을 건너뛴다 (에러 아님)
+- 같은 feature의 같은 이벤트가 같은 세션에서 반복되면 첫 번째만 기록한다
+- 상세 필드는 에러 메시지의 핵심 한 줄 또는 원인 요약 (50자 이내)
