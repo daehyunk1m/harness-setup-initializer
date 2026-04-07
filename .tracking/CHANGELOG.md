@@ -7,6 +7,11 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 11 (2026-04-07): 실전 적용 준비도 분석
+- .tracking/TODO.md: Session 11 추가 — TODO-45~51 (실전 테스트 전 전수 분석에서 도출된 리스크/제한사항 7개)
+- .tracking/HANDOFF.md: § 5를 준비도 분석 결과 + 우선순위 9개 목록으로 확장
+- references/project-context.md: § 3 설계 결정에 준비도 분석 판정 추가, § 6 다음 단계를 TODO 번호와 연결하여 개정
+
 ### 추가 (Added) — Session 10 (2026-04-07): 업그레이드 시스템 구현
 - SKILL.md § 2: 업그레이드 트리거 3개 추가 (harness upgrade, 최신 버전 업데이트, /harness-setup upgrade)
 - SKILL.md § 3: Step 0 모드 판별 분기 추가 (Setup / Bootstrap+Upgrade / Upgrade)

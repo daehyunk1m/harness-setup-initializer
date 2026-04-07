@@ -176,11 +176,28 @@ paths:
 
 ## 5. 향후 작업 (우선순위)
 
-1. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정 (셋업 + 업그레이드 모두)
-2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
-3. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
-4. **첫 마이그레이션 작성** — 스킬에 실제 변경이 발생하면 § 14.4 레지스트리에 M-3.3-to-{next} 추가
-5. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+### 5.1 실전 적용 준비도 분석 결과 (2026-04-07)
+
+Session 11에서 SKILL.md/템플릿/프리셋 전수 분석을 수행했다. **결론: 수정 없이 바로 실행 가능하지만, 7개 리스크/제한사항이 있다.**
+
+- SKILL.md 100% 완성 (14개 섹션, TODO/FIXME 없음)
+- 템플릿 17개 전부 존재 + 실제 내용 (스텁 아님)
+- 플레이스홀더 21개 전부 소스→기본값 매핑 완료
+- 프리셋 2개 (react-next, react-router-fsd) — 커버리지가 좁은 것이 주요 제한
+
+상세: `.claude/plans/humble-dancing-pine.md`
+
+### 5.2 우선순위 목록
+
+1. **실전 테스트 + 피드백 반영** — React Router + FSD 프로젝트에서 첫 실전 테스트 예정. 관찰 포인트 7개 정의됨 (TODO-51)
+2. **react-router-fsd versionConstraints 추가** — v6 이하 오매칭 방지 (TODO-45)
+3. **추가 프리셋** — react-vite.json (TODO-48), express-api.json (TODO-49)
+4. **structural-test 동적 생성 구체화** — domain-based/custom 유형 (TODO-46)
+5. **feature_list.json 추론 정책 명시** — 빈 배열 vs 라우트 추출 (TODO-47)
+6. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
+7. **첫 마이그레이션 작성** — § 14.4 레지스트리에 M-3.3-to-{next} 추가
+8. **컴패니언 스킬 구현** — harness-feedback (TODO-50)
+9. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 

@@ -279,3 +279,51 @@
 - **파일**: `SKILL.md` — 섹션 2, 3, 5, 6, 7, 12, 13 수정 + 새 섹션 14 추가
 - **의존**: TODO-43 완료 (설계 문서 기반 구현)
 - **해결**: frontmatter 업데이트, § 2 업그레이드 트리거, § 3 Step 0 모드 판별, § 5.13 manifest 생성 규칙, § 5 생성순서 18번 추가, § 6.12 manifest 검증, § 7 보고에 manifest/커밋 안내, § 12 구현 완료 표시, § 13 참조 추가, § 14 업그레이드 시스템 전체(14.1~14.6)
+
+---
+
+## Session 11: 실전 적용 준비도 분석 — 리스크/제한사항 정리 (2026-04-07)
+
+> SKILL.md, 템플릿, 프리셋의 전수 분석 결과 발견된 향후 개선 항목. 실전 테스트 전 준비도 평가에서 도출.
+
+### TODO-45: react-router-fsd 프리셋 versionConstraints 추가
+- **상태**: [ ] 미완료
+- **파일**: `presets/react-router-fsd.json`
+- **문제**: `react-next.json`에는 `"next >= 13.0.0"` versionConstraints가 있지만, react-router-fsd에는 없음. React Router v6 이하에서도 프리셋이 매칭되어 v7 전용 패턴(loader/action)이 잘못 적용될 수 있음
+- **해결**: `"versionConstraints": { "react-router": ">=7.0.0" }` 추가
+
+### TODO-46: domain-based / custom structural-test 동적 생성 알고리즘 구체화
+- **상태**: [ ] 미완료
+- **파일**: `SKILL.md` § 5.4
+- **문제**: layer-based(`structural-test-layer.ts`)와 FSD(`structural-test-fsd.ts`)는 전용 템플릿이 있지만, domain-based와 custom은 "동적 생성"이라고만 명시되어 있어 구체적 생성 로직이 불명확
+- **해결**: domain-based용 검사 규칙(도메인 간 직접 import 차단 등) 정의, custom용 최소 스켈레톤 제공 또는 명시적 스킵 규칙 추가
+
+### TODO-47: feature_list.json 기존 프로젝트 추론 알고리즘 구체화
+- **상태**: [ ] 미완료
+- **파일**: `SKILL.md` § 5.3
+- **문제**: "기존 프로젝트는 소스 코드 분석하여 추론"이라고만 되어 있으나 구체적 추론 알고리즘이 없음. 빈 배열 `[]`로 생성될 가능성 높음
+- **해결**: 라우트 파일 기반 페이지 목록 추출, 또는 "빈 배열 생성 + 사용자에게 작성 안내" 중 하나로 명시적 정책 결정
+
+### TODO-48: 추가 프리셋 — react-vite.json
+- **상태**: [ ] 미완료
+- **파일**: `presets/react-vite.json` (신규)
+- **문제**: Vite + React 조합이 프리셋 없이 전부 문답 폴백. 의존성 규칙이 "규칙 없음"으로 생성됨
+- **해결**: react-next.json 기반으로 Vite 특화 프리셋 작성 (detection: vite + react, devServer/scripts 차이점 반영)
+
+### TODO-49: 추가 프리셋 — express-api.json
+- **상태**: [ ] 미완료
+- **파일**: `presets/express-api.json` (신규)
+- **문제**: 백엔드 API 프로젝트는 프론트엔드 중심 질문 풀(컴포넌트, 라우팅 등)이 적합하지 않음. 프리셋 없으면 소크라테스 문답에서 불필요한 질문이 나올 수 있음
+- **해결**: Express/Fastify 백엔드 프리셋 작성 (routes/, controllers/, middleware/ 등 서버사이드 구조, 테스트 패턴)
+
+### TODO-50: 컴패니언 스킬 harness-feedback 구현
+- **상태**: [ ] 미완료
+- **파일**: `companion-skills/harness-feedback/SKILL.md`
+- **문제**: Phase 4 보고에서 피드백 스킬 안내가 나오지만 실제로는 스텁이라 동작하지 않음
+- **해결**: HARNESS_FRICTION.md 파싱 → 패턴 분류 → GitHub Issue 생성 로직 구현
+
+### TODO-51: 실전 테스트 결과 기록 체계
+- **상태**: [ ] 미완료
+- **파일**: `.tracking/` 또는 `references/`
+- **문제**: 실전 테스트에서 발견되는 문제를 체계적으로 기록하고 개선에 반영하는 프로세스가 없음
+- **해결**: 관찰 포인트 7개(프리셋 매칭, 아키텍처 감지, 문답 품질, 생성 파일 품질, structural-test 실행, Phase 3 검증, 마찰 로깅) 기준으로 결과 기록 템플릿 작성, 발견된 문제를 TODO로 승격하는 프로세스 정립

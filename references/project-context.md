@@ -79,6 +79,7 @@
 | 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
 | 업그레이드 시스템 | A(마이그레이션 레지스트리) + B(파일 카테고리 분리) | 사용자 커스터마이징 보존 + managed 파일 자동 갱신. 상세: `references/upgrade-system-design.md` |
 | 버전 추적 | `.harness-manifest.json` (단일 파일) | 파일별 주석 스탬프 대신 하나의 JSON으로 전체 상태 파악. 전체 profile 저장으로 재스캔 없이 재치환 |
+| 실전 테스트 전 준비도 | 전수 분석 후 바로 실행 가능 판정 | SKILL.md 100%, 템플릿 17/17, 플레이스홀더 21/21 매핑 완료. 7개 리스크는 TODO-45~51로 추적 |
 
 ---
 
@@ -150,11 +151,17 @@
 
 ## 6. 다음 단계
 
-1. **실전 테스트 + 피드백 반영** — 셋업 + 업그레이드 모두 다양한 프로젝트에서 검증, 프롬프트 조정
-2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
-3. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
-4. **첫 마이그레이션 작성** — 스킬에 실제 변경 발생 시 § 14.4 레지스트리에 M-3.3-to-{next} 추가
-5. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+> 2026-04-07 준비도 분석 후 업데이트. 상세: `.tracking/TODO.md` Session 11 (TODO-45~51)
+
+1. **실전 테스트** — React Router + FSD 프로젝트에서 첫 실전 테스트. 관찰 포인트 7개 정의 (TODO-51)
+2. **react-router-fsd versionConstraints** — v6 이하 오매칭 방지 (TODO-45)
+3. **추가 프리셋** — react-vite.json (TODO-48), express-api.json (TODO-49)
+4. **structural-test 동적 생성** — domain-based/custom 유형 알고리즘 구체화 (TODO-46)
+5. **feature_list.json 정책** — 빈 배열 vs 라우트 추출 명시 (TODO-47)
+6. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
+7. **첫 마이그레이션 작성** — § 14.4 레지스트리에 M-3.3-to-{next} 추가
+8. **컴패니언 스킬 구현** — harness-feedback (TODO-50)
+9. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 
