@@ -1,13 +1,13 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-04-07 (갱신 — 업그레이드 시스템 설계)
+> 작성일: 2026-04-07 (갱신 — 업그레이드 시스템 구현)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
 
 ## 1. 현재 상태 요약
 
-### 완료된 작업 (TODO-01 ~ TODO-42)
+### 완료된 작업 (TODO-01 ~ TODO-44)
 
 - **Session 1~2 (04-04)**: SKILL.md 사양 갭 메우기, 템플릿 생성, 프리셋 정합성, CLAUDE.md 생성 규칙 (TODO-01~22)
 - **Session 3 (04-05~06)**: 전체 코드베이스 분석 → 20개 이슈 발견 → 4단계(Phase A~D) 수정 (TODO-23~35)
@@ -21,14 +21,28 @@
   - 업그레이드 Phase U1~U5 + 부트스트랩 마이그레이션 (v0→v3.3)
   - 마이그레이션 레지스트리 형식 + 체이닝 규칙
   - 설계 문서: `references/upgrade-system-design.md`
+- **Session 10 (04-07)**: 업그레이드 시스템 SKILL.md 구현 (TODO-44)
+  - § 2 업그레이드 트리거, § 3 Step 0 모드 판별 분기
+  - § 5.13 manifest 생성 규칙, § 5 생성순서 18번 추가
+  - § 6.12 manifest 검증, § 7 보고 업데이트
+  - § 14 업그레이드 시스템 전체 (14.1~14.6): 매니페스트, 카테고리, U1~U5, 레지스트리, 부트스트랩, 엣지케이스
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
 
 ### 현재 SKILL.md가 하는 일
 
-프로젝트를 스캔 → 소크라테스 문답 → 승인 → 17개 파일 생성 → 검증 → 보고.
-생성 파일: CLAUDE.md, AGENTS.md, ARCHITECTURE.md, agents/*.md (7개), .claude/rules/ (3개), feature_list.json, claude-progress.txt, init.sh, scripts/structural-test.ts, scripts/doc-freshness.ts, docs/QUALITY_SCORE.md, docs/TECH_DEBT.md, docs/HARNESS_FRICTION.md, docs/ 하위 디렉토리, package.json scripts.
+프로젝트를 스캔 → 소크라테스 문답 → 승인 → 18개 파일 생성 → 검증 → 보고.
+생성 파일: CLAUDE.md, AGENTS.md, ARCHITECTURE.md, agents/*.md (7개), .claude/rules/ (3개), feature_list.json, claude-progress.txt, init.sh, scripts/structural-test.ts, scripts/doc-freshness.ts, docs/QUALITY_SCORE.md, docs/TECH_DEBT.md, docs/HARNESS_FRICTION.md, docs/ 하위 디렉토리, package.json scripts, .harness-manifest.json.
+
+### 업그레이드 시스템 (v3.3+)
+- Step 0 모드 판별: Setup / Bootstrap+Upgrade / Upgrade
+- `.harness-manifest.json`으로 버전 추적 (프로필, 파일 해시, 카테고리)
+- 파일 카테고리: managed(13) / custom(4) / data(5) — 카테고리별 업그레이드 동작 차별화
+- Phase U1~U5: 분석→계획제시→실행→검증→보고
+- 마이그레이션 레지스트리: M-{from}-to-{to} 형식, 체이닝 지원
+- 부트스트랩: manifest 없는 기존 프로젝트를 v3.3으로 편입
+- 엣지 케이스 6개 처리 (중단, 새 플레이스홀더, 프리셋 삭제, 파일 삭제, 아키텍처 변경, 팀 환경)
 
 ### 피드백 수집 시스템 (v3.3)
 - session-routine.md가 6개 마찰 이벤트(에스컬레이션, 검증 실패 등)를 자동 감지하여 `docs/HARNESS_FRICTION.md`에 기록
@@ -162,10 +176,10 @@ paths:
 
 ## 5. 향후 작업 (우선순위)
 
-1. **업그레이드 시스템 구현 (TODO-44)** — `references/upgrade-system-design.md` 기반으로 SKILL.md § 14 추가. 구현 순서: manifest 생성 → 카테고리 테이블 → 모드 판별 → 부트스트랩 → Phase U1~U5 → 마이그레이션 레지스트리 → 검증/보고
-2. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정
-3. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
-4. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
+1. **실전 테스트 + 피드백 반영** — 다양한 프로젝트에서 스킬 실행 후 SKILL.md 프롬프트 조정 (셋업 + 업그레이드 모두)
+2. **추가 프리셋** — react-vite.json, express-api.json 등 지원 스택 확장
+3. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화
+4. **첫 마이그레이션 작성** — 스킬에 실제 변경이 발생하면 § 14.4 레지스트리에 M-3.3-to-{next} 추가
 5. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
@@ -192,9 +206,10 @@ paths:
 │   └── harness-feedback/             # 피드백 분석→Issue 스킬 (스텁)
 ├── references/
 │   ├── harness-guide.md              # 이론적 기반 (P1-P10)
-│   └── project-context.md            # 설계 결정 기록
+│   ├── project-context.md            # 설계 결정 기록
+│   └── upgrade-system-design.md      # 업그레이드 시스템 설계
 └── .tracking/
-    ├── TODO.md                       # 투두 상태 (01-42 완료)
+    ├── TODO.md                       # 투두 상태 (01-44 완료)
     ├── CHANGELOG.md                  # 변경 이력
     └── HANDOFF.md                    # 이 파일
 ```
