@@ -414,11 +414,10 @@ done
 
 ```
 ✅ 프로필이 저장되었습니다 (.harness-profile.json)
-
-다음 단계: `/harness-scaffold`를 실행하여 하네스 파일을 생성하세요.
-
-💡 필요하면 .harness-profile.json을 직접 편집한 후 스캐폴딩을 실행할 수 있습니다.
+⏳ 스캐폴딩을 자동으로 시작합니다...
 ```
+
+그 직후, **Skill 도구**를 사용하여 `harness-scaffold`를 호출한다. 별도의 사용자 확인 없이 즉시 실행한다.
 
 ---
 

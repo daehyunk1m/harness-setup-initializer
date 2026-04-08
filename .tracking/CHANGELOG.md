@@ -7,6 +7,9 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 수정 (Changed) — Session 13 (2026-04-08)
+- SKILL.md § 4: 프로필 승인 후 수동 안내 → Skill 도구로 harness-scaffold 자동 호출로 변경
+
 ### 추가 (Added) — Session 12 (2026-04-08): 2-스킬 분리 (Issue #1)
 - SKILL-SCAFFOLD.md: 스캐폴딩 스킬 신규 생성 — Phase 2~4 (스캐폴딩 + 검증 + 보고) 추출, `context: fork` + `model: sonnet` frontmatter 유지
 - `.harness-profile.json`: 두 스킬 간 중간 포맷(계약) 도입 — 분석 스킬 출력 → 스캐폴딩 스킬 입력
