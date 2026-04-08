@@ -1,17 +1,38 @@
 ---
 name: harness-scaffold
-description: "하네스 프로필(.harness-profile.json)을 읽어 파일을 생성하는 스킬. /harness-setup 완료 후 안내되며, 직접 호출도 가능하다. 하네스 스캐폴딩, harness scaffold, 파일 생성, 하네스 파일 만들어줘 등을 언급할 때 이 스킬을 사용한다."
-context: fork
-model: sonnet
+description: "하네스 프로필(.harness-profile.json)을 읽어 파일을 생성하는 스킬. /harness-setup 완료 후 자동 실행되며, 직접 호출도 가능하다. 하네스 스캐폴딩, harness scaffold, 파일 생성, 하네스 파일 만들어줘 등을 언급할 때 이 스킬을 사용한다."
+user-invocable: false
+hooks:
+  Stop:
+    - type: command
+      command: "bash -c 'if [ -f .harness-manifest.json ]; then printf \"{\\\"decision\\\":\\\"allow\\\"}\"; else printf \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"파일 생성 미완료\\\",\\\"additionalContext\\\":\\\"아직 모든 하네스 파일과 .harness-manifest.json이 생성되지 않았다. 스캐폴딩을 계속 진행하라.\\\"}\"; fi'"
 ---
 
 # Harness Scaffold Skill
+
+## 0. 프로필 로드
+
+```!
+if [ -f .harness-profile.json ]; then
+  cat .harness-profile.json
+else
+  echo '{"error": "PROFILE_NOT_FOUND"}'
+fi
+```
+
+위 출력에 `"error"` 키가 있으면:
+"프로필이 없습니다. `/harness-setup`을 먼저 실행하세요." 출력 후 **즉시 종료**한다.
+
+위 출력이 정상 JSON이면 이것이 프로젝트 프로필이다. § 3 진입 검증으로 진행한다.
+
+---
 
 ## 1. 개요
 
 이 스킬은 `/harness-setup`이 생성한 **프로젝트 프로필**(`.harness-profile.json`)을 읽어 하네스 파일을 생성한다.
 
-- 프로필 파일을 입력으로 받아 18개 파일을 의존 순서대로 생성한다
+- § 0에서 프로필이 프롬프트에 이미 주입되었으므로, 별도로 파일을 읽을 필요 없이 위 데이터를 사용한다
+- 프로필 데이터를 기반으로 18개 파일을 의존 순서대로 생성한다
 - 생성 후 12항목 검증 체크리스트를 자동 실행한다
 - 최종 결과를 사용자에게 보고한다
 
@@ -23,20 +44,21 @@ model: sonnet
 
 ## 2. 트리거 조건
 
-- `/harness-scaffold` 호출 시
-- `/harness-setup` 완료 후 자동 안내에 따라 실행할 때
+- `/harness-setup`의 Stop hook 또는 프롬프트 지시에 의해 자동 호출될 때
 - "하네스 파일 생성해줘", "스캐폴딩 실행" 등을 요청할 때
+
+> 이 스킬은 `user-invocable: false`이므로 사용자 `/` 메뉴에 표시되지 않는다. `/harness-setup`이 자동으로 호출하거나, 자연어로 요청하면 Claude가 호출한다.
 
 ---
 
 ## 3. 진입 검증
 
-스킬 시작 시 다음을 확인한다:
+§ 0에서 주입된 프로필 데이터를 검증한다:
 
-1. **`.harness-profile.json` 존재 확인**
-   - 미존재 시: "프로필 파일이 없습니다. 먼저 `/harness-setup`을 실행하여 프로필을 생성하세요." 출력 후 종료
+1. **프로필 존재 확인**
+   - § 0 출력이 `{"error": "PROFILE_NOT_FOUND"}`이면 이미 종료 처리됨
 2. **JSON 유효성 확인**
-   - 파싱 실패 시: "프로필 파일이 유효한 JSON이 아닙니다. 파일을 확인하세요." 출력 후 종료
+   - § 0 출력이 유효한 JSON이 아니면: "프로필 파일이 유효한 JSON이 아닙니다. 파일을 확인하세요." 출력 후 종료
 3. **`approved: true` 확인**
    - `approved`가 `false`이거나 없으면: "프로필이 아직 승인되지 않았습니다. `/harness-setup`을 다시 실행하세요." 출력 후 종료
 4. **모드 판별**
@@ -1143,4 +1165,4 @@ Phase 2에서 파일을 생성할 때, 다음 참조를 읽어 구현의 기본 
 - `references/upgrade-system-design.md` — 업그레이드 시스템 설계 문서 (매니페스트, 카테고리, 마이그레이션)
 
 ### 우선순위 규칙
-**SKILL-SCAFFOLD.md가 스캐폴딩의 정규 사양이다.** 이 파일과 harness-guide.md의 내용이 충돌하면 이 파일이 우선한다.
+**이 파일(harness-scaffold/SKILL.md)이 스캐폴딩의 정규 사양이다.** 이 파일과 harness-guide.md의 내용이 충돌하면 이 파일이 우선한다.

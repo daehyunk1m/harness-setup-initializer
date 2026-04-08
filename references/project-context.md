@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-08 (v5.0 — 2-스킬 분리)
+> 마지막 업데이트: 2026-04-08 (v5.1 — hook-driven continuation)
 
 ---
 
@@ -30,8 +30,10 @@
 
 ```
 ~/.claude/skills/harness-setup/
-├── SKILL.md                      # 분석 스킬 (Phase 1: 분석 + Q&A → 프로필)
-├── SKILL-SCAFFOLD.md             # 스캐폴딩 스킬 (Phase 2~4: 생성 + 검증 + 보고)
+├── SKILL.md                      # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
+├── .claude/skills/
+│   └── harness-scaffold/
+│       └── SKILL.md              # 스캐폴딩 스킬 (자동 디스커버리, user-invocable: false)
 ├── presets/                      # 스택별 프리셋
 │   ├── react-next.json           # React + Next.js (App Router) + 레이어 기반
 │   └── react-router-fsd.json     # React Router v7 + FSD
@@ -57,7 +59,7 @@
 ### 작업 환경
 
 - **개발**: `cd ~/.claude/skills/harness-setup && claude`
-- **테스트**: `cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup`
+- **테스트**: `cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup` (단일 등록으로 두 스킬 자동 디스커버리)
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
 ---
@@ -75,13 +77,17 @@
 | Orchestrator 위치 | CLAUDE.md + .claude/rules/ (subagent 아님) | 핸드오프 비용 최소화, 상태 머신 단순화 |
 | TDD 워크플로 | Red → Green → Refactor 강제 | 테스트 없는 기능 완료 방지 |
 | 배포 위치 | `~/.claude/skills/` | 글로벌 스킬, 모든 프로젝트에서 사용 |
-| 실행 모델 | 분석: 메인 세션 (fork 없음) / 스캐폴딩: Sonnet (`context: fork` + `model: sonnet`) | 분석은 멀티턴 Q&A 필요 → fork 불가, 스캐폴딩은 구조화된 작업 → Sonnet 충분 |
+| 실행 모델 | 분석: 메인 세션 / 스캐폴딩: 메인 세션 (fork 제거) | fork는 권한/디렉토리/타임아웃 문제로 Skill 도구 체이닝 비호환. 두 스킬 모두 메인 세션에서 실행 |
 | 피드백 수집 | session-routine 지시 기반 (hook 아님) | TDD 내부 이벤트에 hook 불가, 오케스트레이터 지시로 충분 |
 | 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
 | 업그레이드 시스템 | A(마이그레이션 레지스트리) + B(파일 카테고리 분리) | 사용자 커스터마이징 보존 + managed 파일 자동 갱신. 상세: `references/upgrade-system-design.md` |
 | 버전 추적 | `.harness-manifest.json` (단일 파일) | 파일별 주석 스탬프 대신 하나의 JSON으로 전체 상태 파악. 전체 profile 저장으로 재스캔 없이 재치환 |
 | 실전 테스트 전 준비도 | 전수 분석 후 바로 실행 가능 판정 | SKILL.md 100%, 템플릿 17/17, 플레이스홀더 21/21 매핑 완료. 7개 리스크는 TODO-45~51로 추적 |
-| 2-스킬 분리 (분석 + 스캐폴딩) | SKILL.md → 분석+Q&A, SKILL-SCAFFOLD.md → 스캐폴딩+검증+보고 | `context: fork`는 서브에이전트로 분리 실행되므로 멀티턴 Q&A(소크라테스 문답) 불가. 분석 스킬에서 fork 제거하여 메인 세션에서 Q&A 수행, 스캐폴딩 스킬에서만 fork+sonnet 유지. `.harness-profile.json`이 두 스킬 간 계약 (GitHub Issue #1) |
+| 2-스킬 분리 (분석 + 스캐폴딩) | SKILL.md → 분석+Q&A, harness-scaffold/SKILL.md → 스캐폴딩+검증+보고 | 분석은 멀티턴 Q&A 필요, 스캐폴딩은 구조화된 파일 생성. 두 스킬 모두 메인 세션에서 실행 (fork 제거 — 권한/디렉토리/타임아웃 문제). Phase 1 완료 후 Skill 도구로 자동 체이닝. `.harness-profile.json`이 두 스킬 간 계약 (GitHub Issue #1) |
+| Hook-driven continuation | Stop hook `decision: "block"` + `additionalContext`로 체이닝 강제 | 프롬프트 기반 체이닝은 비결정적. Stop hook은 시스템 레벨 강제로 더 결정적. oh-my-claudecode ralph, barkain/workflow-orchestration 패턴 참조. 프롬프트 지시는 이중 안전장치로 유지 |
+| `!command` 상태 감지/프로필 주입 | SKILL.md § 0에서 상태 감지, scaffold § 0에서 프로필 데이터 주입 | 셸 커맨드는 결정론적. 스킬 프롬프트에 사전 렌더된 상태/데이터를 주입하여 LLM의 판단 부담 감소. planning-with-files 패턴 참조 |
+| scaffold 자동 디스커버리 | `.claude/skills/harness-scaffold/`로 이동 | `--add-dir` 디렉토리의 `.claude/skills/` 하위는 자동 디스커버리됨. 단일 `--add-dir` 등록으로 UX 마찰 제거 |
+| scaffold `user-invocable: false` | 사용자 `/` 메뉴에서 숨김 | scaffold는 오케스트레이터(setup)가 호출하는 내부 스킬. 사용자가 직접 호출할 필요 없음. 자연어 요청 시에는 Claude가 여전히 호출 가능 |
 
 ---
 
@@ -139,13 +145,22 @@
 - 설계 문서: `references/upgrade-system-design.md`
 
 ### v5.0 (2-스킬 분리 — Issue #1 해결)
-- 단일 SKILL.md → SKILL.md(분석) + SKILL-SCAFFOLD.md(스캐폴딩) 분리
+- 단일 SKILL.md → SKILL.md(분석) + harness-scaffold/SKILL.md(스캐폴딩) 분리
 - 원인: `context: fork`가 서브에이전트로 분리 실행하여 멀티턴 Q&A(소크라테스 문답)가 불가
 - SKILL.md: `context: fork` + `model: sonnet` 제거, Phase 1(분석+Q&A)만 담당
-- SKILL-SCAFFOLD.md: `context: fork` + `model: sonnet` 유지, Phase 2~4(스캐폴딩+검증+보고) 담당
+- harness-scaffold/SKILL.md: `context: fork` + `model: sonnet` 유지, Phase 2~4(스캐폴딩+검증+보고) 담당
 - `.harness-profile.json`: 두 스킬 간 계약(contract) — 분석 스킬 출력 → 스캐폴딩 스킬 입력
 - SKILL.md § 5에 프로필 출력 스키마 추가, 섹션 번호 § 6~12 재정렬
-- CLAUDE.md: 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
+- CLAUDE.md: 파일 맵에 harness-scaffold/SKILL.md 추가, 개발 규칙/테스트/원칙 업데이트
+
+### v5.1 (Hook-driven Continuation — 체이닝 결정론 강화)
+- **Stop hook**: SKILL.md 프론트매터에 `hooks.Stop` 추가. 프로필 존재 + 매니페스트 미존재 → `decision: "block"` + `additionalContext`로 scaffold 호출 강제
+- **`!command` 상태 감지**: SKILL.md § 0에 셸 전처리기 추가. 프로필/매니페스트 존재 여부를 결정론적으로 감지 → 중단 후 재개 지원
+- **`!command` 프로필 주입**: scaffold § 0에서 프로필 JSON을 프롬프트에 사전 주입. Read 도구 호출 불필요
+- **디렉토리 재구조화**: `harness-scaffold/` → `.claude/skills/harness-scaffold/`로 이동. `--add-dir` 하나로 자동 디스커버리
+- **scaffold `user-invocable: false`**: 사용자 `/` 메뉴에서 숨김. 오케스트레이터 또는 자연어 요청으로만 호출
+- **scaffold Stop hook**: 매니페스트 미존재 → `decision: "block"`으로 완료까지 강제
+- 커뮤니티 패턴 참조: oh-my-claudecode ralph (boulder pattern), barkain/workflow-orchestration (hook-driven continuation), OthmanAdi/planning-with-files (skill-scoped hooks)
 
 ---
 

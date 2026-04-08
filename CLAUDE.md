@@ -12,8 +12,8 @@
 
 | 파일 | 역할 | 수정 빈도 |
 |------|------|----------|
-| `SKILL.md` | **분석 스킬** — Phase 1 (스캔 + Q&A + 프로필 저장) | 높음 |
-| `SKILL-SCAFFOLD.md` | **스캐폴딩 스킬** — Phase 2~4 (파일 생성 + 검증 + 보고), fork 모드 | 높음 |
+| `SKILL.md` | **분석 스킬** — Phase 1 (스캔 + Q&A + 프로필 저장) + Stop hook 오케스트레이션 | 높음 |
+| `.claude/skills/harness-scaffold/SKILL.md` | **스캐폴딩 스킬** — Phase 2~4 (파일 생성 + 검증 + 보고) | 높음 |
 | `presets/*.json` | 스택별 프리셋 | 가끔 |
 | `templates/agents/*.md` | TDD subagent 정의 템플릿 | 가끔 |
 | `templates/rules/*.md` | .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow) | 가끔 |
@@ -32,15 +32,16 @@
 
 ## 개발 규칙
 
-### SKILL.md / SKILL-SCAFFOLD.md 수정 시
-- SKILL.md가 분석의, SKILL-SCAFFOLD.md가 스캐폴딩의 **정규 사양**이다
+### SKILL.md / .claude/skills/harness-scaffold/SKILL.md 수정 시
+- SKILL.md가 분석의, `.claude/skills/harness-scaffold/SKILL.md`가 스캐폴딩의 **정규 사양**이다
 - 두 파일의 **프로필 스키마가 동일**해야 한다 (계약). 한쪽을 바꾸면 다른 쪽도 반드시 업데이트
 - 기존 섹션 번호를 변경할 때는 내부 참조를 모두 업데이트
-- 생성 순서(SKILL-SCAFFOLD.md § 5)를 바꾸면 의존 관계가 깨지지 않는지 확인
+- 생성 순서(`.claude/skills/harness-scaffold/SKILL.md` § 5)를 바꾸면 의존 관계가 깨지지 않는지 확인
+- **hooks 수정 시**: 프론트매터의 hooks YAML과 SKILL.md 본문의 체이닝 지시가 일관되어야 한다
 
 ### 템플릿 수정 시
 - 플레이스홀더 패턴: `{{UPPER_SNAKE_CASE}}` — 예: `{{VALIDATE_COMMAND}}`
-- 새 플레이스홀더를 추가하면 SKILL-SCAFFOLD.md의 치환 규칙 테이블에도 반드시 추가
+- 새 플레이스홀더를 추가하면 .claude/skills/harness-scaffold/SKILL.md의 치환 규칙 테이블에도 반드시 추가
 - 기존 템플릿의 동작을 바꿀 때는 프리셋과의 정합성 확인
 
 ### 프리셋 수정 시
@@ -72,12 +73,18 @@
 # 실전 테스트 (실제 프로젝트에서 2단계 스킬 실행)
 cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
-# 2단계: "/harness-scaffold" → 18개 파일 생성 확인
+# 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 18개 파일 생성 확인
+# 3단계: .harness-manifest.json 생성 확인 → Stop hook이 allow 반환 → 정상 종료
+
+# 체이닝 검증
+# 1. 프로필 저장 후 Claude가 자동으로 scaffold를 호출하는가 (Stop hook)
+# 2. 프로필만 있는 상태에서 /harness-setup 재실행 → Q&A 스킵, scaffold 호출
+# 3. manifest 있는 상태에서 /harness-setup → 업그레이드 안내
 
 # 정합성 검사 (수동)
-# 1. SKILL.md §5 프로필 출력 스키마 = SKILL-SCAFFOLD.md §4 프로필 입력 스키마
-# 2. 템플릿의 {{...}} 패턴이 SKILL-SCAFFOLD.md 치환 규칙에 모두 정의되어 있는가
-# 3. SKILL-SCAFFOLD.md의 생성 파일 목록과 실제 templates/ 구조가 일치하는가
+# 1. SKILL.md §5 프로필 출력 스키마 = .claude/skills/harness-scaffold/SKILL.md §4 프로필 입력 스키마
+# 2. 템플릿의 {{...}} 패턴이 .claude/skills/harness-scaffold/SKILL.md 치환 규칙에 모두 정의되어 있는가
+# 3. .claude/skills/harness-scaffold/SKILL.md의 생성 파일 목록과 실제 templates/ 구조가 일치하는가
 # 4. 프리셋의 필드가 SKILL.md 프리셋 스키마와 일치하는가
 ```
 
@@ -95,6 +102,6 @@ cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup
 
 1. 하네스는 스택에 종속되지 않는다
 2. 기존 소스 코드를 수정하지 않는다 (대상 프로젝트의)
-3. SKILL.md + SKILL-SCAFFOLD.md 두 파일이 스킬의 전체 사양이다
+3. SKILL.md + .claude/skills/harness-scaffold/SKILL.md 두 파일이 스킬의 전체 사양이다
 4. 프리셋이 없어도 동작한다
 5. 리뷰에서 반복되는 문제는 자동 검사로 승격한다

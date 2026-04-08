@@ -1,7 +1,7 @@
 # harness-setup 스킬 개선 TODO
 
 > 마지막 업데이트: 2026-04-08
-> 분석 기반: SKILL.md + SKILL-SCAFFOLD.md (2-스킬 분리), presets/ 2개, references/ 3개, templates/ 17개
+> 분석 기반: SKILL.md + harness-scaffold/SKILL.md (2-스킬 분리), presets/ 2개, references/ 3개, templates/ 17개
 
 ---
 
@@ -353,6 +353,6 @@
 
 ### TODO-54: .harness-profile.json 스키마 문서화
 - **상태**: [ ] 미완료
-- **파일**: `SKILL.md` § 5, `SKILL-SCAFFOLD.md`
+- **파일**: `SKILL.md` § 5, `harness-scaffold/SKILL.md`
 - **문제**: 두 스킬 간 계약인 `.harness-profile.json`의 정확한 스키마(필수/선택 필드, 타입, 기본값)가 양쪽 스킬에서 일관되게 문서화되어 있는지 확인 필요
-- **해결**: 프로필 출력 스키마를 SKILL.md에 정의하고, SKILL-SCAFFOLD.md에서 동일 스키마를 참조하도록 정합성 확보
+- **해결**: 프로필 출력 스키마를 SKILL.md에 정의하고, harness-scaffold/SKILL.md에서 동일 스키마를 참조하도록 정합성 확보

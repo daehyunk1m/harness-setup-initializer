@@ -7,7 +7,22 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
-### 수정 (Changed) — Session 13 (2026-04-08)
+### 추가 (Added) — Session 13 (2026-04-08): hook-driven continuation
+- .claude/skills/harness-scaffold/SKILL.md: scaffold 스킬 이동 — `user-invocable: false`, Stop hook(매니페스트 미존재 시 block), `!command` 프로필 주입(§ 0)
+
+### 수정 (Changed) — Session 13 (2026-04-08): hook-driven continuation
+- SKILL.md frontmatter: `hooks.Stop` 추가 — 프로필 존재 + 매니페스트 미존재 시 scaffold 호출 강제 (`decision: "block"` + `additionalContext`)
+- SKILL.md § 0: `!command` 상태 감지 블록 추가 — 신규/재개/완료 3-way 분기
+- SKILL.md § 1: 자동 체이닝 이중 안전장치 설명 추가
+- SKILL.md § 4 Step 5: 체이닝 지시를 3단계 절차로 구체화 + Stop hook 백업 안내
+- CLAUDE.md: 파일 맵, 개발 규칙, 테스트 방법, 원칙 갱신 (신규 경로 반영)
+- README.md: 등록 방법 단일 `--add-dir`로 변경, 디렉토리 구조 갱신
+
+### 수정됨 (Fixed) — Session 13 (2026-04-08)
+- 비결정적 체이닝 문제 해결 — Stop hook `decision: "block"`으로 시스템 레벨 강제
+- 이중 `--add-dir` 등록 UX 마찰 해소 — `.claude/skills/` 자동 디스커버리로 단일 등록
+
+### 수정 (Changed) — Session 13 (2026-04-08) (이전 항목)
 - SKILL.md § 4: 프로필 승인 후 수동 안내 → Skill 도구로 harness-scaffold 자동 호출로 변경
 
 ### 추가 (Added) — Session 12 (2026-04-08): 2-스킬 분리 (Issue #1)

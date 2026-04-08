@@ -133,8 +133,11 @@ claude --add-dir ~/.claude/skills/harness-setup
 
 ```
 harness-setup/
-├── SKILL.md                          # 스킬 본체 (전체 사양)
+├── SKILL.md                          # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
 ├── README.md                         # 이 파일
+├── .claude/skills/
+│   └── harness-scaffold/
+│       └── SKILL.md                  # 스캐폴딩 스킬 (자동 디스커버리)
 ├── presets/
 │   ├── react-next.json               # React + Next.js (App Router, 레이어 기반)
 │   └── react-router-fsd.json         # React Router v7 + FSD
