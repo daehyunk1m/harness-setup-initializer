@@ -7,6 +7,19 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 12 (2026-04-08): 2-스킬 분리 (Issue #1)
+- SKILL-SCAFFOLD.md: 스캐폴딩 스킬 신규 생성 — Phase 2~4 (스캐폴딩 + 검증 + 보고) 추출, `context: fork` + `model: sonnet` frontmatter 유지
+- `.harness-profile.json`: 두 스킬 간 중간 포맷(계약) 도입 — 분석 스킬 출력 → 스캐폴딩 스킬 입력
+
+### 수정 (Changed) — Session 12 (2026-04-08)
+- SKILL.md: Phase 2~4 제거, Phase 1(분석 + Q&A)만 남김. `context: fork` 및 `model: sonnet` frontmatter 제거 (멀티턴 Q&A 호환을 위해)
+- SKILL.md § 5: 프로필 출력 스키마 추가 — `.harness-profile.json`으로 저장하는 구조 명시
+- SKILL.md: 섹션 번호 재정렬 (§ 6~12)
+- CLAUDE.md: 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
+
+### 수정됨 (Fixed) — Session 12 (2026-04-08)
+- `context: fork`와 멀티턴 Q&A(소크라테스 문답) 비호환 문제 해결 — 분석 스킬에서 fork 제거, 스캐폴딩 스킬에서만 fork 사용 (GitHub Issue #1)
+
 ### 추가 (Added) — Session 11 (2026-04-07): 실전 적용 준비도 분석
 - .tracking/TODO.md: Session 11 추가 — TODO-45~51 (실전 테스트 전 전수 분석에서 도출된 리스크/제한사항 7개)
 - .tracking/HANDOFF.md: § 5를 준비도 분석 결과 + 우선순위 9개 목록으로 확장

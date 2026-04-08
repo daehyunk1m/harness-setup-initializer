@@ -1,7 +1,7 @@
 # harness-setup 스킬 개선 TODO
 
-> 마지막 업데이트: 2026-04-07
-> 분석 기반: SKILL.md(~1300줄), presets/ 2개, references/ 3개, templates/ 17개
+> 마지막 업데이트: 2026-04-08
+> 분석 기반: SKILL.md + SKILL-SCAFFOLD.md (2-스킬 분리), presets/ 2개, references/ 3개, templates/ 17개
 
 ---
 
@@ -327,3 +327,32 @@
 - **파일**: `.tracking/` 또는 `references/`
 - **문제**: 실전 테스트에서 발견되는 문제를 체계적으로 기록하고 개선에 반영하는 프로세스가 없음
 - **해결**: 관찰 포인트 7개(프리셋 매칭, 아키텍처 감지, 문답 품질, 생성 파일 품질, structural-test 실행, Phase 3 검증, 마찰 로깅) 기준으로 결과 기록 템플릿 작성, 발견된 문제를 TODO로 승격하는 프로세스 정립
+
+---
+
+## Session 12: 2-스킬 분리 — GitHub Issue #1 해결 (2026-04-08)
+
+> SKILL.md를 분석 스킬(SKILL.md)과 스캐폴딩 스킬(SKILL-SCAFFOLD.md)로 분리.
+> `context: fork` + 멀티턴 Q&A 비호환 문제 해결.
+
+### TODO-52: SKILL.md → 2-스킬 분리 (Issue #1)
+- **상태**: [x] 완료 (2026-04-08)
+- **파일**: `SKILL.md`, `SKILL-SCAFFOLD.md` (신규), `CLAUDE.md`
+- **문제**: `context: fork`는 서브에이전트로 분리 실행하므로 멀티턴 Q&A(소크라테스 문답)가 불가. Phase 1(분석+문답)과 Phase 2~4(스캐폴딩+검증+보고)가 같은 스킬 안에서 충돌
+- **해결**: 2-스킬 분리
+  - `SKILL.md` (harness-setup): Phase 1 분석 + Q&A → `.harness-profile.json` 출력. `context: fork` 제거, `model: sonnet` 제거
+  - `SKILL-SCAFFOLD.md` (harness-scaffold): `.harness-profile.json` 읽기 → Phase 2~4 스캐폴딩 + 검증 + 보고. `context: fork` + `model: sonnet` 유지
+  - `.harness-profile.json`이 두 스킬 간 계약(contract) 역할
+  - `CLAUDE.md` 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
+
+### TODO-53: 2-스킬 플로우 실전 테스트
+- **상태**: [ ] 미완료
+- **파일**: 실제 프로젝트에서 테스트
+- **문제**: 분리된 2-스킬 플로우가 실전에서 정상 동작하는지 검증 필요
+- **해결**: `/harness-setup` → `.harness-profile.json` 생성 확인 → `/harness-scaffold` → 18개 파일 생성 확인. 특히 프로필 JSON 스키마 정합성, scaffold 스킬의 프로필 읽기, 누락 필드 기본값 처리 검증
+
+### TODO-54: .harness-profile.json 스키마 문서화
+- **상태**: [ ] 미완료
+- **파일**: `SKILL.md` § 5, `SKILL-SCAFFOLD.md`
+- **문제**: 두 스킬 간 계약인 `.harness-profile.json`의 정확한 스키마(필수/선택 필드, 타입, 기본값)가 양쪽 스킬에서 일관되게 문서화되어 있는지 확인 필요
+- **해결**: 프로필 출력 스키마를 SKILL.md에 정의하고, SKILL-SCAFFOLD.md에서 동일 스키마를 참조하도록 정합성 확보
