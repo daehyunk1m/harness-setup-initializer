@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-07 (v3.3 + 업그레이드 시스템 구현)
+> 마지막 업데이트: 2026-04-08 (v5.0 — 2-스킬 분리)
 
 ---
 
@@ -30,7 +30,8 @@
 
 ```
 ~/.claude/skills/harness-setup/
-├── SKILL.md                      # 스킬 본체 (frontmatter + 지침)
+├── SKILL.md                      # 분석 스킬 (Phase 1: 분석 + Q&A → 프로필)
+├── SKILL-SCAFFOLD.md             # 스캐폴딩 스킬 (Phase 2~4: 생성 + 검증 + 보고)
 ├── presets/                      # 스택별 프리셋
 │   ├── react-next.json           # React + Next.js (App Router) + 레이어 기반
 │   └── react-router-fsd.json     # React Router v7 + FSD
@@ -74,12 +75,13 @@
 | Orchestrator 위치 | CLAUDE.md + .claude/rules/ (subagent 아님) | 핸드오프 비용 최소화, 상태 머신 단순화 |
 | TDD 워크플로 | Red → Green → Refactor 강제 | 테스트 없는 기능 완료 방지 |
 | 배포 위치 | `~/.claude/skills/` | 글로벌 스킬, 모든 프로젝트에서 사용 |
-| 실행 모델 | Sonnet (`context: fork` + `model: sonnet`) | 구조화된 작업이라 Sonnet 충분, 비용/속도 최적화 |
+| 실행 모델 | 분석: 메인 세션 (fork 없음) / 스캐폴딩: Sonnet (`context: fork` + `model: sonnet`) | 분석은 멀티턴 Q&A 필요 → fork 불가, 스캐폴딩은 구조화된 작업 → Sonnet 충분 |
 | 피드백 수집 | session-routine 지시 기반 (hook 아님) | TDD 내부 이벤트에 hook 불가, 오케스트레이터 지시로 충분 |
 | 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
 | 업그레이드 시스템 | A(마이그레이션 레지스트리) + B(파일 카테고리 분리) | 사용자 커스터마이징 보존 + managed 파일 자동 갱신. 상세: `references/upgrade-system-design.md` |
 | 버전 추적 | `.harness-manifest.json` (단일 파일) | 파일별 주석 스탬프 대신 하나의 JSON으로 전체 상태 파악. 전체 profile 저장으로 재스캔 없이 재치환 |
 | 실전 테스트 전 준비도 | 전수 분석 후 바로 실행 가능 판정 | SKILL.md 100%, 템플릿 17/17, 플레이스홀더 21/21 매핑 완료. 7개 리스크는 TODO-45~51로 추적 |
+| 2-스킬 분리 (분석 + 스캐폴딩) | SKILL.md → 분석+Q&A, SKILL-SCAFFOLD.md → 스캐폴딩+검증+보고 | `context: fork`는 서브에이전트로 분리 실행되므로 멀티턴 Q&A(소크라테스 문답) 불가. 분석 스킬에서 fork 제거하여 메인 세션에서 Q&A 수행, 스캐폴딩 스킬에서만 fork+sonnet 유지. `.harness-profile.json`이 두 스킬 간 계약 (GitHub Issue #1) |
 
 ---
 
@@ -136,6 +138,15 @@
 - SKILL.md § 14로 구현 완료 (TODO-44)
 - 설계 문서: `references/upgrade-system-design.md`
 
+### v5.0 (2-스킬 분리 — Issue #1 해결)
+- 단일 SKILL.md → SKILL.md(분석) + SKILL-SCAFFOLD.md(스캐폴딩) 분리
+- 원인: `context: fork`가 서브에이전트로 분리 실행하여 멀티턴 Q&A(소크라테스 문답)가 불가
+- SKILL.md: `context: fork` + `model: sonnet` 제거, Phase 1(분석+Q&A)만 담당
+- SKILL-SCAFFOLD.md: `context: fork` + `model: sonnet` 유지, Phase 2~4(스캐폴딩+검증+보고) 담당
+- `.harness-profile.json`: 두 스킬 간 계약(contract) — 분석 스킬 출력 → 스캐폴딩 스킬 입력
+- SKILL.md § 5에 프로필 출력 스키마 추가, 섹션 번호 § 6~12 재정렬
+- CLAUDE.md: 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
+
 ---
 
 ## 5. 향후 확장 가능 항목
@@ -151,17 +162,19 @@
 
 ## 6. 다음 단계
 
-> 2026-04-07 준비도 분석 후 업데이트. 상세: `.tracking/TODO.md` Session 11 (TODO-45~51)
+> 2026-04-08 2-스킬 분리 후 업데이트. 상세: `.tracking/TODO.md` Session 12 (TODO-52~54)
 
-1. **실전 테스트** — React Router + FSD 프로젝트에서 첫 실전 테스트. 관찰 포인트 7개 정의 (TODO-51)
-2. **react-router-fsd versionConstraints** — v6 이하 오매칭 방지 (TODO-45)
-3. **추가 프리셋** — react-vite.json (TODO-48), express-api.json (TODO-49)
-4. **structural-test 동적 생성** — domain-based/custom 유형 알고리즘 구체화 (TODO-46)
-5. **feature_list.json 정책** — 빈 배열 vs 라우트 추출 명시 (TODO-47)
-6. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
-7. **첫 마이그레이션 작성** — § 14.4 레지스트리에 M-3.3-to-{next} 추가
-8. **컴패니언 스킬 구현** — harness-feedback (TODO-50)
-9. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+1. **2-스킬 플로우 실전 테스트** — `/harness-setup` → `.harness-profile.json` → `/harness-scaffold` 전체 플로우 검증 (TODO-53)
+2. **`.harness-profile.json` 스키마 정합성** — 두 스킬 간 계약 문서화 (TODO-54)
+3. **실전 테스트** — React Router + FSD 프로젝트에서 첫 실전 테스트. 관찰 포인트 7개 정의 (TODO-51)
+4. **react-router-fsd versionConstraints** — v6 이하 오매칭 방지 (TODO-45)
+5. **추가 프리셋** — react-vite.json (TODO-48), express-api.json (TODO-49)
+6. **structural-test 동적 생성** — domain-based/custom 유형 알고리즘 구체화 (TODO-46)
+7. **feature_list.json 정책** — 빈 배열 vs 라우트 추출 명시 (TODO-47)
+8. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
+9. **첫 마이그레이션 작성** — § 14.4 레지스트리에 M-3.3-to-{next} 추가
+10. **컴패니언 스킬 구현** — harness-feedback (TODO-50)
+11. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
 
 ---
 
