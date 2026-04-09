@@ -1,6 +1,7 @@
 ---
 name: harness-setup
 description: "프로젝트에 에이전트 작업 환경(하네스)을 셋업하거나 기존 하네스를 최신 버전으로 업그레이드하는 스킬. 소스 코드를 분석하고, 사용자와 문답을 통해 프로젝트에 맞는 하네스를 구성한다. 기존 소스 코드는 수정하지 않으며, 문서와 설정 파일만 추가한다. 사용자가 하네스 셋업, harness setup, 에이전트 환경 구축, AGENTS.md 생성, 에이전트가 작업할 수 있게 환경 잡아줘, 프로젝트에 하네스 적용, 하네스 업그레이드, harness upgrade 등을 언급할 때 이 스킬을 사용한다."
+allowed-tools: Bash(echo *) Bash([ *) Bash(test *)
 hooks:
   Stop:
     - type: command

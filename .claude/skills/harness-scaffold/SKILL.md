@@ -2,6 +2,7 @@
 name: harness-scaffold
 description: "하네스 프로필(.harness-profile.json)을 읽어 파일을 생성하는 스킬. /harness-setup 완료 후 자동 실행되며, 직접 호출도 가능하다. 하네스 스캐폴딩, harness scaffold, 파일 생성, 하네스 파일 만들어줘 등을 언급할 때 이 스킬을 사용한다."
 user-invocable: false
+allowed-tools: Bash(cat *) Bash(echo *) Bash([ *) Bash(test *)
 hooks:
   Stop:
     - type: command

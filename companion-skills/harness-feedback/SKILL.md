@@ -1,6 +1,7 @@
 ---
 name: harness-feedback
 description: "하네스 마찰 로그(docs/HARNESS_FRICTION.md)를 분석하여 반복 패턴을 식별하고, harness-setup 리포에 개선 Issue를 생성하는 스킬. '피드백 분석', '하네스 피드백', 'harness feedback', '마찰 분석' 등을 요청할 때 사용한다."
+allowed-tools: Bash(cat *) Bash(echo *)
 ---
 
 # Harness Feedback Skill

@@ -7,6 +7,9 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 수정됨 (Fixed) — Session 15 (2026-04-09): Issue #2 권한 에러
+- SKILL.md, .claude/skills/harness-scaffold/SKILL.md, companion-skills/harness-feedback/SKILL.md: frontmatter에 `allowed-tools` 추가 — `` ```! `` 블록 실행 시 권한 체크 실패 해결 (Issue #2)
+
 ### 추가 (Added) — Session 14 (2026-04-09): 이슈 보고 프로세스
 - companion-skills/harness-feedback/SKILL.md: 스텁 → 실제 구현 (파싱→패턴 분석→초안→확인→gh issue create)
 - templates/HARNESS_FRICTION.md: 하네스 이슈 카테고리 7종 추가 + 이슈 보고 안내 섹션
