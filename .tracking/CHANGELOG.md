@@ -7,6 +7,9 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 수정 (Changed) — Session 14 (2026-04-09): README 시나리오 기반 재작성
+- README.md: 2-스킬 구조/Stop hook 체이닝 섹션 추가, Mermaid stateDiagram으로 실행 흐름 시각화, 시나리오별 동작 4가지 추가, 생성 파일 테이블 전면 갱신(18개), 디렉토리 구조·파일 역할 테이블 보완
+
 ### 추가 (Added) — Session 13 (2026-04-08): hook-driven continuation
 - .claude/skills/harness-scaffold/SKILL.md: scaffold 스킬 이동 — `user-invocable: false`, Stop hook(매니페스트 미존재 시 block), `!command` 프로필 주입(§ 0)
 

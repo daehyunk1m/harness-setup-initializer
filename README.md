@@ -15,49 +15,145 @@ Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 
 - AGENTS.md로 프로젝트 맥락을 즉시 파악
 - CLAUDE.md로 작업 규칙과 명령어를 확인
 - ARCHITECTURE.md로 아키텍처 규칙을 준수
+- `.claude/rules/`로 세션 루틴, 코딩 표준, Git 규칙을 자동 적용
+- `agents/*.md`로 TDD subagent 파이프라인을 구동
 - feature_list.json으로 진행 상태를 추적
 - structural-test.ts로 아키텍처 위반을 자동 감지
 - init.sh로 개발 환경을 한 번에 초기화
 
 ---
 
+## 2-스킬 구조
+
+하네스 셋업은 두 개의 스킬이 자동 체이닝으로 연결된다:
+
+| 스킬 | 역할 | 산출물 |
+|------|------|--------|
+| **`/harness-setup`** | Phase 1: 프로젝트 스캔 + Q&A + 프로필 저장 | `.harness-profile.json` |
+| **`/harness-scaffold`** | Phase 2~4: 파일 생성 + 검증 + 보고 | 18개 파일 + `.harness-manifest.json` |
+
+### 자동 체이닝
+
+사용자가 `/harness-setup`만 실행하면 나머지는 자동으로 진행된다:
+
+1. `harness-setup`이 프로필을 저장하면 **Stop hook**이 발동한다
+2. 프로필은 있지만 매니페스트가 없으므로 hook이 `block`을 반환한다
+3. `additionalContext`로 `/harness-scaffold` 호출을 지시한다
+4. scaffold가 모든 파일을 생성하고 매니페스트를 저장하면 hook이 `allow`를 반환한다
+
+---
+
 ## 실행 흐름
 
+```mermaid
+stateDiagram-v2
+    [*] --> 상태감지
+
+    state 상태감지 <<choice>>
+    상태감지 --> Phase1 : profile ✗ manifest ✗
+    상태감지 --> 프로필재사용 : profile ✓ manifest ✗
+    상태감지 --> 업그레이드 : profile ✓ manifest ✓
+
+    state Phase1 {
+        기초스캔 --> 딥스캔
+        딥스캔 --> 프리셋매칭
+        프리셋매칭 --> 소크라테스문답
+        소크라테스문답 --> 계획제시_승인
+    }
+
+    프로필재사용 --> Phase1 : 거부
+    프로필재사용 --> 프로필저장 : 수락
+
+    Phase1 --> 프로필저장 : 사용자 승인
+    업그레이드 --> 프로필저장 : U1~U2 분석
+
+    프로필저장 --> StopHook_block
+    StopHook_block --> Phase2_4
+
+    state Phase2_4 {
+        스캐폴딩 --> 검증
+        검증 --> 보고
+    }
+
+    Phase2_4 --> 매니페스트저장
+    매니페스트저장 --> StopHook_allow
+    StopHook_allow --> [*]
 ```
-Phase 1: 스캔 & 분석
-  ├── Step 1: 기초 스캔 (package.json, 디렉토리 구조)
-  ├── Step 2: 딥스캔 (import 패턴, 아키텍처 분류)
-  ├── Step 3: 프리셋 매칭 (스택+아키텍처 대조)
-  ├── Step 4: 소크라테스 문답 (불확실한 부분만 질문, 최대 3라운드)
-  └── Step 5: 계획 제시 & 승인
-         ↓
-[사용자 승인]
-         ↓
-Phase 2: 스캐폴딩 (12개 파일 생성)
-         ↓
-Phase 3: 검증 (파일 존재, JSON 유효성, structural-test 실행)
-         ↓
-Phase 4: 보고 (결과 요약 + 다음 단계 안내)
+
+---
+
+## 시나리오별 동작
+
+### 1. 신규 셋업 (가장 일반적)
+
+프로필과 매니페스트가 모두 없는 프로젝트.
+
+```
+사용자: "하네스 셋업해줘"
+→ 자동 스캔 → 2~4개 질문 → 프로필 승인 → 18개 파일 자동 생성 → 완료
+```
+
+사용자가 하는 일은 **(1) 셋업 요청, (2) 질문에 답변, (3) 프로필 승인** 세 가지뿐이다.
+
+### 2. 중단 후 재개
+
+이전 세션에서 프로필까지 저장하고 중단된 경우.
+
+```
+사용자: "/harness-setup"
+→ "기존 프로필이 발견되었습니다. 사용할까요?" → 수락 → scaffold 자동 실행
+```
+
+### 3. 업그레이드
+
+이미 하네스가 완성된 프로젝트를 최신 버전으로 갱신.
+
+```
+사용자: "하네스 업그레이드해줘"
+→ 현재 버전 ↔ 최신 버전 비교 → 변경된 부분만 갱신
+```
+
+### 4. Bootstrap
+
+수동으로 AGENTS.md 등을 만들어둔 프로젝트 (매니페스트 없음).
+
+```
+→ 기존 파일 분석 → 프로필 역추론 → 빠진 파일만 보충
 ```
 
 ---
 
 ## 생성되는 파일
 
-| 파일 | 역할 |
-|------|------|
-| **AGENTS.md** | 프로젝트 개요, 스택, 아키텍처 링크, 문서 맵 (100줄 이내) |
-| **CLAUDE.md** | 명령어, 코드 규칙, 세션 루틴, 금지 사항 (200줄 이내) |
-| **ARCHITECTURE.md** | 레이어/슬라이스 규칙, 의존성 방향, 네이밍 규칙 |
-| **feature_list.json** | 기능 목록 + 검증 상태 추적 |
-| **claude-progress.txt** | 세션별 작업 기록 |
-| **init.sh** | 의존성 설치 + 개발 서버 실행 + 준비 확인 |
-| **scripts/structural-test.ts** | 아키텍처 의존성 규칙 자동 검증 |
-| **scripts/doc-freshness.ts** | 문서 최신성 검사 |
-| **docs/QUALITY_SCORE.md** | 6개 카테고리 품질 점수표 |
-| **docs/TECH_DEBT.md** | 기술 부채 추적 (4단계 심각도) |
-| **docs/{하위 디렉토리}** | product-specs, design-docs, exec-plans, references |
-| **package.json** | `lint:arch`, `validate`, `doc:check` 스크립트 추가 |
+| 카테고리 | 파일 | 역할 |
+|----------|------|------|
+| **문서** | `AGENTS.md` | 프로젝트 개요, 스택, 아키텍처 링크, 문서 맵 (100줄 이내) |
+| | `CLAUDE.md` | 명령어, 에이전트 디스패치, 세션 루틴, 금지 사항 |
+| | `ARCHITECTURE.md` | 레이어/슬라이스 규칙, 의존성 방향, 네이밍 규칙 |
+| **규칙** | `.claude/rules/session-routine.md` | TDD 오케스트레이션 상세 |
+| | `.claude/rules/coding-standards.md` | 코드 규칙 (프로필 기반) |
+| | `.claude/rules/git-workflow.md` | Git 커밋/브랜치 규칙 |
+| **에이전트** | `agents/architect.md` | Pre-Red: 설계 + 테스트 계획 |
+| | `agents/test-engineer.md` | Red: 테스트 작성 |
+| | `agents/implementer.md` | Green: 구현 |
+| | `agents/reviewer.md` | Post-Green: 코드 리뷰 |
+| | `agents/simplifier.md` | Refactor: 단순화 |
+| | `agents/debugger.md` | On-demand: 디버깅 |
+| | `agents/security-reviewer.md` | Post-Green: 보안 리뷰 |
+| **추적** | `feature_list.json` | 기능 목록 + 검증 상태 추적 |
+| | `claude-progress.txt` | 세션별 작업 기록 + TDD STATE |
+| **스크립트** | `init.sh` | 의존성 설치 + 개발 서버 실행 + 준비 확인 |
+| | `scripts/structural-test.ts` | 아키텍처 의존성 규칙 자동 검증 |
+| | `scripts/doc-freshness.ts` | 문서 최신성 검사 |
+| **품질** | `docs/QUALITY_SCORE.md` | 6개 카테고리 품질 점수표 |
+| | `docs/TECH_DEBT.md` | 기술 부채 추적 (4단계 심각도) |
+| | `docs/HARNESS_FRICTION.md` | 마찰 로그 (피드백 수집) |
+| **기타** | `docs/product-specs/` | 제품 요구사항 문서 디렉토리 |
+| | `docs/design-docs/` | 설계 결정 기록 디렉토리 |
+| | `docs/exec-plans/` | 작업별 실행 계획 디렉토리 |
+| | `docs/references/` | 참고 자료 디렉토리 |
+| | `package.json` | `lint:arch`, `validate`, `doc:check` 스크립트 추가 |
+| | `.harness-manifest.json` | 버전 추적 매니페스트 |
 
 ---
 
@@ -127,6 +223,8 @@ claude --add-dir ~/.claude/skills/harness-setup
 > 하네스 셋업해줘
 ```
 
+> `--add-dir`로 등록하면 `.claude/skills/harness-scaffold/`가 자동 디스커버리되어 두 스킬이 함께 로딩된다.
+
 ---
 
 ## 디렉토리 구조
@@ -137,13 +235,32 @@ harness-setup/
 ├── README.md                         # 이 파일
 ├── .claude/skills/
 │   └── harness-scaffold/
-│       └── SKILL.md                  # 스캐폴딩 스킬 (자동 디스커버리)
+│       └── SKILL.md                  # 스캐폴딩 스킬 (Phase 2~4, 자동 디스커버리)
 ├── presets/
 │   ├── react-next.json               # React + Next.js (App Router, 레이어 기반)
 │   └── react-router-fsd.json         # React Router v7 + FSD
 ├── templates/
+│   ├── agents/                       # TDD subagent 정의 템플릿 (7개)
+│   │   ├── architect.md
+│   │   ├── test-engineer.md
+│   │   ├── implementer.md
+│   │   ├── reviewer.md
+│   │   ├── simplifier.md
+│   │   ├── debugger.md
+│   │   └── security-reviewer.md
+│   ├── rules/                        # .claude/rules/ 템플릿 (3개)
+│   │   ├── session-routine.md
+│   │   ├── coding-standards.md
+│   │   └── git-workflow.md
 │   ├── structural-test-layer.ts      # 레이어 기반 아키텍처 검증 템플릿
-│   └── structural-test-fsd.ts        # FSD 아키텍처 검증 템플릿
+│   ├── structural-test-fsd.ts        # FSD 아키텍처 검증 템플릿
+│   ├── init.sh                       # 환경 초기화 스크립트 템플릿
+│   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트 템플릿
+│   ├── QUALITY_SCORE.md              # 품질 점수표 템플릿
+│   ├── TECH_DEBT.md                  # 기술 부채 문서 템플릿
+│   └── HARNESS_FRICTION.md           # 마찰 로그 템플릿
+├── companion-skills/
+│   └── harness-feedback/             # 피드백 분석→Issue 스킬 (향후)
 ├── references/
 │   ├── harness-guide.md              # 하네스 엔지니어링 이론 (P1~P10)
 │   └── project-context.md            # 설계 결정 기록 + 버전 히스토리
@@ -156,7 +273,7 @@ harness-setup/
 │   └── settings.local.json           # 권한 설정 (WebSearch, WebFetch, git)
 └── .tracking/
     ├── CHANGELOG.md                  # 변경 이력
-    ├── TODO.md                       # 작업 추적 (TODO-01~35)
+    ├── TODO.md                       # 작업 추적
     └── HANDOFF.md                    # 세션 간 컨텍스트 전달
 ```
 
@@ -164,10 +281,11 @@ harness-setup/
 
 | 파일 | 용도 | 누가 읽는가 |
 |------|------|------------|
-| `SKILL.md` | 스킬의 전체 동작 사양. 4개 Phase, 13개 섹션 | Claude Code (스킬 실행 시) |
+| `SKILL.md` | Phase 1 동작 사양 + Stop hook 오케스트레이션 | Claude Code (스킬 실행 시) |
+| `.claude/skills/harness-scaffold/SKILL.md` | Phase 2~4 동작 사양 (파일 생성 + 검증) | Claude Code (자동 체이닝 시) |
 | `presets/*.json` | 스택별 기본 프로필 | SKILL.md Phase 1 Step 3 |
-| `templates/*.ts` | structural-test 생성의 기반 | SKILL.md Phase 2 |
-| `references/*.md` | 설계 배경, 이론적 근거 | 개발자 (참고용), Phase 2에서 부분 참조 |
+| `templates/*` | 파일 생성의 기반 템플릿 | harness-scaffold/SKILL.md Phase 2 |
+| `references/*.md` | 설계 배경, 이론적 근거 | 개발자 (참고용) |
 | `.tracking/*` | 개선 작업 이력 | 개발자 (유지보수 시) |
 
 ---
@@ -176,6 +294,9 @@ harness-setup/
 
 ### 기존 코드 무수정 원칙
 이 스킬은 문서와 설정 파일만 추가한다. 기존 `.ts`, `.tsx`, `.js`, `.css`, `tsconfig.json`, `eslint` 등은 절대 건드리지 않는다. package.json도 `scripts` 필드에 항목을 추가하는 것만 허용한다.
+
+### 2-스킬 분리
+분석(harness-setup)과 생성(harness-scaffold)을 분리하여 각 스킬의 컨텍스트 윈도우를 효율적으로 사용한다. Stop hook이 자동 체이닝을 보장하므로 사용자 경험은 단일 스킬과 동일하다.
 
 ### 소크라테스 문답
 고정된 설문지가 아니라, 스캔 결과에서 불확실한 부분만 골라 질문한다. 이미 코드에서 확인된 것은 묻지 않고, 한 번에 3개 이내만 묻는다. 최대 3라운드 후 미확정 항목은 추론값을 사용한다.
@@ -192,8 +313,4 @@ harness-setup/
 
 ## 남은 작업
 
-HANDOFF.md(`.tracking/HANDOFF.md`)에 상세 기록. 주요 미완 항목:
-
-1. **Coding Agent 분기 로직 (P6)** — CLAUDE.md의 세션 루틴이 직선 흐름만 기술. 버그 우선 수정, validate 실패 루프, 3회 실패 에스컬레이션 등 분기 로직을 `.claude/rules/`로 분리 예정.
-2. **엔트로피 관리 (P10)** — doc-freshness.ts만 있고 주기적 정리 루프 없음. doc-freshness.ts 확장(코드 메트릭) 또는 별도 cleanup 스킬로 대응 예정.
-3. **실전 테스트** — 실제 프로젝트에서 전체 Phase 1~4 통과 검증 필요.
+상세 현황은 `.tracking/HANDOFF.md`에 기록되어 있다. `.tracking/TODO.md`에서 개별 항목을 추적한다.
