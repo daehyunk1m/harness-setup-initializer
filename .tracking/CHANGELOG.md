@@ -7,6 +7,11 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 14 (2026-04-09): 이슈 보고 프로세스
+- companion-skills/harness-feedback/SKILL.md: 스텁 → 실제 구현 (파싱→패턴 분석→초안→확인→gh issue create)
+- templates/HARNESS_FRICTION.md: 하네스 이슈 카테고리 7종 추가 + 이슈 보고 안내 섹션
+- .claude/skills/harness-scaffold/SKILL.md: 생성 CLAUDE.md에 "하네스 이슈 보고" 섹션 추가
+
 ### 수정 (Changed) — Session 14 (2026-04-09): README 시나리오 기반 재작성
 - README.md: 2-스킬 구조/Stop hook 체이닝 섹션 추가, Mermaid stateDiagram으로 실행 흐름 시각화, 시나리오별 동작 4가지 추가, 생성 파일 테이블 전면 갱신(18개), 디렉토리 구조·파일 역할 테이블 보완
 
