@@ -7,6 +7,11 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 수정됨 (Fixed) — Session 16 (2026-04-09): Issue #2, #3 해결
+- Issue #3: `.claude/skills/harness-scaffold/` → `harness-scaffold/`(리포 루트)로 이동 + `install.sh` 심볼릭 링크 생성 스크립트 추가 — scaffold 디스커버리 실패 해결
+- Issue #2: Session 15에서 이미 수정 완료, 이슈 닫기
+- SKILL.md, CLAUDE.md, README.md, HANDOFF.md, project-context.md: scaffold 경로 참조 일괄 업데이트
+
 ### 수정됨 (Fixed) — Session 15 (2026-04-09): Issue #2 권한 에러
 - SKILL.md, .claude/skills/harness-scaffold/SKILL.md, companion-skills/harness-feedback/SKILL.md: frontmatter에 `allowed-tools` 추가 — `` ```! `` 블록 실행 시 권한 체크 실패 해결 (Issue #2)
 

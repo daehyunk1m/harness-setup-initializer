@@ -223,7 +223,10 @@ claude --add-dir ~/.claude/skills/harness-setup
 > 하네스 셋업해줘
 ```
 
-> `--add-dir`로 등록하면 `.claude/skills/harness-scaffold/`가 자동 디스커버리되어 두 스킬이 함께 로딩된다.
+> 설치 후 `install.sh`를 실행하면 `harness-scaffold` 심볼릭 링크가 자동 생성되어 두 스킬이 함께 로딩된다.
+> ```bash
+> git clone <repo> ~/.claude/skills/harness-setup && ~/.claude/skills/harness-setup/install.sh
+> ```
 
 ---
 
@@ -233,9 +236,9 @@ claude --add-dir ~/.claude/skills/harness-setup
 harness-setup/
 ├── SKILL.md                          # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
 ├── README.md                         # 이 파일
-├── .claude/skills/
-│   └── harness-scaffold/
-│       └── SKILL.md                  # 스캐폴딩 스킬 (Phase 2~4, 자동 디스커버리)
+├── harness-scaffold/
+│   └── SKILL.md                      # 스캐폴딩 스킬 (Phase 2~4, 심볼릭 링크로 디스커버리)
+├── install.sh                        # 심볼릭 링크 생성 스크립트
 ├── presets/
 │   ├── react-next.json               # React + Next.js (App Router, 레이어 기반)
 │   └── react-router-fsd.json         # React Router v7 + FSD
@@ -282,7 +285,7 @@ harness-setup/
 | 파일 | 용도 | 누가 읽는가 |
 |------|------|------------|
 | `SKILL.md` | Phase 1 동작 사양 + Stop hook 오케스트레이션 | Claude Code (스킬 실행 시) |
-| `.claude/skills/harness-scaffold/SKILL.md` | Phase 2~4 동작 사양 (파일 생성 + 검증) | Claude Code (자동 체이닝 시) |
+| `harness-scaffold/SKILL.md` | Phase 2~4 동작 사양 (파일 생성 + 검증) | Claude Code (자동 체이닝 시) |
 | `presets/*.json` | 스택별 기본 프로필 | SKILL.md Phase 1 Step 3 |
 | `templates/*` | 파일 생성의 기반 템플릿 | harness-scaffold/SKILL.md Phase 2 |
 | `references/*.md` | 설계 배경, 이론적 근거 | 개발자 (참고용) |

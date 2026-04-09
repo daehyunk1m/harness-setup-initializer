@@ -356,3 +356,18 @@
 - **파일**: `SKILL.md` § 5, `harness-scaffold/SKILL.md`
 - **문제**: 두 스킬 간 계약인 `.harness-profile.json`의 정확한 스키마(필수/선택 필드, 타입, 기본값)가 양쪽 스킬에서 일관되게 문서화되어 있는지 확인 필요
 - **해결**: 프로필 출력 스키마를 SKILL.md에 정의하고, harness-scaffold/SKILL.md에서 동일 스키마를 참조하도록 정합성 확보
+
+---
+
+## Session 16: Issue #2, #3 해결 (2026-04-09)
+
+### TODO-55: scaffold 디스커버리 실패 해결 (Issue #3)
+- **상태**: [x] 완료 (2026-04-09)
+- **파일**: `harness-scaffold/SKILL.md`, `install.sh`, `SKILL.md`, `CLAUDE.md`, `README.md`, `.tracking/HANDOFF.md`, `references/project-context.md`
+- **문제**: `.claude/skills/harness-scaffold/`가 `--add-dir`로 추가한 디렉토리에서 자동 디스커버리되지 않아 `Skill(skill: "harness-scaffold")`가 `Unknown skill` 에러 발생
+- **해결**: scaffold를 리포 루트 `harness-scaffold/`로 이동 + `install.sh` 생성하여 `~/.claude/skills/harness-scaffold` 심볼릭 링크 자동 생성. 설치: `git clone ... && ./install.sh`
+
+### TODO-56: Issue #2 닫기
+- **상태**: [x] 완료 (2026-04-09)
+- **문제**: Session 15에서 `allowed-tools` 추가로 이미 수정되었지만 이슈가 열려있음
+- **해결**: 이슈 닫기 (커밋 53b23a0 참조)

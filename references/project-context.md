@@ -31,9 +31,9 @@
 ```
 ~/.claude/skills/harness-setup/
 ├── SKILL.md                      # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
-├── .claude/skills/
-│   └── harness-scaffold/
-│       └── SKILL.md              # 스캐폴딩 스킬 (자동 디스커버리, user-invocable: false)
+├── harness-scaffold/
+│   └── SKILL.md                  # 스캐폴딩 스킬 (install.sh로 심볼릭 링크, user-invocable: false)
+├── install.sh                    # 심볼릭 링크 생성 스크립트
 ├── presets/                      # 스택별 프리셋
 │   ├── react-next.json           # React + Next.js (App Router) + 레이어 기반
 │   └── react-router-fsd.json     # React Router v7 + FSD
@@ -86,7 +86,7 @@
 | 2-스킬 분리 (분석 + 스캐폴딩) | SKILL.md → 분석+Q&A, harness-scaffold/SKILL.md → 스캐폴딩+검증+보고 | 분석은 멀티턴 Q&A 필요, 스캐폴딩은 구조화된 파일 생성. 두 스킬 모두 메인 세션에서 실행 (fork 제거 — 권한/디렉토리/타임아웃 문제). Phase 1 완료 후 Skill 도구로 자동 체이닝. `.harness-profile.json`이 두 스킬 간 계약 (GitHub Issue #1) |
 | Hook-driven continuation | Stop hook `decision: "block"` + `additionalContext`로 체이닝 강제 | 프롬프트 기반 체이닝은 비결정적. Stop hook은 시스템 레벨 강제로 더 결정적. oh-my-claudecode ralph, barkain/workflow-orchestration 패턴 참조. 프롬프트 지시는 이중 안전장치로 유지 |
 | `!command` 상태 감지/프로필 주입 | SKILL.md § 0에서 상태 감지, scaffold § 0에서 프로필 데이터 주입 | 셸 커맨드는 결정론적. 스킬 프롬프트에 사전 렌더된 상태/데이터를 주입하여 LLM의 판단 부담 감소. planning-with-files 패턴 참조 |
-| scaffold 자동 디스커버리 | `.claude/skills/harness-scaffold/`로 이동 | `--add-dir` 디렉토리의 `.claude/skills/` 하위는 자동 디스커버리됨. 단일 `--add-dir` 등록으로 UX 마찰 제거 |
+| scaffold 심볼릭 링크 디스커버리 | `harness-scaffold/`를 리포 루트에 배치 + `install.sh`로 `~/.claude/skills/harness-scaffold` 심볼릭 링크 생성 | `--add-dir`의 중첩 `.claude/skills/` 디스커버리가 동작하지 않는 문제 해결 (Issue #3). `install.sh` 원커맨드 설치로 UX 마찰 최소화 |
 | scaffold `user-invocable: false` | 사용자 `/` 메뉴에서 숨김 | scaffold는 오케스트레이터(setup)가 호출하는 내부 스킬. 사용자가 직접 호출할 필요 없음. 자연어 요청 시에는 Claude가 여전히 호출 가능 |
 
 ---
@@ -157,7 +157,7 @@
 - **Stop hook**: SKILL.md 프론트매터에 `hooks.Stop` 추가. 프로필 존재 + 매니페스트 미존재 → `decision: "block"` + `additionalContext`로 scaffold 호출 강제
 - **`!command` 상태 감지**: SKILL.md § 0에 셸 전처리기 추가. 프로필/매니페스트 존재 여부를 결정론적으로 감지 → 중단 후 재개 지원
 - **`!command` 프로필 주입**: scaffold § 0에서 프로필 JSON을 프롬프트에 사전 주입. Read 도구 호출 불필요
-- **디렉토리 재구조화**: `harness-scaffold/` → `.claude/skills/harness-scaffold/`로 이동. `--add-dir` 하나로 자동 디스커버리
+- **디렉토리 재구조화**: `harness-scaffold/`를 리포 루트에 배치. `install.sh`로 `~/.claude/skills/harness-scaffold` 심볼릭 링크 생성 (Issue #3 해결)
 - **scaffold `user-invocable: false`**: 사용자 `/` 메뉴에서 숨김. 오케스트레이터 또는 자연어 요청으로만 호출
 - **scaffold Stop hook**: 매니페스트 미존재 → `decision: "block"`으로 완료까지 강제
 - 커뮤니티 패턴 참조: oh-my-claudecode ralph (boulder pattern), barkain/workflow-orchestration (hook-driven continuation), OthmanAdi/planning-with-files (skill-scoped hooks)
