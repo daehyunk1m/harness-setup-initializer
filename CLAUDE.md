@@ -25,6 +25,7 @@
 | `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
 | `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (스텁) | 향후 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
+| `references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
 | `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |
 | `.tracking/CHANGELOG.md` | 상세 변경 이력 | 작업 후 |
@@ -66,6 +67,14 @@
 ### 브랜치 규칙
 - `main`: 유일한 장기 브랜치
 - 기능 개발: `feature/<name>`, 버그 수정: `fix/<name>`, 문서: `docs/<name>`
+
+### 버전 관리 (semver)
+- [Semantic Versioning 2.0.0](https://semver.org/) 준수
+- 상세 정책: `references/versioning-policy.md`
+- MAJOR: 기존 하네스 호환 불가 (프로필 필드 제거, 플레이스홀더 제거, 파일 카테고리 변경)
+- MINOR: 새 기능 추가 (새 규칙, 새 필드, 새 프리셋, 새 에이전트)
+- PATCH: 버그 수정, 오타, 내부 개선
+- 버전 범프 시 동시 업데이트: `project-context.md`, `CHANGELOG.md`, 프로필/매니페스트 스키마의 version 필드, `git tag`
 
 ## 테스트
 

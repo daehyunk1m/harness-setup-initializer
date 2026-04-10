@@ -7,8 +7,10 @@
 
 ## [v5.2] — 2026-04-10 (안정화 + Plan 모드 통합)
 
-### 추가 (Added) — Session 17 (2026-04-10)
+### 추가 (Added) — Session 17 (2026-04-10~11)
 - references/model-selection-guide.md: Opus vs Sonnet 모델 선택 가이드 리서치 — 벤치마크, 하네스-Sonnet 연계 효과, opusplan 하이브리드, 서브에이전트 라우팅 전략
+- references/versioning-policy.md: semver 2.0.0 기반 버전 관리 정책 — Public API 4개 계약 정의, MAJOR/MINOR/PATCH 판단 기준, 판단 어려운 경우 가이드, 릴리스 프로세스
+- CLAUDE.md: 파일 맵에 versioning-policy.md 추가, Git 워크플로에 "버전 관리 (semver)" 섹션 추가
 
 ### 수정됨 (Fixed) — Session 17 (2026-04-10): Issue #5 Plan 모드 TDD 우회 해결
 - templates/rules/session-routine.md: "Plan 모드 통합" 섹션 추가 — Plan 모드를 PRE-RED(Architect) 대체로 취급, Plan 승인 후 RED부터 TDD 사이클 합류하는 브릿지 패턴
