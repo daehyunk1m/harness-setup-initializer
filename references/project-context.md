@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-08 (v5.1 — hook-driven continuation)
+> 마지막 업데이트: 2026-04-10 (v5.2 — 안정화 + Plan 모드 통합)
 
 ---
 
@@ -162,6 +162,14 @@
 - **scaffold Stop hook**: 매니페스트 미존재 → `decision: "block"`으로 완료까지 강제
 - 커뮤니티 패턴 참조: oh-my-claudecode ralph (boulder pattern), barkain/workflow-orchestration (hook-driven continuation), OthmanAdi/planning-with-files (skill-scoped hooks)
 
+### v5.2 (안정화 + Plan 모드 통합)
+- **Issue #2 수정**: `!command` 블록 실행 시 권한 에러 — SKILL.md, harness-scaffold/SKILL.md, harness-feedback/SKILL.md frontmatter에 `allowed-tools` 추가
+- **Issue #3 수정**: scaffold 심볼릭 링크 디스커버리 실패 — `harness-scaffold/`를 리포 루트에 배치 + `install.sh` 심볼릭 링크 생성 스크립트
+- **Issue #5 수정**: Plan 모드 진입 시 TDD subagent 파이프라인 우회 — Bridge 패턴 도입. Plan 모드를 PRE-RED(Architect) 대체로 취급, Plan 승인 후 RED부터 TDD 사이클 합류. session-routine.md에 "Plan 모드 통합" 섹션, CLAUDE.md/coding-standards.md에 금지 규칙 추가
+- **이슈 보고 프로세스**: harness-feedback 컴패니언 스킬 스텁 → 실제 구현 (파싱→패턴 분석→초안→확인→gh issue create). HARNESS_FRICTION.md에 이슈 카테고리 7종 + 보고 안내 추가
+- **리서치**: Opus vs Sonnet 모델 선택 가이드 (`references/model-selection-guide.md`) — 벤치마크, 하네스-Sonnet 연계 효과, opusplan 하이브리드, 서브에이전트 라우팅 전략
+- **README 재작성**: 2-스킬 구조/Stop hook 체이닝 기반, Mermaid stateDiagram 실행 흐름, 시나리오별 동작 4가지
+
 ---
 
 ## 5. 향후 확장 가능 항목
@@ -177,7 +185,7 @@
 
 ## 6. 다음 단계
 
-> 2026-04-08 2-스킬 분리 후 업데이트. 상세: `.tracking/TODO.md` Session 12 (TODO-52~54)
+> 2026-04-10 v5.2 후 업데이트. 상세: `.tracking/TODO.md`
 
 1. **2-스킬 플로우 실전 테스트** — `/harness-setup` → `.harness-profile.json` → `/harness-scaffold` 전체 플로우 검증 (TODO-53)
 2. **`.harness-profile.json` 스키마 정합성** — 두 스킬 간 계약 문서화 (TODO-54)

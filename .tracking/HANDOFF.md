@@ -1,13 +1,13 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-04-08 (갱신 — hook-driven continuation + 디렉토리 재구조화)
+> 작성일: 2026-04-10 (갱신 — v5.2 안정화 + Plan 모드 통합)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
 
 ## 1. 현재 상태 요약
 
-### 완료된 작업 (TODO-01 ~ TODO-44, TODO-52)
+### 완료된 작업 (TODO-01 ~ TODO-44, TODO-52, TODO-55 ~ TODO-57)
 
 - **Session 1~2 (04-04)**: SKILL.md 사양 갭 메우기, 템플릿 생성, 프리셋 정합성, CLAUDE.md 생성 규칙 (TODO-01~22)
 - **Session 3 (04-05~06)**: 전체 코드베이스 분석 → 20개 이슈 발견 → 4단계(Phase A~D) 수정 (TODO-23~35)
@@ -36,6 +36,19 @@
   - scaffold에 `!command` 프로필 주입 + `user-invocable: false` 적용
   - SKILL.md에 `!command` 상태 감지 (§ 0) 추가 → 중단 후 재개 지원
   - 커뮤니티 패턴 반영: oh-my-claudecode ralph, barkain/workflow-orchestration, planning-with-files
+- **Session 14 (04-09)**: 이슈 보고 프로세스 + README 재작성
+  - harness-feedback 컴패니언 스킬: 스텁 → 실제 구현 (파싱→패턴 분석→초안→gh issue create)
+  - HARNESS_FRICTION.md 이슈 카테고리 7종 + 이슈 보고 안내 추가
+  - README를 2-스킬 구조 기반으로 재작성 (Mermaid stateDiagram, 시나리오별 동작)
+- **Session 15 (04-09)**: Issue #2 수정 — `!command` 블록 권한 에러. frontmatter `allowed-tools` 추가
+- **Session 16 (04-09)**: Issue #2, #3 해결 (TODO-55, 56)
+  - scaffold 심볼릭 링크 디스커버리 실패 → `harness-scaffold/` 리포 루트 배치 + `install.sh`
+- **Session 17 (04-10)**: Issue #5 해결 + 모델 선택 가이드 (TODO-57)
+  - Plan 모드 TDD 우회 방지 — Bridge 패턴 (Plan = PRE-RED 대체, RED부터 TDD 합류)
+  - session-routine.md "Plan 모드 통합" 섹션 + CLAUDE.md/coding-standards.md 금지 규칙
+  - `references/model-selection-guide.md` 리서치 문서 추가
+
+**현재 버전: v5.2** (안정화 + Plan 모드 통합)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
