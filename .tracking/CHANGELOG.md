@@ -7,6 +7,9 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 추가 (Added) — Session 17 (2026-04-10)
+- references/model-selection-guide.md: Opus vs Sonnet 모델 선택 가이드 리서치 — 벤치마크, 하네스-Sonnet 연계 효과, opusplan 하이브리드, 서브에이전트 라우팅 전략
+
 ### 수정됨 (Fixed) — Session 17 (2026-04-10): Issue #5 Plan 모드 TDD 우회 해결
 - templates/rules/session-routine.md: "Plan 모드 통합" 섹션 추가 — Plan 모드를 PRE-RED(Architect) 대체로 취급, Plan 승인 후 RED부터 TDD 사이클 합류하는 브릿지 패턴
 - templates/rules/session-routine.md: Phase 1 PRE-RED에 "Plan 모드 연계" 바이패스 규칙 추가
