@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "3.3",
+  "version": "1.0.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -675,8 +675,8 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 ```json
 {
   "harness": {
-    "version": "3.3",
-    "skillVersion": "3.3",
+    "version": "1.0.0",
+    "skillVersion": "1.0.0",
     "installedAt": "2026-04-07T09:30:00Z",
     "upgradedAt": null,
     "upgradeInProgress": false,

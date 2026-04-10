@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-10 (v5.2 — 안정화 + Plan 모드 통합)
+> 마지막 업데이트: 2026-04-11 (1.0.0 — semver 전환)
 
 ---
 
@@ -169,6 +169,13 @@
 - **이슈 보고 프로세스**: harness-feedback 컴패니언 스킬 스텁 → 실제 구현 (파싱→패턴 분석→초안→확인→gh issue create). HARNESS_FRICTION.md에 이슈 카테고리 7종 + 보고 안내 추가
 - **리서치**: Opus vs Sonnet 모델 선택 가이드 (`references/model-selection-guide.md`) — 벤치마크, 하네스-Sonnet 연계 효과, opusplan 하이브리드, 서브에이전트 라우팅 전략
 - **README 재작성**: 2-스킬 구조/Stop hook 체이닝 기반, Mermaid stateDiagram 실행 흐름, 시나리오별 동작 4가지
+
+### 1.0.0 (semver 전환)
+- **버전 체계 전환**: 레거시 이원 버전(스킬 v5.2 + 하네스 스키마 "3.3") → **단일 semver 1.0.0** 통합
+- **semver 정책 수립**: `references/versioning-policy.md` — Public API 4개 계약(프로필/매니페스트/프리셋/생성파일) 선언, MAJOR/MINOR/PATCH 판단 기준, 릴리스 프로세스
+- **스키마 버전 전환**: `.harness-profile.json` version "3.3" → "1.0.0", `.harness-manifest.json` version/skillVersion "3.3" → "1.0.0"
+- **부트스트랩 업데이트**: 기존 프로젝트 편입 대상 버전을 "3.3" → "1.0.0"으로 변경
+- v1~v5.2는 레거시 참조 기록으로 유지. 이후 모든 버전은 semver X.Y.Z 형식을 따른다.
 
 ---
 

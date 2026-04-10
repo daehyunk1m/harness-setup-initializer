@@ -48,7 +48,7 @@
   - session-routine.md "Plan 모드 통합" 섹션 + CLAUDE.md/coding-standards.md 금지 규칙
   - `references/model-selection-guide.md` 리서치 문서 추가
 
-**현재 버전: v5.2** (안정화 + Plan 모드 통합)
+**현재 버전: 1.0.0** (semver 전환)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

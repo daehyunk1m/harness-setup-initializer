@@ -5,7 +5,7 @@
 
 ---
 
-## [v5.2] — 2026-04-10 (안정화 + Plan 모드 통합)
+## [1.0.0] — 2026-04-11 (semver 전환 + 안정화 + Plan 모드 통합)
 
 ### 추가 (Added) — Session 17 (2026-04-10~11)
 - references/model-selection-guide.md: Opus vs Sonnet 모델 선택 가이드 리서치 — 벤치마크, 하네스-Sonnet 연계 효과, opusplan 하이브리드, 서브에이전트 라우팅 전략

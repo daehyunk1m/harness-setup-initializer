@@ -476,7 +476,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "3.3",
+  "version": "1.0.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -869,7 +869,7 @@ Phase U2 승인 후 저장하는 `.harness-profile.json`에는 `mode: "upgrade"`
 
 마이그레이션 레지스트리, 파일 카테고리, 실행 상세는 harness-scaffold/SKILL.md § 10을 참조한다.
 
-### 12.4 부트스트랩 마이그레이션 (v0 → v3.3)
+### 12.4 부트스트랩 마이그레이션 (v0 → 1.0.0)
 
 manifest 없이 셋업된 기존 프로젝트를 버전 관리 체계에 편입시키는 절차이다.
 
@@ -890,7 +890,7 @@ Step 2: 프로필 추론
   추론 실패 시 → 사용자에게 포커스드 질문
 
 Step 3: 초기 manifest 생성
-  - harness.version = "3.3" (마지막 pre-versioning 릴리스)
+  - harness.version = "1.0.0" (semver 시작 버전)
   - 모든 기존 파일의 현재 내용을 해시하여 templateHash로 기록
   - 카테고리는 § 14.2 테이블에 따라 할당
 
@@ -904,7 +904,7 @@ Step 5: manifest 쓰기 → 정상 업그레이드 플로우 (§ 14.3) 진입
 
 #### 설계 결정
 
-- **v3.3 고정**: pre-versioning 시절의 구조적 변경은 없었으므로 모든 기존 프로젝트를 v3.3으로 간주한다.
+- **1.0.0 고정**: 현재 상태를 semver 1.0.0으로 선언한다. pre-semver 시절의 모든 기존 프로젝트를 1.0.0으로 편입한다. 상세: `references/versioning-policy.md`
 - **해시 = 현재 상태**: 부트스트랩 시 기록되는 templateHash는 "현재 파일 상태"이다. 따라서 첫 업그레이드에서 managed 파일의 해시가 불일치할 수 있고, 이 경우 § 14.2의 3가지 선택지를 제시한다.
 
 ### 12.5 엣지 케이스
