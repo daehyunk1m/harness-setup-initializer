@@ -55,6 +55,34 @@
 
 ---
 
+## Plan 모드 통합
+
+Claude Code의 `/plan` 모드로 기능 설계를 완료한 경우, Plan 모드는 **PRE-RED (Architect) 단계를 대체**한다.
+
+### Plan 모드 감지
+
+다음 조건이 모두 참이면 "Plan 모드 설계 완료" 상태이다:
+1. `.claude/plans/` 디렉토리에 현재 기능과 관련된 plan 파일이 존재한다
+2. 사용자가 Plan 모드를 승인(approve)했다
+3. TDD STATE 블록이 없거나, phase가 PRE-RED이다
+
+### Plan 모드 후 TDD 진입
+
+Plan 모드 설계가 완료되었으면 **Architect를 스킵하고 바로 RED(Phase 2)로 진입**한다:
+1. Plan 파일의 내용을 Architect 계획으로 간주한다
+2. TDD STATE의 `plan_ref`에 Plan 파일 경로를 기록한다
+3. Test Engineer에게 Plan 파일 내용을 Architect 계획 대신 전달한다
+4. 이후 GREEN → REVIEW → Complete는 동일하게 진행한다
+
+### Plan 모드에서도 필수인 단계
+
+Plan 모드가 세션 시작 루틴(§ 세션 시작)을 대체하지는 않는다:
+- **회귀 체크**(Step 3)는 RED 진입 전에 반드시 실행한다
+- **feature_list.json 선택**(Step 2)은 Plan 승인 후 해당 기능을 선택한다
+- **기능 완료 처리**(§ 기능 완료 처리)는 반드시 수행한다
+
+---
+
 ## TDD 사이클
 
 ### Phase 1: PRE-RED (설계)
@@ -64,6 +92,8 @@
 - Output: 구현 계획
 
 **간소화**: 사소한 변경(설정, 텍스트)이면 Architect를 스킵하고 바로 Red로.
+
+**Plan 모드 연계**: `/plan` 모드로 설계가 완료되었으면 Architect를 스킵하고 바로 Red로. Plan 파일이 Architect 계획을 대체한다. (상세: § Plan 모드 통합)
 
 ### Phase 2: RED (테스트 작성)
 
@@ -199,13 +229,14 @@ TDD 사이클이 성공적으로 완료되면:
 feature: {feature ID}
 phase: {PRE-RED | RED | GREEN | REVIEW | SECURITY | REFACTOR}
 attempt: {현재 시도 횟수}
-plan_ref: {Architect 계획 요약 또는 exec-plan 경로}
+plan_ref: {Architect 계획 요약 또는 exec-plan 경로 또는 .claude/plans/ 파일 경로}
 === END TDD STATE ===
 ```
 
 - 사이클 완료 시 이 블록을 제거한다
 - 세션 중단 시 현재 상태를 블록에 저장한다
 - 다음 세션 시작 시 이 블록을 읽고 해당 phase부터 재개한다
+- plan_ref가 `.claude/plans/` 경로를 가리키면 Plan 모드로 작성된 설계이다. RED/GREEN 단계에서 이 파일을 Architect 계획으로 참조한다.
 
 ---
 

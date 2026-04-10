@@ -7,6 +7,14 @@
 
 ## [미출시] — 진행 중 (2026-04-04~)
 
+### 수정됨 (Fixed) — Session 17 (2026-04-10): Issue #5 Plan 모드 TDD 우회 해결
+- templates/rules/session-routine.md: "Plan 모드 통합" 섹션 추가 — Plan 모드를 PRE-RED(Architect) 대체로 취급, Plan 승인 후 RED부터 TDD 사이클 합류하는 브릿지 패턴
+- templates/rules/session-routine.md: Phase 1 PRE-RED에 "Plan 모드 연계" 바이패스 규칙 추가
+- templates/rules/session-routine.md: TDD STATE 블록 plan_ref에 `.claude/plans/` 경로 지원 추가
+- harness-scaffold/SKILL.md: CLAUDE.md 생성 템플릿의 TDD 파이프라인 섹션에 Plan 모드 연계 안내 추가
+- harness-scaffold/SKILL.md: CLAUDE.md 금지 사항에 "Plan 모드 후에도 TDD 필수" 규칙 추가
+- templates/rules/coding-standards.md: 금지 사항에 동일 규칙 추가 (일관성)
+
 ### 수정됨 (Fixed) — Session 16 (2026-04-09): Issue #2, #3 해결
 - Issue #3: `.claude/skills/harness-scaffold/` → `harness-scaffold/`(리포 루트)로 이동 + `install.sh` 심볼릭 링크 생성 스크립트 추가 — scaffold 디스커버리 실패 해결
 - Issue #2: Session 15에서 이미 수정 완료, 이슈 닫기

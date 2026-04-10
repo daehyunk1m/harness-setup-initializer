@@ -371,3 +371,13 @@
 - **상태**: [x] 완료 (2026-04-09)
 - **문제**: Session 15에서 `allowed-tools` 추가로 이미 수정되었지만 이슈가 열려있음
 - **해결**: 이슈 닫기 (커밋 53b23a0 참조)
+
+---
+
+## Session 17: Issue #5 해결 — Plan 모드 TDD 우회 (2026-04-10)
+
+### TODO-57: Plan 모드 진입 시 TDD subagent 파이프라인 우회 해결 (Issue #5)
+- **상태**: [x] 완료 (2026-04-10)
+- **파일**: `templates/rules/session-routine.md`, `harness-scaffold/SKILL.md`, `templates/rules/coding-standards.md`
+- **문제**: `/plan` 모드로 기능 구현 시 Plan 모드 시스템 프롬프트가 하네스의 TDD 파이프라인보다 우선되어, Plan 승인 후 TDD 사이클(Red → Green → Refactor) 없이 직접 코딩 진행. 테스트 미작성, feature_list.json/claude-progress.txt 미갱신
+- **해결**: Bridge 패턴 — Plan 모드를 PRE-RED(Architect) 대체로 취급. session-routine.md에 "Plan 모드 통합" 섹션 + PRE-RED 바이패스 규칙 + TDD STATE plan_ref 확장. CLAUDE.md 생성 템플릿과 coding-standards.md에 금지 사항 추가
