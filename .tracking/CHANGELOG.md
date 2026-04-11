@@ -5,6 +5,28 @@
 
 ---
 
+## [Unreleased] — Session 18 (2026-04-11): 업그레이드 자동 감지 메커니즘
+
+### 수정 (Changed)
+- SKILL.md § 12.3: Phase U1 분석 흐름을 2-상태 → 4-상태 판정으로 개선. 소스 템플릿 재렌더링 비교 단계 추가
+- SKILL.md § 12.2: managed 파일 변경 감지 설명을 § 12.6 자동 감지 알고리즘 기반으로 갱신
+- SKILL.md § 12.1: 설계 결정 테이블에 "템플릿 자동 감지" 항목 추가, "해시 기반 변경 감지" 근거 보강
+- SKILL.md § 5: fileActions 스키마에 `source` 필드(auto-detect/migration/category) 추가, 예시 갱신
+- SKILL.md Phase U2: 계획 테이블 예시를 새 판정 로직 반영 (이유 컬럼: 템플릿 변경 감지, 마이그레이션 지시, 변경 없음 등)
+- harness-scaffold/SKILL.md § 10.1: managed 파일 대응을 자동 감지 기반으로 재작성, fileActions 연동 설명
+- harness-scaffold/SKILL.md § 10.2: Phase U3 실행 로직을 fileActions action 필드 기반으로 명확화
+- harness-scaffold/SKILL.md § 10.2: Phase U5 보고 포맷에 소스 컬럼 추가 (자동 감지 vs 마이그레이션 구분)
+- harness-scaffold/SKILL.md § 10.3: 마이그레이션 레지스트리 안내를 역할 분리 기반으로 갱신
+- references/upgrade-system-design.md § 1.3: templateHash 설계 근거에 자동 감지 설명 추가
+- references/upgrade-system-design.md § 2.3: managed 파일 대응을 4-상태 판정 매트릭스로 갱신
+- references/upgrade-system-design.md § 3.3: Phase U1 흐름에 자동 감지 단계 추가
+- references/versioning-policy.md § 2 PATCH: 템플릿 내용 보강이 자동 감지로 반영됨을 명시
+
+### 추가 (Added)
+- SKILL.md § 12.6: "managed 파일 자동 변경 감지" 섹션 신설 — 감지 알고리즘, 4-상태 판정 매트릭스, 파일-템플릿 매핑 테이블 (13개 managed 파일), 마이그레이션과의 역할 분리 테이블
+
+---
+
 ## [1.0.0] — 2026-04-11 (semver 전환 + 안정화 + Plan 모드 통합)
 
 ### 추가 (Added) — Session 17 (2026-04-10~11)

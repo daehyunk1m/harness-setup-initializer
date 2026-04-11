@@ -381,3 +381,24 @@
 - **파일**: `templates/rules/session-routine.md`, `harness-scaffold/SKILL.md`, `templates/rules/coding-standards.md`
 - **문제**: `/plan` 모드로 기능 구현 시 Plan 모드 시스템 프롬프트가 하네스의 TDD 파이프라인보다 우선되어, Plan 승인 후 TDD 사이클(Red → Green → Refactor) 없이 직접 코딩 진행. 테스트 미작성, feature_list.json/claude-progress.txt 미갱신
 - **해결**: Bridge 패턴 — Plan 모드를 PRE-RED(Architect) 대체로 취급. session-routine.md에 "Plan 모드 통합" 섹션 + PRE-RED 바이패스 규칙 + TDD STATE plan_ref 확장. CLAUDE.md 생성 템플릿과 coding-standards.md에 금지 사항 추가
+
+---
+
+## Session 18: 업그레이드 자동 감지 메커니즘 (2026-04-11)
+
+> 업그레이드 시 "실질적 변경 없이 버전 레이블만 변경" 문제 해결.
+
+### TODO-58: managed 파일 템플릿 자동 변경 감지 (§ 12.6)
+- **상태**: [x] 완료 (2026-04-11)
+- **파일**: `SKILL.md`, `harness-scaffold/SKILL.md`, `references/upgrade-system-design.md`, `references/versioning-policy.md`
+- **문제**: 업그레이드 시스템이 순수 마이그레이션 주도(migration-driven)로 설계되어, 마이그레이션 레지스트리가 비어있으면 템플릿이 아무리 변경되어도 "변경 없음"으로 판정. 3가지 근본 원인: (1) 빈 마이그레이션 레지스트리, (2) templateHash가 사용자 수정만 감지하고 템플릿 변경은 감지 불가, (3) managed 파일의 재생성을 마이그레이션에 의존하는 아키텍처 불일치
+- **해결**: 
+  - § 12.6 "managed 파일 자동 변경 감지" 신설 — 소스 템플릿을 manifest.profile로 재렌더링한 해시(expectedHash)와 manifest.templateHash를 비교하여 템플릿 변경 자동 감지
+  - 4-상태 판정 매트릭스: 템플릿 변경 여부 × 사용자 수정 여부 → 스킵/자동 덮어쓰기/선택
+  - 역할 분리: managed 파일 = 자동 감지 전담, custom/new/remove/profile/data = 마이그레이션 전담
+  - Phase U1 흐름 수정 (2-상태 → 4-상태), Phase U2 테이블 예시 갱신
+  - fileActions 스키마에 `source` 필드 추가 (auto-detect/migration/category)
+  - 파일-템플릿 매핑 테이블 (13개 managed 파일 ↔ 소스 템플릿)
+  - harness-scaffold/SKILL.md Phase U3/U5/마이그레이션 안내 동기화
+  - upgrade-system-design.md § 2.3, § 3.3 동기화
+  - versioning-policy.md PATCH 트리거 테이블 보완

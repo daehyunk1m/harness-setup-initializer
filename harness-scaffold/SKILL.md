@@ -987,11 +987,16 @@ console.log(missing.length===0 ? '✅ files 항목 정합 ('+files.length+'개)'
 
 #### managed 파일의 사용자 수정 대응
 
-managed 파일이라도 사용자가 수정했을 수 있다. `templateHash`와 현재 파일 해시가 다르면 3가지 선택지를 제시한다:
+managed 파일의 템플릿 변경은 SKILL.md § 12.6의 자동 감지 메커니즘으로 판별된다. Phase U1에서 소스 템플릿을 manifest.profile로 렌더링한 결과(`expectedHash`)와 manifest의 `templateHash`를 비교하여, 템플릿 변경 여부와 사용자 수정 여부를 동시에 판정한다.
 
-1. **덮어쓰기** — 최신 템플릿으로 교체 (사용자 변경 소실)
-2. **스킵** — 현재 파일 유지. manifest에 `"userOverride": true` 표시하여 향후 업그레이드에서도 스킵
-3. **병합** — 마이그레이션의 구조적 변경만 적용하고 사용자 추가분 보존 (best-effort)
+프로필의 `fileActions`에 판정 결과가 기록되어 있으므로, scaffold는 이 필드를 따른다:
+
+- `action: "overwrite"` → 최신 템플릿 + profile 값으로 재생성
+- `action: "skip"` → 건드리지 않음
+- `action: "user-choice"` → 사용자가 Phase U2에서 선택한 결과에 따라:
+  1. **덮어쓰기** — 최신 템플릿으로 교체 (사용자 변경 소실)
+  2. **스킵** — 현재 파일 유지. manifest에 `"userOverride": true` 표시
+  3. **병합** — 구조적 변경만 적용하고 사용자 추가분 보존 (best-effort)
 
 ### 10.2 업그레이드 Phase U3~U5
 
@@ -1001,7 +1006,10 @@ managed 파일이라도 사용자가 수정했을 수 있다. `templateHash`와 
 Phase U3: 실행
   1. manifest.harness.upgradeInProgress ← true
   2. 새 디렉토리 생성 (필요 시)
-  3. managed 파일 재생성 (최신 템플릿 + manifest.profile 값)
+  3. fileActions에 따라 managed 파일 처리:
+     - action: "overwrite" → 최신 템플릿 + manifest.profile 값으로 재생성
+     - action: "skip" → 건드리지 않음
+     - action: "user-choice" → 사용자가 Phase U2에서 선택한 결과에 따라 처리
   4. custom 파일 외과적 수정 (마이그레이션 지시 따름)
   5. data 스키마 패치 (필요 시 필드 추가, 기본값 적용)
   6. package.json scripts 추가 (기존 키 삭제 안 함)
@@ -1032,13 +1040,15 @@ Phase U5: 보고
 - 적용된 마이그레이션: {N}개
 
 ### 변경 요약
-| 작업 | 파일 수 |
-|------|---------|
-| 덮어쓰기 (managed) | {N}개 |
-| 부분 수정 (custom) | {N}개 |
-| 신규 생성 | {N}개 |
-| 스킵 (data) | {N}개 |
-| 사용자 스킵 (userOverride) | {N}개 |
+| 작업 | 파일 수 | 소스 |
+|------|---------|------|
+| 덮어쓰기 (managed, 자동 감지) | {N}개 | 템플릿 변경 감지 |
+| 덮어쓰기 (managed, 마이그레이션) | {N}개 | 마이그레이션 지시 |
+| 부분 수정 (custom) | {N}개 | 마이그레이션 지시 |
+| 신규 생성 | {N}개 | 마이그레이션 지시 |
+| 스킵 (변경 없음) | {N}개 | — |
+| 스킵 (data) | {N}개 | — |
+| 사용자 스킵 (userOverride) | {N}개 | — |
 
 ### 주의 사항
 - {마이그레이션별 특이사항}
@@ -1114,7 +1124,10 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 
 #### 등록된 마이그레이션
 
-> 현재 등록된 마이그레이션 없음. 다음 스킬 버전 변경 시 여기에 추가한다.
+> managed 파일의 템플릿 변경은 자동 감지(SKILL.md § 12.6)로 처리된다.
+> 마이그레이션은 다음 경우에만 등록한다:
+> - `[custom]` 외과적 수정, `[new]` 신규 파일, `[remove]` 파일 삭제
+> - `[profile]` 프로필 필드 변경, `[data]` data 스키마 변경
 
 ### 10.4 엣지 케이스
 
