@@ -5,6 +5,13 @@
 
 ---
 
+## [Unreleased] — Session 19 (2026-05-28): 외부 통합 기획 PRD
+
+### 추가 (Added)
+- .tracking/prd-multi-model-consult.md: Codex + Gemini + Claude 3중 합성 자문 스킬 PRD 초안 — oh-my-claudecode /ccg 패턴 차용
+
+---
+
 ## [Unreleased] — Session 18 (2026-04-11): 업그레이드 자동 감지 메커니즘
 
 ### 수정 (Changed)
