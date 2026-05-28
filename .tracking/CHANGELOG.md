@@ -9,6 +9,7 @@
 
 ### 추가 (Added)
 - .tracking/prd-multi-model-consult.md: Codex + Gemini + Claude 3중 합성 자문 스킬 PRD 초안 — oh-my-claudecode /ccg 패턴 차용
+- .tracking/prd-superpowers-integration.md: obra/superpowers 옵트인 통합 PRD 초안 — 프로필 `integrations.superpowers` 필드, 매핑 테이블(brainstorming/debugging/writing-plans 연계, TDD·code-review 제외), 충돌 회피·버전 드리프트·옵트아웃 정책
 
 ---
 
