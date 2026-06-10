@@ -30,6 +30,8 @@
 
 ## 세션 시작
 
+세션 시작 절차(Step 1~3)는 **5분 내 완료**를 목표로 한다. 더 오래 걸리면 하네스 문서가 부실한 것이다 — 마찰 로그(`doc-stale` 또는 `setup-mismatch`)에 기록한다.
+
 ### Step 1: 상태 복원
 ```
 1. claude-progress.txt를 읽는다
@@ -45,6 +47,8 @@
 2. 가장 높은 priority의 미완료 기능을 선택한다
 3. 선택한 기능의 category, description, steps를 기록한다
 ```
+
+**회귀 우선 규칙**: 작업 선택 또는 진행 중에 기존에 `passes: true`였던 기능이 깨진 것을 발견하면, 새 기능보다 **회귀 복구를 우선**한다. 해당 기능의 passes를 false로 되돌리고(notes에 회귀 사유 기록) 복구를 이번 작업으로 선택한다.
 
 ### Step 3: 회귀 체크
 ```
@@ -153,6 +157,17 @@ if 실패:
 - PASS → Security 체크 (해당 시) → Complete
 - NEEDS_REFACTOR → Phase 5 (Refactor)
 - NEEDS_FIX → 마찰 로그 기록 (review-fix) → Phase 3 (Green) 재진입 (시도 횟수 누적)
+
+**자동 검사 승격 처리**: Reviewer Output에 "자동 검사 승격 후보"가 있으면 (Reviewer는 read-only이므로 기록은 오케스트레이터가 한다):
+1. `docs/TECH_DEBT.md`의 "자동 검사 승격 대기 큐"에서 같은 규칙의 기존 행을 찾는다
+2. 있으면 횟수 +1, 최근 지적일 갱신 / 없으면 새 행 추가
+3. 횟수가 **2 이상**이 되면 자동 검사(ESLint 규칙, structural-test 확장, 테스트)로의 승격을 사용자에게 제안한다
+
+기록 매핑 (Reviewer Output → 큐 테이블 컬럼):
+```
+규칙 → 지적 규칙 / 오늘 날짜 → 최근 지적일 / 현재 feature ID → 관련 feature
+제안 검사 → 제안 검사 방법 / 상태 → "대기"로 시작, 승격 완료 시 "승격됨"
+```
 
 **간소화**: 30줄 이하 단일 파일 변경이면 Reviewer를 스킵 (validate만 의존).
 

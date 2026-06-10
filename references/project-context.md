@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-04-11 (1.0.0 — semver 전환)
+> 마지막 업데이트: 2026-06-10 (1.1.0 — 하네스 구성 체크리스트 기반 보강)
 
 ---
 
@@ -40,6 +40,7 @@
 ├── templates/                    # 생성 파일 템플릿
 │   ├── structural-test-layer.ts  # 레이어 기반 아키텍처 검증
 │   ├── structural-test-fsd.ts    # FSD 아키텍처 검증
+│   ├── harness-check.sh          # 하네스 자가진단 (체크리스트 §8 구현)
 │   ├── agents/                   # TDD subagent 정의 템플릿
 │   │   ├── architect.md
 │   │   ├── test-engineer.md
@@ -53,6 +54,9 @@
 │       └── coding-standards.md   # 아키텍처/네이밍 규칙
 └── references/                   # 배경 문서 (스킬 실행 시 자동 로드 안 됨)
     ├── harness-guide.md          # Anthropic + OpenAI 통합 가이드
+    ├── harness-checklist.md      # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
+    ├── versioning-policy.md      # semver 버전 관리 정책
+    ├── upgrade-system-design.md  # 업그레이드 시스템 설계
     └── project-context.md        # 이 파일
 ```
 
@@ -88,6 +92,10 @@
 | `!command` 상태 감지/프로필 주입 | SKILL.md § 0에서 상태 감지, scaffold § 0에서 프로필 데이터 주입 | 셸 커맨드는 결정론적. 스킬 프롬프트에 사전 렌더된 상태/데이터를 주입하여 LLM의 판단 부담 감소. planning-with-files 패턴 참조 |
 | scaffold 심볼릭 링크 디스커버리 | `harness-scaffold/`를 리포 루트에 배치 + `install.sh`로 `~/.claude/skills/harness-scaffold` 심볼릭 링크 생성 | `--add-dir`의 중첩 `.claude/skills/` 디스커버리가 동작하지 않는 문제 해결 (Issue #3). `install.sh` 원커맨드 설치로 UX 마찰 최소화 |
 | scaffold `user-invocable: false` | 사용자 `/` 메뉴에서 숨김 | scaffold는 오케스트레이터(setup)가 호출하는 내부 스킬. 사용자가 직접 호출할 필요 없음. 자연어 요청 시에는 Claude가 여전히 호출 가능 |
+| 체크리스트 기준 문서 편입 | `references/harness-checklist.md`를 Phase 3 검증·단계 판정·harness-check.sh의 판정 기준으로 사용 | 하네스가 "제대로 돌아간다"의 기준을 기계 판정 가능하게 문서화 (MVH/표준/운영 단계). 산점된 체크포인트를 단일 기준으로 통합 |
+| 명령어 SoT 위치 | AGENTS.md "## 명령어" (CLAUDE.md는 @AGENTS.md import로 참조) | 범용 에이전트(Codex 등)는 CLAUDE.md를 읽지 않음. agents.md 표준 관행과 일치. 체크리스트 §1.2 충족. 행동 지침 SoT는 여전히 CLAUDE.md |
+| 자가진단 스크립트 언어 | bash (`templates/harness-check.sh`, `npm run harness:check`) | 진단 도구는 진단 대상(tsx/node_modules)에 의존하면 안 됨 — 깨진 상태에서도 구조 항목은 보고 가능. init.sh와 일관. 구조 항목(①②③)과 품질 항목(④⑤)을 구분 보고 |
+| ESLint 보조 규칙 | Q&A 옵트인 → 마커 블록 외과 수정, 실패 시 권고 스니펫 폴백 | "기존 설정 비수정" 원칙의 예외는 사용자 명시 동의 기반으로만 허용 (package.json scripts와 동급). structural-test가 주 검사, ESLint는 에디터 실시간 보조. tsconfig는 검사만(harness-check ⑦) |
 
 ---
 
@@ -176,6 +184,19 @@
 - **스키마 버전 전환**: `.harness-profile.json` version "3.3" → "1.0.0", `.harness-manifest.json` version/skillVersion "3.3" → "1.0.0"
 - **부트스트랩 업데이트**: 기존 프로젝트 편입 대상 버전을 "3.3" → "1.0.0"으로 변경
 - v1~v5.2는 레거시 참조 기록으로 유지. 이후 모든 버전은 semver X.Y.Z 형식을 따른다.
+
+### 1.1.0 (하네스 구성 체크리스트 기반 보강)
+- **체크리스트 편입**: `references/harness-checklist.md` 신설 — 생성 하네스의 판정 기준 (Q1~Q4, §1~§8, MVH/표준/운영 단계). Phase 3 검증과 Phase 4 단계 판정이 이 문서를 기준으로 동작
+- **자가진단 스크립트**: `templates/harness-check.sh` 신설 (managed) + `npm run harness:check` — 체크리스트 §8의 구현. 검사 7항목(구조 ①②③ / 품질 ④⑤ / 경고 ⑥⑦), 전체 통과 시 "표준 하네스 가동" 판정. 새 플레이스홀더 3종(`{{LINT_ARCH_COMMAND}}`, `{{DOC_CHECK_COMMAND}}`, `{{PATH_ALIAS_LIST}}`) — 총 24개
+- **명령어 SoT 이동**: AGENTS.md에 "## 명령어" 섹션 신설 (source of truth), CLAUDE.md는 @AGENTS.md import로 참조. 역할 분리 테이블 갱신 (체크리스트 §1.2)
+- **AGENTS.md 주요 규칙 필수 2종**: feature_list 보호 + passes 검증 규칙을 반드시 포함 (체크리스트 §2.1)
+- **ESLint 보조 규칙 옵트인**: 프로필 선택 필드 `eslintAssist` 추가, Q&A 옵트인 질문(ESLint 설정 감지 시에만), scaffold §5.15 — 마커 블록 외과 수정 + 멱등 + 폴백 (체크리스트 §3.2)
+- **승격 루프**: TECH_DEBT.md에 "자동 검사 승격 대기 큐" 섹션, reviewer.md에 반복 지적 감지 + 승격 후보 출력, session-routine.md Phase 4에 큐 기록·2회 이상 승격 제안 (체크리스트 §3.3)
+- **검증 레벨 4단계**: coding-standards.md에 L1 정적/L2 유닛/L3 통합/L4 E2E 테이블 + steps↔E2E 1:1 매핑 규칙 (feature_list 생성 규칙, test-engineer.md에도 반영) (체크리스트 §4.2)
+- **세션 루틴 보강**: 시작 절차 5분 목표, 회귀 우선 규칙 (session-routine.md, CLAUDE.md 금지 사항) (체크리스트 §5.1/§5.3)
+- **운영 사이클 문서화**: CLAUDE.md에 일간/주간/격주/월간 테이블, QUALITY_SCORE/TECH_DEBT 헤더에 갱신 주기 (체크리스트 §6.3 — 실행은 사용자 몫)
+- **마이그레이션**: M-1.0.0-to-1.1.0 등록 (harness-check 신설, AGENTS/CLAUDE 외과 수정, TECH_DEBT/QUALITY_SCORE data 패치, eslintAssist 프로필 필드)
+- **스테일 참조 수정**: SKILL.md 내부 §14 → §12 참조 잔존분 정리, Step 5 생성 예정 파일 목록 누락분(git-workflow.md, HARNESS_FRICTION.md) 보완
 
 ---
 

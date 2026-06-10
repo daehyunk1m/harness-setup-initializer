@@ -30,7 +30,7 @@ Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 
 | 스킬 | 역할 | 산출물 |
 |------|------|--------|
 | **`/harness-setup`** | Phase 1: 프로젝트 스캔 + Q&A + 프로필 저장 | `.harness-profile.json` |
-| **`/harness-scaffold`** | Phase 2~4: 파일 생성 + 검증 + 보고 | 18개 파일 + `.harness-manifest.json` |
+| **`/harness-scaffold`** | Phase 2~4: 파일 생성 + 검증 + 보고 | 19개 파일 + `.harness-manifest.json` |
 
 ### 자동 체이닝
 
@@ -90,7 +90,7 @@ stateDiagram-v2
 
 ```
 사용자: "하네스 셋업해줘"
-→ 자동 스캔 → 2~4개 질문 → 프로필 승인 → 18개 파일 자동 생성 → 완료
+→ 자동 스캔 → 2~4개 질문 → 프로필 승인 → 19개 파일 자동 생성 → 완료
 ```
 
 사용자가 하는 일은 **(1) 셋업 요청, (2) 질문에 답변, (3) 프로필 승인** 세 가지뿐이다.

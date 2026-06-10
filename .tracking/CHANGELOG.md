@@ -5,15 +5,44 @@
 
 ---
 
-## [Unreleased] — Session 19 (2026-05-28): 외부 통합 기획 PRD
+## [1.1.0] — 2026-06-10 (하네스 구성 체크리스트 기반 보강)
 
-### 추가 (Added)
+> Session 18~20을 하나의 릴리스로 묶음. 최고 수준 변경 = MINOR (새 파일, 새 프로필 필드, 새 플레이스홀더, 규칙 추가)
+
+### 추가 (Added) — Session 20 (2026-06-10): 체크리스트 기반 검토·개선
+- references/harness-checklist.md: 하네스 구성 체크리스트 편입 — 생성 하네스의 판정 기준 (Q1~Q4, §1~§8, MVH/표준/운영 단계). Phase 3 검증·Phase 4 단계 판정·harness-check.sh의 SSoT
+- templates/harness-check.sh: 하네스 자가진단 스크립트 (managed, 체크리스트 §8 구현) — 검사 7항목(구조 ①②③/품질 ④⑤/경고 ⑥⑦), 구조·품질 구분 보고, 전체 통과 시 "표준 하네스 가동" 판정
+- 새 플레이스홀더 3종: `{{LINT_ARCH_COMMAND}}`, `{{DOC_CHECK_COMMAND}}`, `{{PATH_ALIAS_LIST}}` (21 → 24개), harness-scaffold/SKILL.md § 5.14 치환 테이블 신설
+- 프로필 선택 필드 `eslintAssist`: ESLint 보조 규칙 옵트인 (no-restricted-imports 레이어 이중 차단 + max-lines) — SKILL.md § 4.2 옵트인 질문(ESLint 설정 감지 시에만), harness-scaffold/SKILL.md § 5.15 신설 (마커 블록 외과 수정 + 멱등 + 권고 스니펫 폴백). 체크리스트 §3.2
+- package.json scripts에 `harness:check` 추가 (§ 5.5) — validate에는 포함하지 않음 (순환 방지)
+- templates/TECH_DEBT.md: "자동 검사 승격 대기 큐" 섹션 — 문서 규칙이지만 검사기 없는 항목 추적. 체크리스트 §3.3
+- templates/agents/reviewer.md: "반복 지적 감지" 단계 + Output에 "자동 검사 승격 후보" 섹션 (read-only 유지 — 기록은 오케스트레이터)
+- templates/rules/session-routine.md: Phase 4에 승격 큐 기록·2회 이상 시 승격 제안, 시작 절차 5분 목표, 회귀 우선 규칙. 체크리스트 §5.1/§5.3
+- templates/rules/coding-standards.md: "검증 레벨" 섹션 (L1 정적/L2 유닛/L3 통합/L4 E2E) + steps↔E2E 1:1 매핑 규칙 + 승격 원칙 1줄. 체크리스트 §4.2
+- harness-scaffold/SKILL.md § 5.1.1: CLAUDE.md에 "운영 사이클" 섹션 (일간/주간/격주/월간) + 금지 사항 회귀 우선 규칙. 체크리스트 §6.3
+- harness-scaffold/SKILL.md § 6: Phase 3 검증 6.13 (harness:check 실행) + 6.14 (ESLint 마커 검증) — 12 → 14항목
+- harness-scaffold/SKILL.md § 7: "하네스 단계 판정" 신설 (표준 하네스 가동/MVH/판정 보류)
+- harness-scaffold/SKILL.md § 10.3: M-1.0.0-to-1.1.0 마이그레이션 등록 (harness-check 신설, AGENTS/CLAUDE 외과 수정, TECH_DEBT/QUALITY_SCORE data 패치, eslintAssist 프로필 필드)
+- harness-scaffold/SKILL.md § 5.3.1: claude-progress.txt 생성 규칙 신설 — 기존 사양 갭 (생성 순서 #10에는 있으나 규칙 섹션 부재). 초기 내용 + TDD STATE 포맷 주석 안내
+
+### 수정 (Changed) — Session 20 (2026-06-10)
+- **명령어 SoT 이동**: AGENTS.md에 "## 명령어" 섹션 신설 (source of truth), CLAUDE.md 생성 템플릿에서 명령어 섹션 제거 (@AGENTS.md import로 커버) — 범용 에이전트(Codex 등) 접근성. 역할 분리 테이블 3곳(§ 5.1 불릿, § 5.1.1 테이블, § 5.11.4 테이블) 동기 수정. 체크리스트 §1.2
+- AGENTS.md "주요 규칙"에 필수 2종 명시: feature_list 보호 + passes 검증 규칙 반드시 포함. 체크리스트 §2.1
+- harness-scaffold/SKILL.md § 5 생성 순서: 18 → 20단계 (14번 harness-check.sh, 19번 ESLint 옵트인 수정, manifest는 20번 마지막 유지)
+- harness-scaffold/SKILL.md § 5.3: feature_list steps의 E2E 1:1 매핑 규칙 추가, templates/agents/test-engineer.md에도 반영
+- 프로필 스키마 version "1.0.0" → "1.1.0" (SKILL.md § 5 + harness-scaffold/SKILL.md § 4 동기), 매니페스트 profile 예시에 eslintAssist 보존 추가
+- templates/QUALITY_SCORE.md / TECH_DEBT.md 헤더에 갱신 주기(주간/격주) 명시
+- SKILL.md § 8 / harness-scaffold/SKILL.md § 8 절대 규칙: 기존 설정 수정 허용 범위에 옵트인 ESLint 보조 규칙 명시
+- 파일 카테고리 테이블(SKILL.md § 12.2, harness-scaffold § 10.1)에 24번 harness-check.sh(managed), 25번 ESLint 설정(custom) 추가. § 12.6.1 파일-템플릿 매핑에 harness-check.sh 추가
+- versioning-policy.md / CLAUDE.md / project-context.md: 플레이스홀더 21→24, 생성 파일 18→19 카운트 갱신, 파일 맵에 신규 파일 2종 추가
+- SKILL.md 스테일 내부 참조 수정 (§14 → §12 재번호 잔존분 7곳, § 9의 "섹션 8" → "§ 6"), Step 5 생성 예정 파일 목록 누락분(git-workflow.md, HARNESS_FRICTION.md) 보완
+- 적대적 검증 워크플로(5관점) 발견 사항 수정: § 5.11.4 명령어 행 SoT 반영 누락, manifest profile 저장 필드 목록 명시(§ 5.13 — "전체 프로필" 모호성 해소), 승격 큐 기록 매핑 명세(session-routine.md), harness-check skipFiles 주의(§ 5.14), eslintAssist 필드 설명 보강(scaffold § 4)
+
+### 추가 (Added) — Session 19 (2026-05-28): 외부 통합 기획 PRD
 - .tracking/prd-multi-model-consult.md: Codex + Gemini + Claude 3중 합성 자문 스킬 PRD 초안 — oh-my-claudecode /ccg 패턴 차용
 - .tracking/prd-superpowers-integration.md: obra/superpowers 옵트인 통합 PRD 초안 — 프로필 `integrations.superpowers` 필드, 매핑 테이블(brainstorming/debugging/writing-plans 연계, TDD·code-review 제외), 충돌 회피·버전 드리프트·옵트아웃 정책
 
----
-
-## [Unreleased] — Session 18 (2026-04-11): 업그레이드 자동 감지 메커니즘
+### Session 18 (2026-04-11): 업그레이드 자동 감지 메커니즘
 
 ### 수정 (Changed)
 - SKILL.md § 12.3: Phase U1 분석 흐름을 2-상태 → 4-상태 판정으로 개선. 소스 템플릿 재렌더링 비교 단계 추가

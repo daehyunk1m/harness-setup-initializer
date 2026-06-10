@@ -402,3 +402,69 @@
   - harness-scaffold/SKILL.md Phase U3/U5/마이그레이션 안내 동기화
   - upgrade-system-design.md § 2.3, § 3.3 동기화
   - versioning-policy.md PATCH 트리거 테이블 보완
+
+---
+
+## Session 20: 하네스 구성 체크리스트 기반 검토·개선 — 1.1.0 (2026-06-10)
+
+> 사용자 제공 "하네스 구성 체크리스트"(Anthropic+OpenAI 통합 판정 기준)와 스킬을 전수 대조하여 갭 8건 수정.
+
+### TODO-59: 체크리스트 기준 문서 편입
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `references/harness-checklist.md` (신규), `SKILL.md` § 11, `harness-scaffold/SKILL.md` § 6/§ 7/§ 11, `CLAUDE.md`
+- **문제**: 하네스가 "제대로 돌아간다"의 판정 기준이 여러 문서에 산점되어 있고 기계 판정 불가
+- **해결**: 체크리스트 원문을 references/에 편입, Phase 3 검증·Phase 4 단계 판정·harness-check.sh가 이 문서를 기준으로 참조
+
+### TODO-60: harness:check 자가진단 스크립트 (체크리스트 §8)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `templates/harness-check.sh` (신규), `harness-scaffold/SKILL.md` § 5.5/§ 5.14(신설)/§ 6.13/§ 7, `SKILL.md` § 12.2/§ 12.6.1
+- **문제**: 스캐폴딩 직후 Phase 3 검증만 있고, 사용자가 이후 반복 실행할 자가진단 수단이 없음
+- **해결**: bash 자가진단 스크립트 (진단 대상인 tsx/node_modules에 비의존). 검사 7항목 — 구조(①②③, 실패 시 exit 1) / 품질(④⑤, exit 전파) / 경고(⑥⑦). 새 플레이스홀더 3종({{LINT_ARCH_COMMAND}}, {{DOC_CHECK_COMMAND}}, {{PATH_ALIAS_LIST}}). 전체 통과 시 "표준 하네스 가동" 판정
+
+### TODO-61: 명령어 SoT를 AGENTS.md로 이동 (체크리스트 §1.2)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `harness-scaffold/SKILL.md` § 5.1/§ 5.1.1/§ 5.11.4, § 10.3 (M-1.0.0-to-1.1.0)
+- **문제**: 명령어 SoT가 CLAUDE.md여서 범용 에이전트(Codex 등)가 테스트/개발 서버 명령을 알 수 없음
+- **해결**: AGENTS.md에 "## 명령어" 섹션 신설(SoT), CLAUDE.md는 @AGENTS.md import로 참조. 역할 분리 서술 3곳 동기 수정. AGENTS.md 주요 규칙에 feature_list 보호 + passes 검증 필수 2종 명시 (§2.1)
+
+### TODO-62: ESLint 보조 규칙 Q&A 옵트인 (체크리스트 §3.2)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `SKILL.md` § 4(Step 1.4, § 4.2~4.4, Step 5)/§ 5, `harness-scaffold/SKILL.md` § 4/§ 5.15(신설)/§ 6.14/§ 8
+- **문제**: ESLint 보조 규칙(no-restricted-imports, max-lines)·tsconfig paths가 미커버. 기존 설정 수정은 원칙과 충돌
+- **해결**: 프로필 선택 필드 `eslintAssist` + ESLint 설정 감지 시에만 옵트인 질문. 마커 블록 외과 수정 + 멱등 + 권고 스니펫 폴백. tsconfig는 수정하지 않고 harness-check ⑦이 검사만
+
+### TODO-63: 승격 루프 (체크리스트 §3.3)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `templates/TECH_DEBT.md`, `templates/agents/reviewer.md`, `templates/rules/session-routine.md`, `templates/rules/coding-standards.md`
+- **문제**: "리뷰 2회 반복 지적 → 자동 검사 승격" 절차와 승격 대기 큐가 생성 하네스에 없음
+- **해결**: TECH_DEBT.md에 "자동 검사 승격 대기 큐" 섹션, reviewer.md에 반복 지적 감지 + 승격 후보 출력(read-only 유지), session-routine.md Phase 4에 큐 기록·횟수 2 이상 시 승격 제안, coding-standards.md에 원칙 1줄
+
+### TODO-64: 검증 레벨 4단계 + steps↔E2E 매핑 (체크리스트 §4.2)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `templates/rules/coding-standards.md`, `harness-scaffold/SKILL.md` § 5.3, `templates/agents/test-engineer.md`
+- **문제**: L1 정적/L2 유닛/L3 통합/L4 E2E 분류와 steps↔E2E 1:1 매핑 규칙이 미문서화
+- **해결**: coding-standards.md에 검증 레벨 테이블, feature_list 생성 규칙과 test-engineer.md에 1:1 매핑 규칙 반영
+
+### TODO-65: 세션 루틴 보강 + 운영 사이클 (체크리스트 §5.1/§5.3/§6.3)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `templates/rules/session-routine.md`, `harness-scaffold/SKILL.md` § 5.1.1, `templates/QUALITY_SCORE.md`, `templates/TECH_DEBT.md`
+- **문제**: "기존 버그 우선"/"시작 5분 내" 규칙과 운영 사이클(일/주/격주/월)이 생성 하네스에 없음
+- **해결**: session-routine.md에 5분 목표 + 회귀 우선 규칙, CLAUDE.md에 운영 사이클 테이블 + 금지 사항 회귀 규칙, QUALITY_SCORE/TECH_DEBT 헤더에 갱신 주기 (실행은 사용자 몫 — 체크리스트 §7)
+
+### TODO-66: 1.1.0 신기능 실전 테스트
+- **상태**: [ ] 미완료
+- **파일**: 실제 프로젝트에서 테스트 (TODO-53과 함께)
+- **문제**: 신규 메커니즘의 실전 검증 필요
+- **해결**: 관찰 포인트 — (1) harness:check 7항목 출력과 단계 판정, (2) AGENTS.md 100줄 준수(명령어 섹션 추가 후), (3) eslintAssist 옵트인 질문이 ESLint 감지 시에만 나오는가, (4) ESLint 마커 블록 적용/폴백, (5) M-1.0.0-to-1.1.0 업그레이드 멱등성
+
+### TODO-67: eslintAssist legacy JS 형식 전략
+- **상태**: [ ] 미완료
+- **파일**: `harness-scaffold/SKILL.md` § 5.15
+- **문제**: `.eslintrc.js` 등 JS 형식 legacy 설정은 현재 일괄 폴백 처리 — 수정 전략 부재
+- **해결**: 실전 폴백 발동률 관찰 후, 필요하면 JS legacy 형식의 안전한 삽입 전략 설계 (또는 폴백 유지 확정)
+
+### TODO-68: harness-check 검사 항목 확장 검토
+- **상태**: [ ] 미완료
+- **파일**: `templates/harness-check.sh`
+- **문제**: 현재 7항목은 체크리스트 §8(빠른 자가진단) 범위. §6 엔트로피 항목(문서-실구조 일치, passes 재검증)은 미포함
+- **해결**: 운영 경험 후 확장 여부 결정 — AGENTS.md 경로 실존 검사, ARCHITECTURE.md 폴더 일치 검사 등 후보

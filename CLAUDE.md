@@ -20,11 +20,13 @@
 | `templates/structural-test-*.ts` | 아키텍처 검증 템플릿 | 낮음 |
 | `templates/init.sh` | 환경 초기화 스크립트 템플릿 | 낮음 |
 | `templates/doc-freshness.ts` | 문서 최신성 검사 스크립트 템플릿 | 낮음 |
+| `templates/harness-check.sh` | 하네스 자가진단 스크립트 템플릿 (체크리스트 §8 구현) | 낮음 |
 | `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
 | `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
 | `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
 | `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (스텁) | 향후 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
+| `references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
 | `references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
 | `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |
@@ -82,8 +84,9 @@
 # 실전 테스트 (실제 프로젝트에서 2단계 스킬 실행)
 cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
-# 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 18개 파일 생성 확인
+# 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 19개 파일 생성 확인 (생성 순서 20단계)
 # 3단계: .harness-manifest.json 생성 확인 → Stop hook이 allow 반환 → 정상 종료
+# 4단계: npm run harness:check 실행 → "표준 하네스 가동" 판정 확인
 
 # 체이닝 검증
 # 1. 프로필 저장 후 Claude가 자동으로 scaffold를 호출하는가 (Stop hook)
