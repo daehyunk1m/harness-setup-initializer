@@ -82,7 +82,8 @@
 
 ```bash
 # 실전 테스트 (실제 프로젝트에서 2단계 스킬 실행)
-cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup
+# 스킬은 ~/.claude/skills/에 글로벌 설치 + harness-scaffold 심볼릭 링크 — --add-dir 불필요
+cd ~/Desktop/side-project/haja-web-fe && claude
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
 # 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 19개 파일 생성 확인 (생성 순서 20단계)
 # 3단계: .harness-manifest.json 생성 확인 → Stop hook이 allow 반환 → 정상 종료
