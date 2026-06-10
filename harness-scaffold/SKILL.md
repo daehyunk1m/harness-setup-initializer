@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -150,6 +150,7 @@ fi
 ```
 
 **필드 참조 규칙:**
+- `scripts.test`는 **비대화형(단발 실행) 명령**이다 — watch 기본 러너(예: `vitest` 단독)는 분석 단계에서 `npm run test:run` 형태로 기록되며, § 5.5가 `test:run` 키를 package.json에 추가한다. `{{TEST_COMMAND}}`와 `{{VALIDATE_COMMAND}}`의 안전성이 이 규칙에 의존한다.
 - `extras`의 각 항목은 문답에서 확인된 경우에만 존재한다. 없는 키는 해당 섹션 생략을 의미한다.
 - `eslintAssist`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드 — 프리셋 비대상, 감지+문답 전용). 생략 시 ESLint 설정을 수정하지 않는다 (§ 5.15). `configFormat`은 설정 파일 형식: `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*).
 - `existingFiles`에 포함된 파일은 이미 프로젝트에 존재하는 파일이다.
@@ -444,6 +445,7 @@ plan_ref: {계획 참조}
   - `validate`: **항상 동적으로 조합한다** (프리셋에서 가져오지 않음 — 아래 조합 규칙 참조)
   - `doc:check`: 문서 최신성 검사
   - `harness:check`: 하네스 자가진단 — `bash scripts/harness-check.sh`
+  - `test:run` (조건부): 기존 `test` 스크립트가 watch 기본(예: `vitest` 단독)일 때만 추가 — 단발 실행 형태 (예: `vitest run`). 기존 `test` 키는 수정하지 않는다
 - 기존에 같은 이름의 script가 있으면 스킵한다
 - Node 스크립트로 안전하게 수정한다:
 
@@ -456,6 +458,7 @@ const toAdd = {
   'doc:check': '{프로필에서 가져온 doc:check 명령}',
   'harness:check': 'bash scripts/harness-check.sh'
 };
+// 기존 test가 watch 기본일 때만: toAdd['test:run'] = '{단발 실행 명령, 예: vitest run}';
 let changed = false;
 for (const [key, val] of Object.entries(toAdd)) {
   if (!pkg.scripts[key]) {
@@ -477,9 +480,11 @@ validate 명령 조합 규칙:
 - lint 명령이 있으면 포함, 없으면 생략
 - lint:arch는 항상 포함
 - test 명령이 있으면 포함, 없으면 생략
+- **validate를 구성하는 모든 명령은 비대화형(단발 실행)이어야 한다** — watch/serve 모드 명령이 섞이면 에이전트 검증 루프와 harness:check가 영구 대기한다. 기존 `test`가 watch 기본이면 `npm run test` 대신 `npm run test:run`을 조합에 사용한다
 - `harness:check`는 validate에 **포함하지 않는다** — harness-check.sh가 validate를 호출하므로 순환이 생긴다
 - 예시: `npm run typecheck && npm run lint && npm run lint:arch && npm run test`
 - 예시 (typecheck 없는 경우): `npm run lint && npm run lint:arch && npm run test`
+- 예시 (test가 watch 기본인 경우): `npm run lint && npm run lint:arch && npm run test:run`
 
 ### 5.6 init.sh 생성 규칙
 
@@ -1331,6 +1336,27 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
    - 소스: 업그레이드 시 자동으로 질문하지 않는다 — 사용자가 원하면 ESLint 설정 감지 후 문답으로 옵트인 (§ 5.15)
 
 > managed 템플릿 변경분(session-routine.md, coding-standards.md, reviewer.md, test-engineer.md)은 자동 감지(SKILL.md § 12.6)로 전파되므로 이 마이그레이션에 포함하지 않는다. TECH_DEBT/QUALITY_SCORE는 data 카테고리라 자동 감지 대상이 아니므로 7~8번 항목으로 처리한다.
+
+#### M-1.1.0-to-1.2.0: 비대화형 검증 명령 보장 (watch 모드 영구 대기 방지)
+
+**조건**: harness.version == "1.1.0"
+**결과**: harness.version → "1.2.0"
+
+> 배경: 실전 테스트(haja-web-fe)에서 `"test": "vitest"`(watch 기본)가 validate에 그대로 조합되어
+> 비대화형 검증 루프(harness:check, 에이전트 검증)가 영구 대기하는 문제 발견.
+
+**변경 목록**:
+
+1. [custom] package.json: watch 기본 test 가드
+   - 작업: modify-section (scripts)
+   - 조건: 기존 `test` 스크립트가 watch 기본(예: `vitest` 단독, `--watch` 포함)일 때만 실행. 아니면 전체 스킵
+   - 내용: ① `test:run` 키 추가 (단발 실행 형태, 예: `vitest run`, 이미 있으면 스킵) ② `validate` 스크립트의 `npm run test` 구간을 `npm run test:run`으로 교체 (validate를 사용자가 수정한 경우 교체 전 확인)
+   - 보존: 기존 `test` 키는 수정하지 않는다 (사용자의 watch 워크플로 유지)
+
+2. [profile] scripts.test: 비대화형 명령으로 갱신
+   - 작업: rename (값 갱신)
+   - 조건: manifest.profile.scripts.test가 watch 기본 명령일 때만
+   - 내용: `npm run test:run`으로 갱신 — `{{TEST_COMMAND}}` 재치환의 원천이므로, 갱신 후 managed 자동 감지가 test-engineer.md/session-routine.md를 재생성한다
 
 ### 10.4 엣지 케이스
 

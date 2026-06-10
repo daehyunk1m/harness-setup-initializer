@@ -156,6 +156,7 @@ cat package.json
 - `dependencies`에서: 주요 프레임워크 및 라이브러리
 - `devDependencies`에서: TypeScript, 린트, 포맷터, 테스트 도구
 - `scripts`에서: dev, build, test, lint 명령과 그 내용
+- **test 명령이 watch 기본인지**: `vitest` 단독처럼 인자 없이 watch 모드로 도는 명령은 비대화형 검증 루프(validate, harness:check, 에이전트 검증)에서 **영구 대기**를 일으킨다. 감지 시 프로필 `scripts.test`에 단발 실행 형태(`npm run test:run` — scaffold가 키 추가)로 기록한다 (§ 4.4)
 - 패키지 매니저: package-lock.json / yarn.lock / pnpm-lock.yaml 존재 여부
 
 #### 1.3 디렉토리 구조 매핑
@@ -393,7 +394,7 @@ done
 | 네이밍 규칙 | 컴포넌트 PascalCase, 훅 camelCase+use, 서비스 camelCase, 타입 PascalCase | React 커뮤니티 관행 |
 | 개발 서버 명령 | package.json scripts의 `dev` 필드 | 실제 설정 기반 |
 | 개발 서버 포트 | scripts.dev에서 추출, 불가 시 Next.js→3000, Vite→5173, 기타→3000 | 프레임워크 기본값 |
-| 테스트 명령 | package.json scripts의 `test` 필드, 없으면 생략 | 실제 설정 기반 |
+| 테스트 명령 | package.json scripts의 `test` 필드, 없으면 생략. **watch 기본 명령(예: `vitest` 단독)이면 `npm run test:run`으로 기록** — scaffold가 `test:run`(단발 실행, 예: `vitest run`) 스크립트를 추가한다. 기존 `test` 키는 수정하지 않는다 | 비대화형 검증 루프에서 영구 대기 방지 (실전 테스트 발견) |
 | E2E 프레임워크 | devDependencies에서 감지 (playwright/cypress), 없으면 생략 | 실제 설정 기반 |
 | path alias | tsconfig.json `paths`에서 추출, 없으면 상대 경로 | 실제 설정 기반 |
 | 소스 루트 | `src/` 존재 시 `src/`, 없으면 `app/` 존재 시 `app/`, 둘 다 없으면 사용자에게 질문 | 디렉토리 탐색 |
@@ -487,7 +488,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -573,6 +574,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 | `stack` | Step 1 스캔 | 프레임워크, 언어, 주요 라이브러리 |
 | `architectureType` | Step 2 분류 또는 문답 | `layer-based` / `fsd` / `domain-based` / `custom` |
 | `srcRoot` ~ `docFreshnessDays` | 스캔 + 프리셋 + 문답 | 프로필 4.3의 [기본] 항목에 대응 |
+| `scripts.test` | Step 1.2 감지 | **비대화형(단발 실행) 명령이어야 한다** — watch 기본 러너(예: `vitest` 단독)면 `npm run test:run`으로 기록하고 scaffold가 `test:run` 키를 추가한다 (§ 4.4) |
 | `eslintAssist` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 ESLint 수정 없음. `configFormat`은 `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*). 프리셋 비대상 (감지+문답 전용) |
 | `extras` | Step 4 문답에서 확인된 경우만 | 해당 키가 없으면 섹션 생략 |
 | `existingFiles` | Step 1.5 스캔 | 이미 존재하는 하네스 파일 목록 |
@@ -586,8 +588,8 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 ```json
 {
   "mode": "upgrade",
-  "fromVersion": "1.0.0",
-  "toVersion": "1.1.0",
+  "fromVersion": "1.1.0",
+  "toVersion": "1.2.0",
   "migrations": [],
   "fileActions": {
     "agents/architect.md": { "action": "overwrite", "reason": "템플릿 변경 감지, 사용자 수정 없음", "source": "auto-detect" },

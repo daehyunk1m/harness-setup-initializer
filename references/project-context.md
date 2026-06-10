@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-10 (1.1.0 — 하네스 구성 체크리스트 기반 보강)
+> 마지막 업데이트: 2026-06-10 (1.2.0 — 비대화형 검증 명령 보장)
 
 ---
 
@@ -96,6 +96,7 @@
 | 명령어 SoT 위치 | AGENTS.md "## 명령어" (CLAUDE.md는 @AGENTS.md import로 참조) | 범용 에이전트(Codex 등)는 CLAUDE.md를 읽지 않음. agents.md 표준 관행과 일치. 체크리스트 §1.2 충족. 행동 지침 SoT는 여전히 CLAUDE.md |
 | 자가진단 스크립트 언어 | bash (`templates/harness-check.sh`, `npm run harness:check`) | 진단 도구는 진단 대상(tsx/node_modules)에 의존하면 안 됨 — 깨진 상태에서도 구조 항목은 보고 가능. init.sh와 일관. 구조 항목(①②③)과 품질 항목(④⑤)을 구분 보고 |
 | ESLint 보조 규칙 | Q&A 옵트인 → 마커 블록 외과 수정, 실패 시 권고 스니펫 폴백 | "기존 설정 비수정" 원칙의 예외는 사용자 명시 동의 기반으로만 허용 (package.json scripts와 동급). structural-test가 주 검사, ESLint는 에디터 실시간 보조. tsconfig는 검사만(harness-check ⑦) |
+| 비대화형 검증 명령 원칙 | 프로필 `scripts.test`와 validate 구성 명령은 모두 단발 실행이어야 한다. watch 기본 러너는 `test:run` 키 추가로 우회 (기존 `test` 키는 비수정) | 실전 테스트(haja-web-fe)에서 `vitest`(watch 기본)가 validate에 조합되어 검증 루프가 53분 영구 대기. 에이전트 검증 루프 전체가 validate에 의존하므로 치명적 |
 
 ---
 
@@ -197,6 +198,11 @@
 - **운영 사이클 문서화**: CLAUDE.md에 일간/주간/격주/월간 테이블, QUALITY_SCORE/TECH_DEBT 헤더에 갱신 주기 (체크리스트 §6.3 — 실행은 사용자 몫)
 - **마이그레이션**: M-1.0.0-to-1.1.0 등록 (harness-check 신설, AGENTS/CLAUDE 외과 수정, TECH_DEBT/QUALITY_SCORE data 패치, eslintAssist 프로필 필드)
 - **스테일 참조 수정**: SKILL.md 내부 §14 → §12 참조 잔존분 정리, Step 5 생성 예정 파일 목록 누락분(git-workflow.md, HARNESS_FRICTION.md) 보완
+
+### 1.2.0 (비대화형 검증 명령 보장)
+- **실전 테스트 결과 (haja-web-fe, M-1.0.0-to-1.1.0 업그레이드)**: 자동 감지·마이그레이션·단계 판정 모두 사양대로 동작. AGENTS.md 60줄, manifest 22개 파일 추적. 자가진단이 프로젝트 품질 문제 2건(레이어 위반, 잔존 테스트 산출물)을 구조 문제와 정확히 구분 — "MVH 가동" 판정
+- **발견된 스킬 갭**: `"test": "vitest"`(watch 기본)가 validate에 그대로 조합 → 비대화형 검증 루프 53분 영구 대기 (마찰 로그 경유 발견)
+- **수정**: 프로필 `scripts.test` 비대화형 원칙 (SKILL.md Step 1.2 감지 + § 4.4 + 필드 규칙), scaffold § 5.5에 조건부 `test:run` 키 추가 + "validate 구성 명령은 모두 비대화형" 규칙, M-1.1.0-to-1.2.0 마이그레이션 등록 (기존 하네스의 validate 재조합 + profile 갱신)
 
 ---
 

@@ -5,6 +5,24 @@
 
 ---
 
+## [1.2.0] — 2026-06-10 (비대화형 검증 명령 보장)
+
+> 실전 테스트(haja-web-fe 업그레이드, TODO-66)에서 발견된 watch 모드 영구 대기 문제 수정. MINOR (새 조합 규칙 + 조건부 test:run 키 + 새 마이그레이션)
+
+### 추가 (Added) — Session 21 (2026-06-10)
+- harness-scaffold/SKILL.md § 5.5: 조건부 `test:run` 스크립트 추가 규칙 — 기존 `test`가 watch 기본(예: `vitest` 단독)이면 단발 실행 키 추가 (기존 `test` 키는 비수정)
+- harness-scaffold/SKILL.md § 10.3: M-1.1.0-to-1.2.0 마이그레이션 — 기존 하네스의 validate에서 `npm run test` → `npm run test:run` 교체 + manifest.profile.scripts.test 갱신
+- .tracking/TODO.md: TODO-66 실전 테스트 결과 기록, TODO-69(watch 가드) 완료, TODO-70(업그레이드 멱등성 재검증) 신규
+
+### 수정 (Changed) — Session 21 (2026-06-10)
+- SKILL.md Step 1.2 / § 4.4 / § 5 필드 규칙: `scripts.test`는 비대화형(단발 실행) 명령이어야 한다 — watch 기본 러너 감지 시 `npm run test:run`으로 기록
+- harness-scaffold/SKILL.md § 4 필드 참조 규칙: scripts.test 비대화형 계약 명시 ({{TEST_COMMAND}}/{{VALIDATE_COMMAND}} 안전성의 전제)
+- harness-scaffold/SKILL.md § 5.5 validate 조합 규칙: "구성 명령은 모두 비대화형" 원칙 + watch 기본 예시 추가
+- 프로필 스키마 version "1.1.0" → "1.2.0" (두 SKILL.md 동기)
+- CLAUDE.md: 실전 테스트 경로 스테일 수정 (~/projects/haja → ~/Desktop/side-project/haja-web-fe, --add-dir 불필요 명시)
+
+---
+
 ## [1.1.0] — 2026-06-10 (하네스 구성 체크리스트 기반 보강)
 
 > Session 18~20을 하나의 릴리스로 묶음. 최고 수준 변경 = MINOR (새 파일, 새 프로필 필드, 새 플레이스홀더, 규칙 추가)

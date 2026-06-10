@@ -452,10 +452,16 @@
 - **해결**: session-routine.md에 5분 목표 + 회귀 우선 규칙, CLAUDE.md에 운영 사이클 테이블 + 금지 사항 회귀 규칙, QUALITY_SCORE/TECH_DEBT 헤더에 갱신 주기 (실행은 사용자 몫 — 체크리스트 §7)
 
 ### TODO-66: 1.1.0 신기능 실전 테스트
-- **상태**: [ ] 미완료
-- **파일**: 실제 프로젝트에서 테스트 (TODO-53과 함께)
+- **상태**: [x] 완료 (2026-06-10, haja-web-fe 업그레이드 경로)
+- **파일**: ~/Desktop/side-project/haja-web-fe (1.0.0 → 1.1.0 업그레이드)
 - **문제**: 신규 메커니즘의 실전 검증 필요
-- **해결**: 관찰 포인트 — (1) harness:check 7항목 출력과 단계 판정, (2) AGENTS.md 100줄 준수(명령어 섹션 추가 후), (3) eslintAssist 옵트인 질문이 ESLint 감지 시에만 나오는가, (4) ESLint 마커 블록 적용/폴백, (5) M-1.0.0-to-1.1.0 업그레이드 멱등성
+- **결과**:
+  - ✅ M-1.0.0-to-1.1.0 + managed 자동 감지(4개 템플릿) 사양대로 적용. manifest 1.1.0, 22개 파일 추적, 플레이스홀더 잔존 0
+  - ✅ [custom] AGENTS.md 명령어 SoT + 필수 규칙 2종 (60줄 ≤ 100), CLAUDE.md 명령어 제거 + 운영 사이클 + 회귀 규칙, [data] TECH_DEBT 큐·QUALITY_SCORE 헤더
+  - ✅ harness:check 7항목 + 단계 판정 동작 — 구조 통과/품질 2건 실패를 정확히 구분하여 "MVH 가동" 판정 (품질 실패는 haja 프로젝트 문제: 레이어 위반 1건, 잔존 .js 테스트 1건)
+  - ✅ eslintAssist는 업그레이드에서 질문되지 않음 (설계 의도). eslintAssist 옵트인/마커 블록은 신규 셋업 경로 테스트로 이월 (TODO-53)
+  - ⚠️ 멱등성(재실행 시 변경 0건)은 미검증 → TODO-70
+  - 🐛 스킬 갭 발견: watch 기본 test 명령이 validate에 조합되어 53분 영구 대기 → TODO-69 (1.2.0에서 수정)
 
 ### TODO-67: eslintAssist legacy JS 형식 전략
 - **상태**: [ ] 미완료
@@ -468,3 +474,15 @@
 - **파일**: `templates/harness-check.sh`
 - **문제**: 현재 7항목은 체크리스트 §8(빠른 자가진단) 범위. §6 엔트로피 항목(문서-실구조 일치, passes 재검증)은 미포함
 - **해결**: 운영 경험 후 확장 여부 결정 — AGENTS.md 경로 실존 검사, ARCHITECTURE.md 폴더 일치 검사 등 후보
+
+### TODO-69: 비대화형 검증 명령 보장 — watch 모드 가드 (1.2.0)
+- **상태**: [x] 완료 (2026-06-10)
+- **파일**: `SKILL.md` Step 1.2/§ 4.4/§ 5 필드 규칙, `harness-scaffold/SKILL.md` § 4/§ 5.5/§ 10.3
+- **문제**: `"test": "vitest"`(watch 기본)를 validate에 그대로 조합 → harness:check와 에이전트 검증 루프(implementer/debugger/simplifier)가 비대화형 환경에서 영구 대기. 실전 테스트에서 53분 멈춤으로 발견 (마찰 로그 경유)
+- **해결**: ① 분석 단계에서 watch 기본 러너 감지 → 프로필 scripts.test를 `npm run test:run`으로 기록 ② scaffold가 조건부 `test:run` 키 추가 (기존 test 키 비수정) ③ "validate 구성 명령은 모두 비대화형" 조합 규칙 ④ M-1.1.0-to-1.2.0으로 기존 하네스의 validate 재조합 + profile 갱신
+
+### TODO-70: 업그레이드 멱등성 실전 재검증
+- **상태**: [ ] 미완료
+- **파일**: 실제 프로젝트 (haja-web-fe — 1.1.0 → 1.2.0 업그레이드 시 함께)
+- **문제**: TODO-66에서 멱등성(업그레이드 직후 재실행 → 변경 0건, 중복 섹션 없음)이 검증되지 않음
+- **해결**: M-1.1.0-to-1.2.0 적용 시 관찰 — ① 업그레이드 완료 후 "하네스 업그레이드" 재실행 → 변경 0건 ② AGENTS.md/CLAUDE.md에 중복 섹션 없음 ③ test:run 키 중복 추가 없음. haja의 test 스크립트가 watch 기본(vitest)이므로 M-1.1.0-to-1.2.0의 조건부 가드도 함께 검증됨
