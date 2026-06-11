@@ -494,3 +494,17 @@
   - ✅ `test:run: vitest run` 추가, validate가 `yarn test:run` 사용, profile.scripts.test 갱신 (M-1.1.0-to-1.2.0 조건부 가드 동작)
   - ✅ 중복 섹션 없음 — AGENTS.md "## 명령어" 1개, CLAUDE.md "## 운영 사이클" 1개, TECH_DEBT 승격 큐 1개
   - ✅ AGENTS.md 60줄 유지
+
+---
+
+## Session 23: harness-cleanup 컴패니언 스킬 — 1.4.0 (2026-06-11)
+
+### TODO-71: harness-cleanup 컴패니언 스킬 구현
+- **상태**: [x] 완료 (2026-06-11, 1.4.0)
+- **파일**: `companion-skills/harness-cleanup/SKILL.md` (신규), `harness-scaffold/SKILL.md` § 5.1.1/§ 7/§ 10.3, `CLAUDE.md`, `references/project-context.md`
+- **문제**: 체크리스트 § 6.3 운영 사이클(주간/격주/월간)의 실행 주체가 없음 — P10 엔트로피 관리가 "범위 밖"으로만 분류되어 문서화(운영 사이클 테이블)와 감지(doc-freshness)만 있고 실행 루프가 부재
+- **해결**: harness-feedback과 동일한 배포 모델(--add-dir opt-in)의 컴패니언 스킬 구현
+  - 루틴: 주간 W1~W4 (doc:check / QUALITY_SCORE 재측정 — 카테고리별 측정 방법 명세 / 코드 엔트로피 스캔 — 잔존 산출물·300줄 초과·금지 패턴·미사용 의존성 / harness:check) · 격주 B1~B2 (TECH_DEBT 검토 / 승격 큐 횟수 ≥ 2 승격 제안) · 월간 M1~M3 (문서-실구조 일치 / passes 재검증 — 회귀 시 false 되돌림 제안 + TDD 위임 / 종합 판정)
+  - 루틴 판별: docs/CLEANUP_LOG.md(스킬이 생성·행 추가) 경과 시간 기반 자동 + 사용자 명시 우선
+  - 원칙: 삭제 우선, 모든 적용은 승인 후, scope 제한(소스 동작 변경 금지 — TECH_DEBT/feature_list 항목화로 TDD 사이클 위임), 기록 보존, 적용 후 validate 확인
+  - scaffold 연계: Phase 4 운용 스킬 안내, CLAUDE.md 운영 사이클 안내 1줄, M-1.3.0-to-1.4.0 ([custom] 멱등 추가)

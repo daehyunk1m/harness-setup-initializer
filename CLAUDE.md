@@ -24,7 +24,8 @@
 | `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
 | `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
 | `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
-| `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (스텁) | 향후 |
+| `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
+| `companion-skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
 | `references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
 | `references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |

@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-11 (1.3.0 — 프리셋 확장 + domain 템플릿 + 추론 정책)
+> 마지막 업데이트: 2026-06-11 (1.4.0 — harness-cleanup 컴패니언 스킬)
 
 ---
 
@@ -55,6 +55,9 @@
 │   └── rules/                    # .claude/rules/ 템플릿
 │       ├── session-routine.md    # TDD 오케스트레이션 플로우
 │       └── coding-standards.md   # 아키텍처/네이밍 규칙
+├── companion-skills/             # 운용 컴패니언 스킬 (--add-dir opt-in)
+│   ├── harness-feedback/         # 마찰 로그 분석 → GitHub Issue
+│   └── harness-cleanup/          # 엔트로피 정리 — 운영 사이클(주간/격주/월간) 실행 주체
 └── references/                   # 배경 문서 (스킬 실행 시 자동 로드 안 됨)
     ├── harness-guide.md          # Anthropic + OpenAI 통합 가이드
     ├── harness-checklist.md      # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
@@ -103,6 +106,8 @@
 | detection.exclude 필드 | 프리셋 detection에 선택 필드 `exclude` — 나열된 패키지가 존재하면 후보 제외 | required가 범용 패키지(react, vite)인 프리셋이 더 구체적인 스택(next, react-router)을 오매칭하는 것을 방지. react-vite/express-api 프리셋 추가의 전제 조건 |
 | domain-based 검증 템플릿 | 동적 생성 → `templates/structural-test-domain.ts` 템플릿 채택. 도메인 목록은 실행 시점에 srcRoot 하위 디렉토리에서 발견 | 템플릿이 있어야 § 12.6 자동 감지가 동작 (해시 추적). 도메인 목록을 하드코딩하지 않아 도메인 추가/삭제 시 스크립트 수정 불필요. 공유 모듈은 프로필 `sharedDirs`(기본 ["shared"])로 치환. custom 유형만 동적 생성으로 남김 (자동 감지 제외) |
 | feature_list 추론 정책 | 라우트 기반(1순위) → 기능 모듈 기반(2순위) → 빈 배열(폴백). 상한 15개, 초과분은 보고에 명시 | 추론 기준이 모호하면 스캐폴딩마다 결과가 달라진다. 라우트가 사용자 관점 기능 단위와 가장 가깝고, 침묵 누락 금지 원칙(no silent caps) 적용 |
+| Cleanup 스킬 배치 | `companion-skills/harness-cleanup/` (별도 저장소 아님) | harness-feedback과 동일한 배포/호출 모델 (--add-dir opt-in). "별도 스킬" 결정(P10 범위 분리)은 유지하되 저장소는 단일화 — 설치·버전 관리 일원화 |
+| Cleanup 스킬 scope | 하네스 문서·상태 필드·잔존 산출물만 직접 수정. 소스 코드 동작 변경은 TECH_DEBT/feature_list 항목화로 TDD 사이클에 위임 | 정리 루프가 코드를 직접 고치면 TDD 파이프라인(테스트 우선)을 우회하게 된다. oh-my-claudecode ai-slop-cleaner의 "삭제 우선 + scope 제한" 패턴 채용. 루틴 판별은 docs/CLEANUP_LOG.md 경과 시간 기반 |
 
 ---
 
@@ -220,6 +225,14 @@
 - **마이그레이션**: M-1.2.0-to-1.3.0 ([profile] sharedDirs, domain-based 한정)
 - **TODO 정리**: TODO-50(harness-feedback)은 Session 14에 이미 구현 완료 — 상태 누락 정정. TODO-51(기록 체계), TODO-54(스키마 정합성), TODO-70(멱등성 — haja 1.2.0 업그레이드로 검증) 종결
 
+### 1.4.0 (harness-cleanup 컴패니언 스킬)
+- **harness-cleanup 신설** (`companion-skills/harness-cleanup/SKILL.md`): 운영 사이클(체크리스트 § 6.3)의 실행 주체 — P10 엔트로피 관리가 "범위 밖"에서 "컴패니언 스킬로 커버"로 전환
+  - 루틴: 주간(doc:check, QUALITY_SCORE 재측정, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 점검 — 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증, 종합 판정)
+  - 루틴 판별: `docs/CLEANUP_LOG.md` 경과 시간 기반 자동 + 사용자 명시 우선
+  - 원칙: 삭제 우선·승인 필수·scope 제한(소스 동작 변경은 TDD 위임)·기록 보존
+- **scaffold 연계**: Phase 4 운용 스킬 안내에 추가, CLAUDE.md 운영 사이클에 안내 1줄, M-1.3.0-to-1.4.0 ([custom] 안내 추가, 멱등)
+- **정정**: 저장소 CLAUDE.md의 harness-feedback "(스텁)" 표기 → 구현됨
+
 ---
 
 ## 5. 향후 확장 가능 항목
@@ -228,26 +241,21 @@
 |------|------|---------|
 | ~~업그레이드 시스템 구현~~ | ~~SKILL.md § 14 추가~~ — **구현 완료** (TODO-44) | ~~높음~~ |
 | Initializer 그룹 subagent | 하네스 셋업 내부의 subagent 분리 (Scanner/Scaffolder) | 낮음 |
-| Cleanup 스킬 (별도 프로젝트) | 엔트로피 관리 — 주기적 정리 루프 | 보통 |
-| 추가 프리셋 | react-vite.json, express-api.json 등 | 보통 |
+| ~~Cleanup 스킬~~ | ~~엔트로피 관리 — 주기적 정리 루프~~ — **구현 완료** (1.4.0, companion-skills/harness-cleanup) | ~~보통~~ |
+| ~~추가 프리셋~~ | ~~react-vite.json, express-api.json~~ — **구현 완료** (1.3.0) | ~~보통~~ |
+| 외부 통합 | 멀티모델 합성 자문, superpowers 옵트인 (Session 19 PRD 초안) | 보통 |
 
 ---
 
 ## 6. 다음 단계
 
-> 2026-04-10 v5.2 후 업데이트. 상세: `.tracking/TODO.md`
+> 2026-06-11 1.4.0 후 업데이트. 상세: `.tracking/TODO.md`, `.tracking/HANDOFF.md` § 5.2
 
-1. **2-스킬 플로우 실전 테스트** — `/harness-setup` → `.harness-profile.json` → `/harness-scaffold` 전체 플로우 검증 (TODO-53)
-2. **`.harness-profile.json` 스키마 정합성** — 두 스킬 간 계약 문서화 (TODO-54)
-3. **실전 테스트** — React Router + FSD 프로젝트에서 첫 실전 테스트. 관찰 포인트 7개 정의 (TODO-51)
-4. **react-router-fsd versionConstraints** — v6 이하 오매칭 방지 (TODO-45)
-5. **추가 프리셋** — react-vite.json (TODO-48), express-api.json (TODO-49)
-6. **structural-test 동적 생성** — domain-based/custom 유형 알고리즘 구체화 (TODO-46)
-7. **feature_list.json 정책** — 빈 배열 vs 라우트 추출 명시 (TODO-47)
-8. **에이전트 템플릿 실전 조정** — subagent 프롬프트 최적화
-9. **첫 마이그레이션 작성** — § 14.4 레지스트리에 M-3.3-to-{next} 추가
-10. **컴패니언 스킬 구현** — harness-feedback (TODO-50)
-11. **Cleanup 스킬 (별도 프로젝트)** — P10 엔트로피 관리 자동화
+1. **신규 셋업 경로 실전 테스트** (TODO-53) — 신규 프리셋 매칭(exclude 동작), eslintAssist 옵트인/마커 블록, feature_list 라우트 추론, harness-cleanup 첫 실행
+2. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화 (실전 피드백 기반)
+3. **eslintAssist legacy JS 형식 전략** (TODO-67) — 폴백 발동률 관찰 후 결정
+4. **harness-check 검사 항목 확장 검토** (TODO-68) — 체크리스트 §6 엔트로피 항목 (harness-cleanup M1과 역할 중복 주의 — 스크립트는 기계 검사, 스킬은 판단 검사)
+5. **외부 통합 PRD 구체화** — 멀티모델 합성 자문, superpowers 옵트인 (Session 19 초안)
 
 ---
 

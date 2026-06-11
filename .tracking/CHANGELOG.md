@@ -5,6 +5,24 @@
 
 ---
 
+## [1.4.0] — 2026-06-11 (harness-cleanup 컴패니언 스킬)
+
+> 체크리스트 § 6.3 운영 사이클의 실행 주체 구현 (TODO-71). P10 엔트로피 관리: "범위 밖" → "컴패니언 스킬로 커버". MINOR (생성 CLAUDE.md/보고에 안내 추가 + 새 마이그레이션)
+
+### 추가 (Added) — Session 23 (2026-06-11)
+- companion-skills/harness-cleanup/SKILL.md: 엔트로피 정리 스킬 신설 — 주간(doc:check, QUALITY_SCORE 재측정 — 카테고리별 측정 방법 명세, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증 — 회귀 시 되돌림 제안 + TDD 위임, 종합 판정). docs/CLEANUP_LOG.md 경과 시간 기반 루틴 판별. 원칙: 삭제 우선·승인 필수·scope 제한(소스 동작 변경 금지)·기록 보존
+- harness-scaffold/SKILL.md § 10.3: M-1.3.0-to-1.4.0 — 기존 하네스 CLAUDE.md 운영 사이클에 cleanup 안내 1줄 ([custom], 멱등)
+
+### 수정 (Changed) — Session 23 (2026-06-11)
+- harness-scaffold/SKILL.md § 5.1.1: 생성 CLAUDE.md 운영 사이클 테이블 아래 harness-cleanup 안내 1줄
+- harness-scaffold/SKILL.md § 7: Phase 4 "운용 스킬 (선택)" 안내에 harness-cleanup 추가
+- 프로필 스키마 version "1.3.0" → "1.4.0" (두 SKILL.md 동기)
+- CLAUDE.md(저장소): harness-feedback "(스텁)" 표기 정정(구현됨) + harness-cleanup 파일 맵 행 추가
+- SKILL.md § 10: 향후 확장 포인트의 Cleanup/피드백 스킬 구현 완료 표시
+- harness-scaffold/SKILL.md § 5.7: doc-freshness 검사 대상 명확화 (교차 검증 발견) — "docs/ 하위 모든 .md" 문구와 정적 치환 예시의 모순 해소. 정적 목록으로 확정하고 이벤트 로그(HARNESS_FRICTION, CLEANUP_LOG)는 제외 (추가형 로그는 staleness 무의미)
+
+---
+
 ## [1.3.0] — 2026-06-11 (프리셋 확장 + domain 템플릿 + 추론 정책)
 
 > 잔여 TODO 일괄 처리 (TODO-45~49 구현, TODO-50/51/54/70 종결). MINOR (새 프리셋 2종, 새 detection 필드, 새 템플릿, 새 플레이스홀더, 새 프로필 필드)
