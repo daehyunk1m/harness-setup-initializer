@@ -11,7 +11,7 @@ semver는 "Public API를 선언하라"고 요구한다. 이 스킬의 Public API
 
 | 계약 | 파일 | 소비자 | 안정성 |
 |------|------|--------|--------|
-| **프로필 스키마** | `.harness-profile.json` | harness-scaffold | 높음 (24개 플레이스홀더의 원천) |
+| **프로필 스키마** | `.harness-profile.json` | harness-scaffold | 높음 (25개 플레이스홀더의 원천) |
 | **매니페스트 스키마** | `.harness-manifest.json` | 업그레이드 시스템 | 높음 (마이그레이션 키) |
 | **프리셋 스키마** | `presets/*.json` | 프리셋 매칭 로직 | 보통 |
 | **생성 파일 구조** | 템플릿 → 생성된 19개 파일 | AI 에이전트, 사용자 | 보통 |
@@ -34,7 +34,7 @@ Public API에 포함되지 **않는** 것:
 
 | 변경 | 예시 | 왜 MAJOR인가 |
 |------|------|-------------|
-| 프로필 필수 필드 제거/이름 변경 | `srcRoot` → `sourceRoot` | 24개 플레이스홀더 중 하나의 원천이 사라져 scaffold가 실패한다 |
+| 프로필 필수 필드 제거/이름 변경 | `srcRoot` → `sourceRoot` | 25개 플레이스홀더 중 하나의 원천이 사라져 scaffold가 실패한다 |
 | 프로필 필드 타입 변경 | `pathAlias: string` → `object` | 템플릿 치환 로직이 깨진다 |
 | 플레이스홀더 제거 | `{{VALIDATE_COMMAND}}` 삭제 | session-routine.md에서 검증 명령이 사라진다 |
 | 파일 카테고리 변경 | `CLAUDE.md`를 custom → managed로 | 업그레이드 시 사용자 편집이 덮어써진다 |

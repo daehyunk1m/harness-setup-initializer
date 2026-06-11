@@ -1,0 +1,71 @@
+{
+  "name": "react-vite",
+  "displayName": "React + Vite (SPA)",
+  "description": "React + Vite + TypeScript 단일 페이지 앱 — 레이어 기반 아키텍처",
+
+  "detection": {
+    "required": ["react", "vite"],
+    "optional": ["react-dom", "typescript", "vitest", "zustand", "@tanstack/react-query"],
+    "exclude": ["next", "react-router", "@remix-run/react"]
+  },
+
+  "architecture": {
+    "type": "layer-based",
+    "description": "기능별 레이어 분리 — 각 레이어는 하위(왼쪽) 레이어만 import 가능",
+    "layers": {
+      "order": ["types", "config", "lib", "services", "hooks", "components", "pages"],
+      "rules": {
+        "types":      { "allowedImports": [] },
+        "config":     { "allowedImports": ["types"] },
+        "lib":        { "allowedImports": ["types", "config"] },
+        "services":   { "allowedImports": ["types", "config", "lib"] },
+        "hooks":      { "allowedImports": ["types", "config", "lib", "services"] },
+        "components": { "allowedImports": ["types", "config", "lib", "hooks"] },
+        "pages":      { "allowedImports": ["types", "config", "lib", "services", "hooks", "components"] }
+      },
+      "descriptions": {
+        "types":      "공유 타입, enum, interface",
+        "config":     "환경변수, 상수, 설정",
+        "lib":        "순수 유틸 함수 (외부 의존 없음)",
+        "services":   "API 통신, 비즈니스 로직",
+        "hooks":      "React 커스텀 훅 (상태/사이드이펙트)",
+        "components": "UI 컴포넌트 (ui/ + features/)",
+        "pages":      "라우트별 페이지 조합"
+      }
+    },
+    "extraRules": [
+      "components/ui/는 services를 직접 import하지 않음 (hooks를 통해서만)",
+      "pages/는 비즈니스 로직을 직접 포함하지 않음",
+      "앱 진입점(main.tsx, App.tsx)은 src/ 루트에 위치 — 레이어 검사 대상 아님"
+    ]
+  },
+
+  "naming": {
+    "components": "PascalCase (예: PatientCard.tsx)",
+    "hooks":      "camelCase + use 접두사 (예: usePatientList.ts)",
+    "services":   "camelCase (예: patientService.ts)",
+    "types":      "PascalCase + Type/Props/State 접미사",
+    "tests":      "원본명.test.ts(x)"
+  },
+
+  "scripts": {
+    "lint:arch":  "npx tsx scripts/structural-test.ts",
+    "doc:check":  "npx tsx scripts/doc-freshness.ts"
+  },
+
+  "devServer": {
+    "command": "npm run dev",
+    "port": 5173,
+    "readyCheck": "curl -s -o /dev/null -w '%{http_code}' http://localhost:5173"
+  },
+
+  "pathAlias": "@/",
+  "srcRoot": "src/",
+
+  "testFramework": {
+    "unit": "vitest",
+    "e2e": "playwright"
+  },
+
+  "docFreshnessDays": 14
+}

@@ -5,6 +5,29 @@
 
 ---
 
+## [1.3.0] — 2026-06-11 (프리셋 확장 + domain 템플릿 + 추론 정책)
+
+> 잔여 TODO 일괄 처리 (TODO-45~49 구현, TODO-50/51/54/70 종결). MINOR (새 프리셋 2종, 새 detection 필드, 새 템플릿, 새 플레이스홀더, 새 프로필 필드)
+
+### 추가 (Added) — Session 22 (2026-06-11)
+- presets/react-vite.json: React + Vite SPA 프리셋 — layer-based 7레이어, devServer 5173 (TODO-48)
+- presets/express-api.json: Express + TypeScript API 프리셋 — layer-based 8레이어 (routes→controllers→services→models 흐름), readyCheck 연결 성공 정규화 형태, testFramework vitest+supertest (TODO-49)
+- SKILL.md § 6: 프리셋 detection에 `exclude` 선택 필드 신설 — 나열 패키지 존재 시 후보 제외 (범용 required의 오매칭 방지). 매칭 로직 3.3 단계 + Step 3.2 + § 9 가이드 4.5 반영
+- templates/structural-test-domain.ts: domain-based 검증 템플릿 신설 — 도메인 간 직접 import 금지 + 공유 모듈→도메인 역방향 금지, 도메인 목록 실행 시점 발견. 픽스처 기능 테스트 통과 (TODO-46)
+- 새 플레이스홀더 `{{SHARED_DIRS}}` (24 → 25개) + 프로필 선택 필드 `sharedDirs` (domain-based 전용, 기본 ["shared"]) — § 4.2 질문/§ 4.4 기본값/스키마/manifest 저장 필드 연결
+- harness-scaffold/SKILL.md § 5.4: custom 유형 동적 생성 4단계 알고리즘 명문화 (layers.rules 재사용 → extraArchitectureRules 기계화 → 주석 나열 → 최소 스크립트 폴백, § 12.6 자동 감지 제외 명시) (TODO-46)
+- harness-scaffold/SKILL.md § 5.3: feature_list 기존 프로젝트 3단계 추론 정책 — 라우트 기반 → 기능 모듈 기반 → 빈 배열 폴백, 상한 15개 + 초과분 보고, 셋업 직후 사용자 검토 안내 (TODO-47)
+- harness-scaffold/SKILL.md § 10.3: M-1.2.0-to-1.3.0 마이그레이션 ([profile] sharedDirs, domain-based 한정)
+
+### 수정 (Changed) — Session 22 (2026-06-11)
+- presets/react-router-fsd.json: versionConstraints `react-router >= 7.0.0` 추가 — v6 이하 오매칭 방지 (TODO-45)
+- harness-scaffold/SKILL.md § 5.6: readyCheck 파싱 규칙에 API 정규화 형태 허용 명문화 (`curl ... && echo 200 || echo 000`)
+- 프로필 스키마 version "1.2.0" → "1.3.0" (두 SKILL.md 동기)
+- 플레이스홀더 카운트 24 → 25 (SKILL.md § 12.1, versioning-policy.md)
+- TODO 정리: TODO-50(harness-feedback)은 Session 14 구현 완료 — 상태 누락 정정. TODO-51(기록 체계 — TODO-66 패턴을 표준 프로세스로 확정), TODO-54(스키마 정합성 — 3회 연속 기계 검증 IDENTICAL), TODO-70(멱등성 — haja 1.2.0 업그레이드 최종 상태 검증) 종결
+
+---
+
 ## [1.2.0] — 2026-06-10 (비대화형 검증 명령 보장)
 
 > 실전 테스트(haja-web-fe 업그레이드, TODO-66)에서 발견된 watch 모드 영구 대기 문제 수정. MINOR (새 조합 규칙 + 조건부 test:run 키 + 새 마이그레이션)

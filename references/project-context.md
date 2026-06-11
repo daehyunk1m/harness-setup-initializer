@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-10 (1.2.0 — 비대화형 검증 명령 보장)
+> 마지막 업데이트: 2026-06-11 (1.3.0 — 프리셋 확장 + domain 템플릿 + 추론 정책)
 
 ---
 
@@ -36,10 +36,13 @@
 ├── install.sh                    # 심볼릭 링크 생성 스크립트
 ├── presets/                      # 스택별 프리셋
 │   ├── react-next.json           # React + Next.js (App Router) + 레이어 기반
-│   └── react-router-fsd.json     # React Router v7 + FSD
+│   ├── react-router-fsd.json     # React Router v7 + FSD
+│   ├── react-vite.json           # React + Vite (SPA) + 레이어 기반
+│   └── express-api.json          # Express + TypeScript API + 레이어 기반
 ├── templates/                    # 생성 파일 템플릿
 │   ├── structural-test-layer.ts  # 레이어 기반 아키텍처 검증
 │   ├── structural-test-fsd.ts    # FSD 아키텍처 검증
+│   ├── structural-test-domain.ts # 도메인 기반 아키텍처 검증
 │   ├── harness-check.sh          # 하네스 자가진단 (체크리스트 §8 구현)
 │   ├── agents/                   # TDD subagent 정의 템플릿
 │   │   ├── architect.md
@@ -97,6 +100,9 @@
 | 자가진단 스크립트 언어 | bash (`templates/harness-check.sh`, `npm run harness:check`) | 진단 도구는 진단 대상(tsx/node_modules)에 의존하면 안 됨 — 깨진 상태에서도 구조 항목은 보고 가능. init.sh와 일관. 구조 항목(①②③)과 품질 항목(④⑤)을 구분 보고 |
 | ESLint 보조 규칙 | Q&A 옵트인 → 마커 블록 외과 수정, 실패 시 권고 스니펫 폴백 | "기존 설정 비수정" 원칙의 예외는 사용자 명시 동의 기반으로만 허용 (package.json scripts와 동급). structural-test가 주 검사, ESLint는 에디터 실시간 보조. tsconfig는 검사만(harness-check ⑦) |
 | 비대화형 검증 명령 원칙 | 프로필 `scripts.test`와 validate 구성 명령은 모두 단발 실행이어야 한다. watch 기본 러너는 `test:run` 키 추가로 우회 (기존 `test` 키는 비수정) | 실전 테스트(haja-web-fe)에서 `vitest`(watch 기본)가 validate에 조합되어 검증 루프가 53분 영구 대기. 에이전트 검증 루프 전체가 validate에 의존하므로 치명적 |
+| detection.exclude 필드 | 프리셋 detection에 선택 필드 `exclude` — 나열된 패키지가 존재하면 후보 제외 | required가 범용 패키지(react, vite)인 프리셋이 더 구체적인 스택(next, react-router)을 오매칭하는 것을 방지. react-vite/express-api 프리셋 추가의 전제 조건 |
+| domain-based 검증 템플릿 | 동적 생성 → `templates/structural-test-domain.ts` 템플릿 채택. 도메인 목록은 실행 시점에 srcRoot 하위 디렉토리에서 발견 | 템플릿이 있어야 § 12.6 자동 감지가 동작 (해시 추적). 도메인 목록을 하드코딩하지 않아 도메인 추가/삭제 시 스크립트 수정 불필요. 공유 모듈은 프로필 `sharedDirs`(기본 ["shared"])로 치환. custom 유형만 동적 생성으로 남김 (자동 감지 제외) |
+| feature_list 추론 정책 | 라우트 기반(1순위) → 기능 모듈 기반(2순위) → 빈 배열(폴백). 상한 15개, 초과분은 보고에 명시 | 추론 기준이 모호하면 스캐폴딩마다 결과가 달라진다. 라우트가 사용자 관점 기능 단위와 가장 가깝고, 침묵 누락 금지 원칙(no silent caps) 적용 |
 
 ---
 
@@ -203,6 +209,16 @@
 - **실전 테스트 결과 (haja-web-fe, M-1.0.0-to-1.1.0 업그레이드)**: 자동 감지·마이그레이션·단계 판정 모두 사양대로 동작. AGENTS.md 60줄, manifest 22개 파일 추적. 자가진단이 프로젝트 품질 문제 2건(레이어 위반, 잔존 테스트 산출물)을 구조 문제와 정확히 구분 — "MVH 가동" 판정
 - **발견된 스킬 갭**: `"test": "vitest"`(watch 기본)가 validate에 그대로 조합 → 비대화형 검증 루프 53분 영구 대기 (마찰 로그 경유 발견)
 - **수정**: 프로필 `scripts.test` 비대화형 원칙 (SKILL.md Step 1.2 감지 + § 4.4 + 필드 규칙), scaffold § 5.5에 조건부 `test:run` 키 추가 + "validate 구성 명령은 모두 비대화형" 규칙, M-1.1.0-to-1.2.0 마이그레이션 등록 (기존 하네스의 validate 재조합 + profile 갱신)
+
+### 1.3.0 (프리셋 확장 + domain 템플릿 + 추론 정책)
+- **프리셋 2종 추가**: `react-vite.json`(React+Vite SPA, layer-based 7레이어), `express-api.json`(Express API, layer-based 8레이어 — routes→controllers→services→models 흐름, readyCheck 연결 성공 정규화)
+- **detection.exclude 필드**: 프리셋 스키마에 선택 필드 추가 — 나열 패키지 존재 시 후보 제외 (범용 required의 오매칭 방지). 매칭 로직 3.3 단계 + 작성 가이드 갱신
+- **react-router-fsd versionConstraints**: `react-router >= 7.0.0` (v6 이하 오매칭 방지, TODO-45)
+- **domain-based 검증 템플릿**: `templates/structural-test-domain.ts` 신설 — 도메인 간 직접 import 금지 + 공유→도메인 역방향 금지, 도메인 목록 실행 시점 발견. 새 플레이스홀더 `{{SHARED_DIRS}}`(25번째) + 프로필 선택 필드 `sharedDirs` (TODO-46)
+- **custom 동적 생성 알고리즘 구체화**: layers.rules 재사용 → extraArchitectureRules 기계화 → 최소 스크립트 폴백 4단계 (TODO-46)
+- **feature_list 추론 정책**: 라우트 기반 → 기능 모듈 기반 → 빈 배열 3단계 + 상한 15개 + 보고 검토 안내 (TODO-47)
+- **마이그레이션**: M-1.2.0-to-1.3.0 ([profile] sharedDirs, domain-based 한정)
+- **TODO 정리**: TODO-50(harness-feedback)은 Session 14에 이미 구현 완료 — 상태 누락 정정. TODO-51(기록 체계), TODO-54(스키마 정합성), TODO-70(멱등성 — haja 1.2.0 업그레이드로 검증) 종결
 
 ---
 

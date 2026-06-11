@@ -287,46 +287,50 @@
 > SKILL.md, 템플릿, 프리셋의 전수 분석 결과 발견된 향후 개선 항목. 실전 테스트 전 준비도 평가에서 도출.
 
 ### TODO-45: react-router-fsd 프리셋 versionConstraints 추가
-- **상태**: [ ] 미완료
+- **상태**: [x] 완료 (2026-06-11, 1.3.0)
 - **파일**: `presets/react-router-fsd.json`
 - **문제**: `react-next.json`에는 `"next >= 13.0.0"` versionConstraints가 있지만, react-router-fsd에는 없음. React Router v6 이하에서도 프리셋이 매칭되어 v7 전용 패턴(loader/action)이 잘못 적용될 수 있음
 - **해결**: `"versionConstraints": { "react-router": ">=7.0.0" }` 추가
 
 ### TODO-46: domain-based / custom structural-test 동적 생성 알고리즘 구체화
-- **상태**: [ ] 미완료
-- **파일**: `SKILL.md` § 5.4
+- **상태**: [x] 완료 (2026-06-11, 1.3.0)
+- **파일**: `templates/structural-test-domain.ts` (신규), `harness-scaffold/SKILL.md` § 5.4, `SKILL.md` § 12.6.1
 - **문제**: layer-based(`structural-test-layer.ts`)와 FSD(`structural-test-fsd.ts`)는 전용 템플릿이 있지만, domain-based와 custom은 "동적 생성"이라고만 명시되어 있어 구체적 생성 로직이 불명확
-- **해결**: domain-based용 검사 규칙(도메인 간 직접 import 차단 등) 정의, custom용 최소 스켈레톤 제공 또는 명시적 스킵 규칙 추가
+- **해결**: domain-based는 전용 템플릿 신설 — 도메인 간 직접 import 금지 + 공유 모듈→도메인 역방향 금지, 도메인 목록은 실행 시점 발견(하드코딩 없음), `{{SHARED_DIRS}}` 플레이스홀더 + 프로필 `sharedDirs` 필드. 템플릿화로 § 12.6 자동 감지 대상에 편입. custom은 4단계 동적 생성 알고리즘 명문화 (layers.rules 재사용 → extraArchitectureRules 기계화 → 주석 나열 → 최소 스크립트 폴백, 자동 감지 제외). 픽스처 기능 테스트 통과 (위반 감지 exit 1 / 통과 exit 0)
 
 ### TODO-47: feature_list.json 기존 프로젝트 추론 알고리즘 구체화
-- **상태**: [ ] 미완료
-- **파일**: `SKILL.md` § 5.3
+- **상태**: [x] 완료 (2026-06-11, 1.3.0)
+- **파일**: `harness-scaffold/SKILL.md` § 5.3
 - **문제**: "기존 프로젝트는 소스 코드 분석하여 추론"이라고만 되어 있으나 구체적 추론 알고리즘이 없음. 빈 배열 `[]`로 생성될 가능성 높음
-- **해결**: 라우트 파일 기반 페이지 목록 추출, 또는 "빈 배열 생성 + 사용자에게 작성 안내" 중 하나로 명시적 정책 결정
+- **해결**: 3단계 추론 정책 명문화 — ① 라우트 기반 (Next.js app/pages, React Router 설정, Express 라우트 등록) ② 기능 모듈 기반 (features/services/controllers) ③ 빈 배열 폴백 + 보고 안내. 상한 15개 + 초과분 보고 명시(침묵 누락 금지), priority 기준, 셋업 직후 사용자 검토 안내
 
 ### TODO-48: 추가 프리셋 — react-vite.json
-- **상태**: [ ] 미완료
-- **파일**: `presets/react-vite.json` (신규)
+- **상태**: [x] 완료 (2026-06-11, 1.3.0)
+- **파일**: `presets/react-vite.json` (신규), `SKILL.md` § 6 (detection.exclude 필드)
 - **문제**: Vite + React 조합이 프리셋 없이 전부 문답 폴백. 의존성 규칙이 "규칙 없음"으로 생성됨
-- **해결**: react-next.json 기반으로 Vite 특화 프리셋 작성 (detection: vite + react, devServer/scripts 차이점 반영)
+- **해결**: layer-based 7레이어 (react-next에서 app 제외), devServer 5173. required ["react","vite"]가 범용 패키지라서 **detection.exclude 필드를 프리셋 스키마에 신설** — next/react-router/@remix-run 존재 시 후보 제외 (오매칭 방지)
 
 ### TODO-49: 추가 프리셋 — express-api.json
-- **상태**: [ ] 미완료
-- **파일**: `presets/express-api.json` (신규)
+- **상태**: [x] 완료 (2026-06-11, 1.3.0)
+- **파일**: `presets/express-api.json` (신규), `harness-scaffold/SKILL.md` § 5.6 (readyCheck 정규화)
 - **문제**: 백엔드 API 프로젝트는 프론트엔드 중심 질문 풀(컴포넌트, 라우팅 등)이 적합하지 않음. 프리셋 없으면 소크라테스 문답에서 불필요한 질문이 나올 수 있음
-- **해결**: Express/Fastify 백엔드 프리셋 작성 (routes/, controllers/, middleware/ 등 서버사이드 구조, 테스트 패턴)
+- **해결**: layer-based 8레이어 (types→config→lib→models→services→middlewares→controllers→routes), exclude ["next","react"]. API 루트가 404일 수 있어 readyCheck를 연결 성공 정규화 형태(`curl ... && echo 200 || echo 000`)로 작성 — § 5.6 파싱 규칙에 허용 형태로 명문화. testFramework: vitest + supertest
 
 ### TODO-50: 컴패니언 스킬 harness-feedback 구현
-- **상태**: [ ] 미완료
+- **상태**: [x] 완료 (Session 14, 2026-04-09 — 상태 누락을 2026-06-11에 정정)
 - **파일**: `companion-skills/harness-feedback/SKILL.md`
 - **문제**: Phase 4 보고에서 피드백 스킬 안내가 나오지만 실제로는 스텁이라 동작하지 않음
-- **해결**: HARNESS_FRICTION.md 파싱 → 패턴 분류 → GitHub Issue 생성 로직 구현
+- **해결**: Session 14에서 실제 구현 완료 (159줄 — 마찰 로그 파싱 → 환경 수집 → 패턴 분석 → Issue 초안 → 확인 → gh issue create). CHANGELOG v5.2 "이슈 보고 프로세스" 항목 참조. 이 TODO의 체크 표시가 누락되어 있었음
 
 ### TODO-51: 실전 테스트 결과 기록 체계
-- **상태**: [ ] 미완료
-- **파일**: `.tracking/` 또는 `references/`
+- **상태**: [x] 완료 (2026-06-11 — TODO-66 선례로 프로세스 확립)
+- **파일**: `.tracking/TODO.md` (이 프로세스 정의), `.tracking/HANDOFF.md` (관찰 포인트 사전 정의)
 - **문제**: 실전 테스트에서 발견되는 문제를 체계적으로 기록하고 개선에 반영하는 프로세스가 없음
-- **해결**: 관찰 포인트 7개(프리셋 매칭, 아키텍처 감지, 문답 품질, 생성 파일 품질, structural-test 실행, Phase 3 검증, 마찰 로깅) 기준으로 결과 기록 템플릿 작성, 발견된 문제를 TODO로 승격하는 프로세스 정립
+- **해결**: TODO-66에서 확립한 패턴을 표준 프로세스로 확정 —
+  1. **사전**: 테스트용 TODO에 관찰 포인트를 표로 정의 (HANDOFF 우선순위 목록에도 반영)
+  2. **기록**: 테스트 완료 시 해당 TODO에 "결과" 섹션을 추가 — 관찰 포인트별 ✅/⚠️/🐛 판정 + 근거
+  3. **승격**: 발견된 스킬 갭(🐛)은 즉시 새 TODO로 승격하고 수정 버전을 명시, 미검증 항목(⚠️)은 새 TODO로 이월
+  4. 대상 프로젝트의 마찰 로그(HARNESS_FRICTION.md)가 1차 수집 채널, TODO 결과 기록이 스킬 저장소의 영구 기록
 
 ---
 
@@ -352,10 +356,10 @@
 - **해결**: `/harness-setup` → `.harness-profile.json` 생성 확인 → `/harness-scaffold` → 18개 파일 생성 확인. 특히 프로필 JSON 스키마 정합성, scaffold 스킬의 프로필 읽기, 누락 필드 기본값 처리 검증
 
 ### TODO-54: .harness-profile.json 스키마 문서화
-- **상태**: [ ] 미완료
-- **파일**: `SKILL.md` § 5, `harness-scaffold/SKILL.md`
+- **상태**: [x] 완료 (2026-06-11)
+- **파일**: `SKILL.md` § 5, `harness-scaffold/SKILL.md` § 4
 - **문제**: 두 스킬 간 계약인 `.harness-profile.json`의 정확한 스키마(필수/선택 필드, 타입, 기본값)가 양쪽 스킬에서 일관되게 문서화되어 있는지 확인 필요
-- **해결**: 프로필 출력 스키마를 SKILL.md에 정의하고, harness-scaffold/SKILL.md에서 동일 스키마를 참조하도록 정합성 확보
+- **해결**: 양쪽에 동일 텍스트로 스키마 문서화 (필드 규칙/필드 참조 규칙 테이블 포함). 1.1.0~1.3.0 릴리스마다 JSON 블록 diff 기계 검증(python difflib)을 릴리스 절차로 수행하여 동일성 확인 — 3회 연속 IDENTICAL. 선택 필드(eslintAssist, sharedDirs)의 생략 시 동작도 양쪽에 명시
 
 ---
 
@@ -482,7 +486,11 @@
 - **해결**: ① 분석 단계에서 watch 기본 러너 감지 → 프로필 scripts.test를 `npm run test:run`으로 기록 ② scaffold가 조건부 `test:run` 키 추가 (기존 test 키 비수정) ③ "validate 구성 명령은 모두 비대화형" 조합 규칙 ④ M-1.1.0-to-1.2.0으로 기존 하네스의 validate 재조합 + profile 갱신
 
 ### TODO-70: 업그레이드 멱등성 실전 재검증
-- **상태**: [ ] 미완료
-- **파일**: 실제 프로젝트 (haja-web-fe — 1.1.0 → 1.2.0 업그레이드 시 함께)
+- **상태**: [x] 완료 (2026-06-11, haja-web-fe 1.1.0 → 1.2.0 업그레이드)
+- **파일**: ~/Desktop/side-project/haja-web-fe
 - **문제**: TODO-66에서 멱등성(업그레이드 직후 재실행 → 변경 0건, 중복 섹션 없음)이 검증되지 않음
-- **해결**: M-1.1.0-to-1.2.0 적용 시 관찰 — ① 업그레이드 완료 후 "하네스 업그레이드" 재실행 → 변경 0건 ② AGENTS.md/CLAUDE.md에 중복 섹션 없음 ③ test:run 키 중복 추가 없음. haja의 test 스크립트가 watch 기본(vitest)이므로 M-1.1.0-to-1.2.0의 조건부 가드도 함께 검증됨
+- **결과**: 사용자가 haja에서 1.2.0 업그레이드 + 잔여 작업 수행 완료. 스킬 저장소 세션에서 최종 상태 검증 —
+  - ✅ manifest 1.2.0 (upgradeInProgress: false), files 22개
+  - ✅ `test:run: vitest run` 추가, validate가 `yarn test:run` 사용, profile.scripts.test 갱신 (M-1.1.0-to-1.2.0 조건부 가드 동작)
+  - ✅ 중복 섹션 없음 — AGENTS.md "## 명령어" 1개, CLAUDE.md "## 운영 사이클" 1개, TECH_DEBT 승격 큐 1개
+  - ✅ AGENTS.md 60줄 유지

@@ -1,0 +1,74 @@
+{
+  "name": "express-api",
+  "displayName": "Express API (Node.js 백엔드)",
+  "description": "Express + TypeScript REST API 서버 — 레이어 기반 아키텍처",
+
+  "detection": {
+    "required": ["express"],
+    "optional": ["typescript", "zod", "prisma", "@prisma/client", "cors", "helmet", "vitest", "supertest"],
+    "exclude": ["next", "react"]
+  },
+
+  "architecture": {
+    "type": "layer-based",
+    "description": "API 레이어 분리 — 각 레이어는 하위(왼쪽) 레이어만 import 가능. 요청 흐름: routes → controllers → services → models",
+    "layers": {
+      "order": ["types", "config", "lib", "models", "services", "middlewares", "controllers", "routes"],
+      "rules": {
+        "types":       { "allowedImports": [] },
+        "config":      { "allowedImports": ["types"] },
+        "lib":         { "allowedImports": ["types", "config"] },
+        "models":      { "allowedImports": ["types", "config", "lib"] },
+        "services":    { "allowedImports": ["types", "config", "lib", "models"] },
+        "middlewares": { "allowedImports": ["types", "config", "lib", "services"] },
+        "controllers": { "allowedImports": ["types", "config", "lib", "models", "services"] },
+        "routes":      { "allowedImports": ["types", "config", "middlewares", "controllers"] }
+      },
+      "descriptions": {
+        "types":       "공유 타입, DTO, enum, interface",
+        "config":      "환경변수, 상수, DB 연결 설정",
+        "lib":         "순수 유틸 함수 (외부 의존 없음)",
+        "models":      "데이터 모델, ORM 엔티티, 스키마",
+        "services":    "비즈니스 로직, 트랜잭션",
+        "middlewares": "인증, 검증, 에러 핸들링 미들웨어",
+        "controllers": "요청 파싱 → 서비스 호출 → 응답 변환",
+        "routes":      "엔드포인트 등록 — 컨트롤러/미들웨어 연결만"
+      }
+    },
+    "extraRules": [
+      "routes/는 비즈니스 로직을 직접 포함하지 않음 (controllers에 위임)",
+      "controllers/는 DB에 직접 접근하지 않음 (services/models를 통해서만)",
+      "앱 진입점(app.ts, server.ts)은 src/ 루트에 위치 — 레이어 검사 대상 아님"
+    ]
+  },
+
+  "naming": {
+    "controllers": "camelCase + Controller 접미사 (예: userController.ts)",
+    "services":    "camelCase + Service 접미사 (예: userService.ts)",
+    "models":      "camelCase (예: user.ts)",
+    "routes":      "kebab-case + .routes 접미사 (예: user.routes.ts)",
+    "types":       "PascalCase + Type/Dto 접미사",
+    "tests":       "원본명.test.ts"
+  },
+
+  "scripts": {
+    "lint:arch":  "npx tsx scripts/structural-test.ts",
+    "doc:check":  "npx tsx scripts/doc-freshness.ts"
+  },
+
+  "devServer": {
+    "command": "npm run dev",
+    "port": 3000,
+    "readyCheck": "curl -s -o /dev/null http://localhost:3000 && echo 200 || echo 000"
+  },
+
+  "pathAlias": "@/",
+  "srcRoot": "src/",
+
+  "testFramework": {
+    "unit": "vitest",
+    "e2e": "supertest (HTTP 통합 테스트)"
+  },
+
+  "docFreshnessDays": 14
+}

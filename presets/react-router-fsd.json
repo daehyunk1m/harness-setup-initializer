@@ -5,7 +5,10 @@
 
   "detection": {
     "required": ["react-router"],
-    "optional": ["react", "react-dom", "typescript", "@react-router/dev"]
+    "optional": ["react", "react-dom", "typescript", "@react-router/dev"],
+    "versionConstraints": {
+      "react-router": ">=7.0.0"
+    }
   },
 
   "architecture": {
