@@ -5,6 +5,26 @@
 
 ---
 
+## [1.5.0] — 2026-06-12 (superpowers 옵트인 통합)
+
+> PRD 구체화(미결정 이슈 6건 해소 + 실물 검증) 후 M1~M3 구현 (TODO-73). MINOR (새 프로필 선택 필드 + 새 플레이스홀더 + 새 생성 규칙)
+
+### 추가 (Added) — Session 25 (2026-06-12)
+- references/integrations/superpowers-mapping.md: 연계/제외 분류 정본 — superpowers v5.1.0 스킬 14종 전수 (연계 3: brainstorming·systematic-debugging·writing-plans / 선택 1: using-superpowers / 제외 10: TDD·코드리뷰·검증·git·오케스트레이션 = 코어 SoT). 분기 리뷰 갱신 절차 포함
+- 프로필 선택 필드 `integrations.superpowers`: enabled/source/detectedVersion/installPath/linkedSkills — 생략 = 미연계 (eslintAssist 패턴). 두 SKILL.md 스키마 동기 + manifest profile 보존
+- SKILL.md Step 1.6: 외부 통합 감지 — installed_plugins.json `superpowers@*` 키(1순위, version·installPath 추출) + ~/.claude/skills/superpowers* 폴백. 미감지 시 질문 생략 (모르는 도구 비노출)
+- SKILL.md § 4.2: superpowers 연계 옵트인 질문 (감지 시에만, 우선순위 5)
+- harness-scaffold/SKILL.md § 5.16(신설): 렌더링 절차 — ① linkedSkills 실존 검증 (installPath/skills/{name}, 없으면 드롭+경고) ② 매핑 정본 밖 스킬 비렌더링 (제외 필터) ③ AGENTS.md "보조 스킬" 섹션 (문서 맵 앞, ~8줄) ④ session-routine 연계 라인
+- 새 플레이스홀더 `{{INTEGRATION_NOTES}}` (25 → 26개): session-routine.md Plan 모드 통합 끝 — writing-plans 연계 시 1줄, 미연계 시 빈 문자열. **managed 템플릿에 조건부 텍스트를 넣는 정규 방법** (scaffold 임의 삽입은 § 12.6 자동 감지의 재렌더링 해시 비교를 깨뜨림)
+- harness-scaffold/SKILL.md § 6.15: 연계 검증 (옵트인 시 섹션 존재 / 옵트아웃 시 "superpowers" 문자열 부재) — Phase 3 검증 14 → 15항목
+- SKILL.md § 12.3 U1: 업그레이드 시 외부 통합 재감지 — 신규 감지 → 추가 제안, 기존 통합 → linkedSkills 실존 재검증·제거 지원
+
+### 수정 (Changed) — Session 25 (2026-06-12)
+- .tracking/prd-superpowers-integration.md: Draft → Implemented — 미결정 이슈 6건을 결정 기록으로 전환, 스킬명 실물 정정(debugging→systematic-debugging, using-skills→using-superpowers, code-review→requesting/receiving-code-review), F2.2 버전 호환 매트릭스 폐기(F1.7 실존 검증으로 대체 — semver 범위는 스킬 이름 변경을 못 잡음), 초안의 agents/red-green-refactor.md 오참조 정정
+- 프로필 스키마 version "1.4.0" → "1.5.0" (두 SKILL.md 동기). 마이그레이션 등록 불필요 (integrations는 생략이 기본값, session-routine 템플릿 변경은 자동 감지로 전파)
+
+---
+
 ## [1.4.0] — 2026-06-11 (harness-cleanup 컴패니언 스킬)
 
 > 체크리스트 § 6.3 운영 사이클의 실행 주체 구현 (TODO-71). P10 엔트로피 관리: "범위 밖" → "컴패니언 스킬로 커버". MINOR (생성 CLAUDE.md/보고에 안내 추가 + 새 마이그레이션)

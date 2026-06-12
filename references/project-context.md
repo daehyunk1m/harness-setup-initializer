@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-11 (1.4.0 — harness-cleanup 컴패니언 스킬)
+> 마지막 업데이트: 2026-06-12 (1.5.0 — superpowers 옵트인 통합)
 
 ---
 
@@ -63,6 +63,8 @@
     ├── harness-checklist.md      # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
     ├── versioning-policy.md      # semver 버전 관리 정책
     ├── upgrade-system-design.md  # 업그레이드 시스템 설계
+    ├── integrations/             # 외부 패키지 연계 매핑 정본
+    │   └── superpowers-mapping.md
     └── project-context.md        # 이 파일
 ```
 
@@ -108,6 +110,9 @@
 | feature_list 추론 정책 | 라우트 기반(1순위) → 기능 모듈 기반(2순위) → 빈 배열(폴백). 상한 15개, 초과분은 보고에 명시 | 추론 기준이 모호하면 스캐폴딩마다 결과가 달라진다. 라우트가 사용자 관점 기능 단위와 가장 가깝고, 침묵 누락 금지 원칙(no silent caps) 적용 |
 | Cleanup 스킬 배치 | `companion-skills/harness-cleanup/` (별도 저장소 아님) | harness-feedback과 동일한 배포/호출 모델 (--add-dir opt-in). "별도 스킬" 결정(P10 범위 분리)은 유지하되 저장소는 단일화 — 설치·버전 관리 일원화 |
 | Cleanup 스킬 scope | 하네스 문서·상태 필드·잔존 산출물만 직접 수정. 소스 코드 동작 변경은 TECH_DEBT/feature_list 항목화로 TDD 사이클에 위임 | 정리 루프가 코드를 직접 고치면 TDD 파이프라인(테스트 우선)을 우회하게 된다. oh-my-claudecode ai-slop-cleaner의 "삭제 우선 + scope 제한" 패턴 채용. 루틴 판별은 docs/CLEANUP_LOG.md 경과 시간 기반 |
+| 외부 통합 메커니즘 | 프로필 선택 필드 `integrations.<name>` — 감지 시에만 질문(옵트인), 생략 = 미적용, 코어 충돌 영역 제외, 매핑 정본은 references/integrations/ | 코어 자급자족 유지. eslintAssist의 "감지 → 옵트인 → 생략 = 미적용" 패턴 재사용. 규약 문서화는 두 번째 통합 구현 시 일반화 (선례 1개로 규약화 안 함) |
+| superpowers 드리프트 대응 | 버전 호환 매트릭스 대신 **스캐폴딩 시점 스킬 실존 검증** (installPath/skills/{name} 확인 → 드롭+경고) | semver 범위 검사는 스킬 이름 변경을 못 잡는다. 실존 검증이 드리프트를 직접 잡음. detectedVersion은 정보용만 |
+| 통합의 managed 템플릿 처리 | 조건부 텍스트는 scaffold 임의 삽입이 아니라 **템플릿 플레이스홀더**(`{{INTEGRATION_NOTES}}`, 미연계 시 빈 문자열)로 | scaffold가 템플릿 밖 텍스트를 삽입하면 § 12.6 자동 감지(재렌더링 해시 비교)가 깨진다. 재렌더링 재현성 유지 |
 
 ---
 
@@ -225,6 +230,15 @@
 - **마이그레이션**: M-1.2.0-to-1.3.0 ([profile] sharedDirs, domain-based 한정)
 - **TODO 정리**: TODO-50(harness-feedback)은 Session 14에 이미 구현 완료 — 상태 누락 정정. TODO-51(기록 체계), TODO-54(스키마 정합성), TODO-70(멱등성 — haja 1.2.0 업그레이드로 검증) 종결
 
+### 1.5.0 (superpowers 옵트인 통합)
+- **PRD 구체화** (.tracking/prd-superpowers-integration.md): 미결정 이슈 6건 해소 — 감지 경로(installed_plugins.json 1순위 + skills 폴백), 버전 추출(plugin manifest), 매핑 위치(references/integrations/), 스킬명 영어 유지, 삭제 시 안내문 잔류, 규약 일반화 보류. 실물 검증: superpowers v5.1.0, 스킬 14종 전수 (초안의 debugging/using-skills/code-review는 부정확한 이름이었음 — systematic-debugging/using-superpowers/requesting·receiving-code-review로 정정)
+- **프로필 선택 필드 `integrations`**: superpowers — enabled/source/detectedVersion/installPath/linkedSkills. 생략 = 미연계
+- **감지·질문**: SKILL.md Step 1.6 신설 (미감지 시 질문 생략 — 모르는 도구 비노출), § 4.2 옵트인 질문
+- **렌더링**: scaffold § 5.16 신설 — 실존 검증(F1.7, 드롭+경고) → 제외 필터(F1.6, 매핑 정본 밖 비렌더링) → AGENTS.md "보조 스킬" 섹션 + session-routine `{{INTEGRATION_NOTES}}`(26번째 플레이스홀더, 미연계 시 빈 문자열)
+- **매핑 정본**: references/integrations/superpowers-mapping.md — 연계 3(brainstorming, systematic-debugging, writing-plans) + 선택 1(using-superpowers) + 제외 10 (TDD·코드리뷰·검증·git·오케스트레이션 = 코어 SoT)
+- **업그레이드**: U1에 외부 통합 재감지 (신규 감지 시 추가 제안, 기존 통합 제거 지원). 마이그레이션 등록 불필요 (생략이 기본값, 템플릿 변경은 자동 감지)
+- Phase 3 검증 14 → 15항목 (6.15 연계/옵트아웃 양방향 검증)
+
 ### 1.4.0 (harness-cleanup 컴패니언 스킬)
 - **harness-cleanup 신설** (`companion-skills/harness-cleanup/SKILL.md`): 운영 사이클(체크리스트 § 6.3)의 실행 주체 — P10 엔트로피 관리가 "범위 밖"에서 "컴패니언 스킬로 커버"로 전환
   - 루틴: 주간(doc:check, QUALITY_SCORE 재측정, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 점검 — 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증, 종합 판정)
@@ -243,7 +257,8 @@
 | Initializer 그룹 subagent | 하네스 셋업 내부의 subagent 분리 (Scanner/Scaffolder) | 낮음 |
 | ~~Cleanup 스킬~~ | ~~엔트로피 관리 — 주기적 정리 루프~~ — **구현 완료** (1.4.0, companion-skills/harness-cleanup) | ~~보통~~ |
 | ~~추가 프리셋~~ | ~~react-vite.json, express-api.json~~ — **구현 완료** (1.3.0) | ~~보통~~ |
-| 외부 통합 | 멀티모델 합성 자문, superpowers 옵트인 (Session 19 PRD 초안) | 보통 |
+| ~~superpowers 옵트인 통합~~ | ~~옵트인 연계 레이어~~ — **구현 완료** (1.5.0) | ~~보통~~ |
+| 멀티모델 합성 자문 | Codex + Gemini + Claude 합성 자문 (Session 19 PRD 초안 — 구체화 대기) | 보통 |
 
 ---
 
@@ -255,7 +270,7 @@
 2. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화 (실전 피드백 기반)
 3. **eslintAssist legacy JS 형식 전략** (TODO-67) — 폴백 발동률 관찰 후 결정
 4. **harness-check 검사 항목 확장 검토** (TODO-68) — 체크리스트 §6 엔트로피 항목 (harness-cleanup M1과 역할 중복 주의 — 스크립트는 기계 검사, 스킬은 판단 검사)
-5. **외부 통합 PRD 구체화** — 멀티모델 합성 자문, superpowers 옵트인 (Session 19 초안)
+5. **멀티모델 합성 자문 PRD 구체화** — Session 19 초안 (superpowers 통합은 1.5.0에서 완료 — `integrations.<name>` 메커니즘 재사용 가능). 두 번째 통합 구현 시 "외부 패키지 통합 규약" 일반화 검토
 
 ---
 

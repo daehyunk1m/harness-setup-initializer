@@ -524,3 +524,19 @@
   - ✅ §7: CLEANUP_LOG 생성, 커밋 제안만 (자동 커밋 없음)
   - 스킬 갭 발견 없음. W3 목록 밖의 버그 발견(모달 리스너 누수)도 scope 제한을 지키며 TECH_DEBT로 처리 — 사양 변경 불필요로 판단
   - 다음 관찰 기회: 2회차 실행에서 CLEANUP_LOG 기반 루틴 판별(경과 시간), 승격 큐 횟수 누적 → 승격 제안 발동
+
+---
+
+## Session 25: superpowers 옵트인 통합 — 1.5.0 (2026-06-12)
+
+### TODO-73: superpowers 옵트인 통합 (PRD 구체화 + M1~M3 구현)
+- **상태**: [x] 완료 (2026-06-12, 1.5.0) — 단, 옵트인 경로 실전 테스트는 superpowers 설치 환경 확보 후
+- **파일**: `.tracking/prd-superpowers-integration.md` (Confirmed→Implemented), `references/integrations/superpowers-mapping.md` (신규), `SKILL.md` Step 1.6/§ 4.2~4.4/§ 5/§ 12.3, `harness-scaffold/SKILL.md` § 4/§ 5.1/§ 5.11.3/§ 5.16(신설)/§ 5.13/§ 6.15/§ 7, `templates/rules/session-routine.md`
+- **PRD 구체화**: 미결정 이슈 6건 전부 해소 (감지=installed_plugins.json `superpowers@*` 키 + skills 폴백 / 버전=plugin manifest / 매핑 위치=references/integrations/ / 스킬명 영어 / 삭제 시 안내문 잔류 / 규약 일반화는 2번째 통합 때). 실물 검증: v5.1.0, 스킬 14종 전수 — 초안의 스킬명 3건 부정확 정정. F2.2 버전 매트릭스 폐기 → F1.7 실존 검증으로 대체
+- **구현**:
+  - 프로필 선택 필드 `integrations.superpowers` (생략 = 미연계, eslintAssist 패턴)
+  - 매핑 정본: 연계 3종(brainstorming/systematic-debugging/writing-plans) + 선택 1 + 제외 10 (코어 SoT 영역)
+  - scaffold § 5.16: 실존 검증(드롭+경고) → 제외 필터 → AGENTS.md "보조 스킬" 섹션 + session-routine `{{INTEGRATION_NOTES}}` 치환
+  - `{{INTEGRATION_NOTES}}` (26번째 플레이스홀더): managed 템플릿에 조건부 텍스트를 넣는 정규 방법 확립 — scaffold 임의 삽입은 § 12.6 자동 감지를 깨뜨림
+  - U1 외부 통합 재감지 (신규 감지 → 추가 제안, 기존 → 실존 재검증/제거 지원). 마이그레이션 등록 불필요
+- **남은 검증** (TODO-53과 함께): superpowers 설치 → 감지/질문/렌더링/100줄 예산, 미설치 → 질문 생략 + 산출물에 "superpowers" 문자열 0건
