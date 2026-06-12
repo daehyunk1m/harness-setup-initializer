@@ -75,6 +75,10 @@
   - CLEANUP_LOG.md 경과 시간 기반 루틴 판별, 삭제 우선·승인 필수·소스 코드 비수정(TDD 위임) 원칙
   - scaffold 연계: Phase 4 운용 스킬 안내 + CLAUDE.md 운영 사이클 안내 1줄 + M-1.3.0-to-1.4.0
   - P10 엔트로피 관리: "범위 밖" → "컴패니언 스킬로 커버"
+- **Session 24 (06-12)**: harness-cleanup 첫 실전 실행 — haja-web-fe (TODO-72, 기록 전용)
+  - 7개 섹션 전부 사양대로 동작. 발견 11건, QUALITY_SCORE 첫 측정 74/100, 승격 큐 첫 가동(no-console 횟수 1)
+  - scope 제한 준수 확인 — 적용 5건 모두 문서·데이터, 코드 수정은 TECH_DEBT 8건으로 TDD 위임. 스킬 갭 없음
+  - 2회차 관찰 포인트: CLEANUP_LOG 경과 시간 기반 루틴 판별, 승격 큐 누적 → 승격 제안 발동
 
 **현재 버전: 1.4.0** (harness-cleanup 컴패니언 스킬)
 

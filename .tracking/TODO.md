@@ -508,3 +508,19 @@
   - 루틴 판별: docs/CLEANUP_LOG.md(스킬이 생성·행 추가) 경과 시간 기반 자동 + 사용자 명시 우선
   - 원칙: 삭제 우선, 모든 적용은 승인 후, scope 제한(소스 동작 변경 금지 — TECH_DEBT/feature_list 항목화로 TDD 사이클 위임), 기록 보존, 적용 후 validate 확인
   - scaffold 연계: Phase 4 운용 스킬 안내, CLAUDE.md 운영 사이클 안내 1줄, M-1.3.0-to-1.4.0 ([custom] 멱등 추가)
+
+---
+
+## Session 24: harness-cleanup 첫 실전 실행 기록 (2026-06-12)
+
+### TODO-72: harness-cleanup 첫 실전 실행 (haja-web-fe)
+- **상태**: [x] 완료 (2026-06-12, 기록 전용 — 스킬 변경 없음)
+- **파일**: ~/Desktop/side-project/haja-web-fe (하네스 1.2.0)
+- **결과** (TODO-51 기록 프로세스):
+  - ✅ §1~2: manifest 확인 → CLEANUP_LOG 부재 → 첫 실행 판별 → W+B 수행, M 제외 (사양 그대로)
+  - ✅ §3 주간: doc:check(ARCHITECTURE 63일 stale 감지) / QUALITY_SCORE 첫 측정 74/100 (측정 방법 준수 — any 0건→19, lint:arch 0건→20, 접근성 5, 커버리지 9) / 엔트로피 스캔 — 발견 11건 (버그 1, 실험 코드 노출 1, 문서 부식 1, 죽은 디렉토리 1, console.log 6곳, 미사용 의존성 5종, ESLint 경고 4, 접근성, 크기 위반 2, .d.ts 비표준, stale TODO) / harness:check "표준 하네스 가동"
+  - ✅ §4 격주: TECH_DEBT 8건 등록 + **승격 큐 첫 가동** (no-console 횟수 1 — 리뷰에서 재지적 시 승격 제안 발동 예정)
+  - ✅ §6 원칙 준수: 적용 5건 모두 문서·데이터·빈 디렉토리만 (소스 비수정 — 누수/실험 코드는 TECH_DEBT로 TDD 위임), 적용 후 validate+doc:check 재확인 그린
+  - ✅ §7: CLEANUP_LOG 생성, 커밋 제안만 (자동 커밋 없음)
+  - 스킬 갭 발견 없음. W3 목록 밖의 버그 발견(모달 리스너 누수)도 scope 제한을 지키며 TECH_DEBT로 처리 — 사양 변경 불필요로 판단
+  - 다음 관찰 기회: 2회차 실행에서 CLEANUP_LOG 기반 루틴 판별(경과 시간), 승격 큐 횟수 누적 → 승격 제안 발동
