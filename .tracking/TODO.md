@@ -539,4 +539,5 @@
   - scaffold § 5.16: 실존 검증(드롭+경고) → 제외 필터 → AGENTS.md "보조 스킬" 섹션 + session-routine `{{INTEGRATION_NOTES}}` 치환
   - `{{INTEGRATION_NOTES}}` (26번째 플레이스홀더): managed 템플릿에 조건부 텍스트를 넣는 정규 방법 확립 — scaffold 임의 삽입은 § 12.6 자동 감지를 깨뜨림
   - U1 외부 통합 재감지 (신규 감지 → 추가 제안, 기존 → 실존 재검증/제거 지원). 마이그레이션 등록 불필요
-- **남은 검증** (TODO-53과 함께): superpowers 설치 → 감지/질문/렌더링/100줄 예산, 미설치 → 질문 생략 + 산출물에 "superpowers" 문자열 0건
+- **감지 표면 실물 검증 완료** (2026-06-12, superpowers v5.1.0 사용자 범위 설치 후): 감지 키 `superpowers@claude-plugins-official`·version·installPath 추출 ✓, `{installPath}/skills/{스킬명}/` 구조 ✓ (14개 디렉토리 — 매핑 정본 실명 전부 일치), 연계 3종 실존 ✓, Step 1.6 grep 명령 그대로 동작 ✓
+- **남은 검증** (TODO-53과 함께): 옵트인 E2E — 실제 셋업/업그레이드에서 질문 → 렌더링 → AGENTS.md 100줄 예산. 추천 경로: haja 업그레이드 (1.2.0 → 1.5.0 마이그레이션 체인 + U1 재감지의 통합 추가 제안 경로를 한 번에 검증)
