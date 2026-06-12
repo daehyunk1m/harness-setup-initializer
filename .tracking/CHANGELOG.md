@@ -5,6 +5,22 @@
 
 ---
 
+## [1.6.2] — 2026-06-12 (멀티모델 자문 권고 반영)
+
+> multi-model-consult 첫 실사용 — 자문 대상은 이 스킬 구조 자체 (codex 결함 관점 61초 + Claude 대안 관점 합성). 10개 권고 중 4건 선별 수용 ("판단은 LLM, 계약-임계 역학은 코드" 경계 유지). PATCH (규칙 명확화 + hook 보강)
+
+### 수정 (Changed) — Session 27 (2026-06-12)
+- SKILL.md 프론트매터 Stop hook: `"approved": true` 검사 추가 (TODO-76) — 승인 전 초안·손상·수동 프로필에서 scaffold 강제 발동 방지. 5케이스 시뮬레이션 검증. § 1 자동 체이닝 서술 동기
+- harness-scaffold/SKILL.md § 5.15: ESLint 설정 **비실행 원칙** 명문화 (TODO-78) — 삽입 지점 탐색용 import/require/eval 금지, 텍스트 파싱만. 프로젝트 자체 eslint 실행(수정 후 검증)은 validate와 동급 허용으로 경계 명시
+- .gitignore: `.claude/artifacts/` 추가 (consult 아티팩트 — multi-model-consult § 6 제안 수용)
+- 프로필 스키마 version "1.6.2" 동기 (계약 변경 없음)
+
+### 추가 (Added) — Session 27 (2026-06-12)
+- TODO-77 등록 (미착수): § 12.6 템플릿 재렌더링 해시 재현성 결정화 검토 — LF 정규화 명시(저비용) → 오탐 마찰 누적 시 치환 전용 결정적 스크립트. 자문에서 codex·Claude가 유일하게 합의한 코드화 후보
+- TODO-53 확장: 픽스처 매트릭스 후보 병합 (모노레포·백엔드·no-ESLint·CRLF 등)
+
+---
+
 ## [1.6.1] — 2026-06-12 (install.sh 멱등성 수정)
 
 ### 수정됨 (Fixed) — Session 26 (2026-06-12)

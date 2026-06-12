@@ -91,8 +91,12 @@
   - Public API 변경 없음 — 스키마 version 1.6.0 동기만 (업그레이드 no-op). 하네스 연계는 안정화 후
 
   - 1.6.1 (핫픽스): install.sh `ln -sf` → `ln -sfn` 멱등성 수정 — 재실행 시 자기참조 심링크 생성 버그 (v1.6.0 커밋에 잔여물 포함됐었음, 제거 완료). 설치는 v1.6.1 이상
+- **Session 27 (06-12)**: 1.6.2 — 멀티모델 자문 권고 반영 (TODO-76~78)
+  - **multi-model-consult 첫 실사용**: 자문 대상 = 이 스킬 구조 자체. codex(결함 관점, 61초) + Claude(대안 관점) 합성, gemini 부재 degradation 경로 실동작. 10개 권고 중 4건 선별 수용 — "판단은 LLM, 계약-임계 역학은 코드" 경계
+  - 적용: Stop hook `approved` 검사 (TODO-76, 5케이스 시뮬레이션), § 5.15 ESLint 비실행 원칙 (TODO-78), .gitignore에 .claude/artifacts/
+  - 등록: TODO-77 (§ 12.6 해시 재현성 결정화 — 오탐 마찰 누적 시 착수), TODO-53에 픽스처 매트릭스 병합
 
-**현재 버전: 1.6.1** (multi-model-consult + install.sh 멱등성 수정)
+**현재 버전: 1.6.2** (멀티모델 자문 권고 반영)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

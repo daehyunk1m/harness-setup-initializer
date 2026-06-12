@@ -243,6 +243,11 @@
 - **업그레이드**: U1에 외부 통합 재감지 (신규 감지 시 추가 제안, 기존 통합 제거 지원). 마이그레이션 등록 불필요 (생략이 기본값, 템플릿 변경은 자동 감지)
 - Phase 3 검증 14 → 15항목 (6.15 연계/옵트아웃 양방향 검증)
 
+### 1.6.2 (멀티모델 자문 권고 반영)
+- **multi-model-consult 첫 실사용** — 자문 대상은 이 스킬 구조 자체 (도그푸딩). codex 결함 관점 + Claude 대안 관점 합성, gemini 부재 degradation 실동작 확인
+- 선별 수용 4건: Stop hook `approved: true` 검사 (초안/손상 프로필 오발동 방지), § 5.15 ESLint 비실행 원칙 명문화, .gitignore에 .claude/artifacts/, TODO-77(§ 12.6 해시 재현성 결정화 검토 — codex·Claude 합의된 유일한 코드화 후보) + TODO-53 픽스처 매트릭스 병합
+- 비수용 (추측 설계 금지): 전면 코드화·JSON Schema 분리·마이그레이션 executable화·프리셋 confidence 모델 — 스킬 철학(산문 사양 + LLM 실행 + 마찰 루프 안전망)과 비용 대비 과함. 실전 마찰 누적 시 재검토
+
 ### 1.6.1 (install.sh 멱등성 수정)
 - `ln -sf` → `ln -sfn`: 대상 심링크 존재 시 따라 들어가 자기참조 심링크를 만드는 함정 수정. v1.6.0 커밋에 포함된 `harness-scaffold/harness-scaffold` 잔여물 제거. 2회 연속 실행 멱등성 검증
 

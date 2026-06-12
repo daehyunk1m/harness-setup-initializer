@@ -349,11 +349,12 @@
   - `.harness-profile.json`이 두 스킬 간 계약(contract) 역할
   - `CLAUDE.md` 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
 
-### TODO-53: 2-스킬 플로우 실전 테스트
+### TODO-53: 2-스킬 플로우 실전 테스트 (신규 셋업 경로)
 - **상태**: [ ] 미완료
 - **파일**: 실제 프로젝트에서 테스트
-- **문제**: 분리된 2-스킬 플로우가 실전에서 정상 동작하는지 검증 필요
-- **해결**: `/harness-setup` → `.harness-profile.json` 생성 확인 → `/harness-scaffold` → 18개 파일 생성 확인. 특히 프로필 JSON 스키마 정합성, scaffold 스킬의 프로필 읽기, 누락 필드 기본값 처리 검증
+- **문제**: 분리된 2-스킬 플로우의 신규 셋업 경로가 실전에서 정상 동작하는지 검증 필요 (업그레이드 경로는 TODO-66/70/73에서 검증 완료)
+- **해결**: `/harness-setup` → `.harness-profile.json` 생성 확인 → `/harness-scaffold` → 19개 파일 생성 확인. 특히 프로필 JSON 스키마 정합성, scaffold 스킬의 프로필 읽기, 누락 필드 기본값 처리 검증. 잔여 관찰 포인트: 신규 프리셋 매칭(exclude), eslintAssist 마커 블록, feature_list 라우트 추론, harness-cleanup 첫 실행
+- **픽스처 매트릭스 확장** (2026-06-12 멀티모델 자문 권고 병합): React SPA 1종 검증에서 다양화 — 후보: 빈 TS 패키지, Next.js, Express 백엔드, pnpm workspace 모노레포, ESLint 없는 프로젝트, CRLF 줄바꿈, 손상된 package.json. 전부를 한 번에 하지 말고 신규 셋업 테스트 1~2종부터
 
 ### TODO-54: .harness-profile.json 스키마 문서화
 - **상태**: [x] 완료 (2026-06-11)
@@ -564,3 +565,27 @@
 - **파일**: `install.sh`, `harness-scaffold/harness-scaffold` (잔여물 제거)
 - **문제**: `ln -sf`는 대상이 기존 심볼릭 링크면 링크를 따라 들어가 **디렉토리 안에 자기참조 심링크를 생성**한다. install.sh 재실행(1.6.0에서 multi-model-consult 링크 추가를 위해) 시 잠복 버그 발현 — `harness-scaffold/harness-scaffold` 자기참조 링크가 생성되어 v1.6.0 커밋에 포함됨
 - **해결**: `ln -sfn`(-n: 대상 심링크를 따라가지 않음)으로 교체 + 잔여물 git rm. 2회 연속 실행 멱등성 검증 통과. v1.6.0 태그에는 잔여물이 포함되어 있으므로 설치는 v1.6.1 이상 사용
+
+---
+
+## Session 27: 멀티모델 자문 권고 반영 — 1.6.2 (2026-06-12)
+
+> multi-model-consult 첫 실사용 (자문 대상: 이 스킬 구조 자체). codex 결함 관점 + Claude 대안 관점 합성 → 4건 선별 수용. 아티팩트: .claude/artifacts/consult/ (gitignore 등록)
+
+### TODO-76: Stop hook approved 검사 추가
+- **상태**: [x] 완료 (2026-06-12, 1.6.2)
+- **파일**: `SKILL.md` 프론트매터 hooks + § 1 자동 체이닝
+- **문제**: Stop hook이 "프로필 존재+매니페스트 부재"만 검사 — 승인 전 초안, 손상, 수동 작성 프로필에서도 scaffold를 강제할 수 있음 (codex 자문 지적 #3)
+- **해결**: hook 조건에 `grep -Eq '"approved"\s*:\s*true'` 추가. 승인은 § 4 Step 5에서만 기록되므로 정상 플로우 동작 동일. 5케이스 시뮬레이션 검증 (승인+무매니페스트→BLOCK, 미승인/필드없음/매니페스트존재/둘다없음→ALLOW)
+
+### TODO-77: 템플릿 재렌더링 해시 재현성 결정화 검토
+- **상태**: [ ] 미완료
+- **파일**: `SKILL.md` § 12.6, (검토 시) `scripts/render-template.*` 신규
+- **문제**: § 12.6 자동 감지가 "LLM이 템플릿을 바이트 단위로 동일하게 재렌더링한다"에 의존 — 산문 실행 중 가장 기계적 정밀성이 필요한 급소 (codex 자문 #1·#4, Claude도 동의한 유일한 코드화 후보). 공백/줄바꿈/치환 미세 차이가 오탐(템플릿 변경으로 오판)을 만들 수 있음
+- **해결 후보**: ① § 12.6에 LF 정규화 + 비교 전 정규화 규칙 명시 (저비용) ② 치환 전용 결정적 스크립트(sed/node) 도입 — 렌더링만 코드화하고 판단은 LLM 유지 ("판단은 LLM, 계약-임계 역학은 코드" 경계). 실전 업그레이드에서 오탐 마찰이 기록되면 ② 착수, 그 전에는 ①만
+
+### TODO-78: ESLint 설정 비실행 원칙 명문화
+- **상태**: [x] 완료 (2026-06-12, 1.6.2)
+- **파일**: `harness-scaffold/SKILL.md` § 5.15
+- **문제**: 폴백 규칙은 있었으나 "삽입 지점 탐색을 위해 설정 JS를 실행/평가하지 않는다"가 명문화되지 않음 (codex 자문 #8 — codex·Claude 합의)
+- **해결**: 비실행 원칙 추가 (import/require/eval 금지, 텍스트 파싱만). 수정 후 프로젝트 자체 eslint 실행은 validate와 동급으로 허용 — 경계 명시

@@ -5,7 +5,7 @@ allowed-tools: Bash(echo *) Bash([ *) Bash(test *)
 hooks:
   Stop:
     - type: command
-      command: "bash -c 'if [ -f .harness-profile.json ] && ! [ -f .harness-manifest.json ]; then printf \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"scaffold pending\\\",\\\"additionalContext\\\":\\\"프로필이 저장되었지만 스캐폴딩이 미실행 상태다. 지금 즉시 Skill 도구를 호출하라: Skill(skill: harness-scaffold). 다른 출력 없이 바로 호출한다.\\\"}\"; else printf \"{\\\"decision\\\":\\\"allow\\\"}\"; fi'"
+      command: "bash -c 'if [ -f .harness-profile.json ] && ! [ -f .harness-manifest.json ] && grep -Eq \"\\\"approved\\\"[[:space:]]*:[[:space:]]*true\" .harness-profile.json; then printf \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"scaffold pending\\\",\\\"additionalContext\\\":\\\"승인된 프로필이 저장되었지만 스캐폴딩이 미실행 상태다. 지금 즉시 Skill 도구를 호출하라: Skill(skill: harness-scaffold). 다른 출력 없이 바로 호출한다.\\\"}\"; else printf \"{\\\"decision\\\":\\\"allow\\\"}\"; fi'"
 ---
 
 # Harness Setup Skill
@@ -54,7 +54,7 @@ echo "=== END STATE ==="
 
 프로필 저장 후 `/harness-scaffold`가 자동으로 실행된다. 이 체이닝은 두 가지 메커니즘으로 보장된다:
 
-1. **Stop hook** (프론트매터) — 프로필이 존재하지만 매니페스트가 없으면 `decision: "block"`으로 턴 종료를 막고, `additionalContext`로 scaffold 호출을 지시한다
+1. **Stop hook** (프론트매터) — **승인된 프로필**(`"approved": true`)이 존재하지만 매니페스트가 없으면 `decision: "block"`으로 턴 종료를 막고, `additionalContext`로 scaffold 호출을 지시한다. 승인 전 초안·손상·approved 필드 없는 수동 프로필에는 발동하지 않는다 (승인은 § 4 Step 5에서만 기록되므로 정상 플로우 동작은 동일)
 2. **프롬프트 지시** (§ 4 Step 5) — 프로필 저장 직후 `Skill(skill: "harness-scaffold")` 호출을 명시적으로 지시한다
 
 두 메커니즘이 이중 안전장치로 작동한다.
@@ -512,7 +512,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.6.1",
+  "version": "1.6.2",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
