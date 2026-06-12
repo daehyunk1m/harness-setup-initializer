@@ -79,10 +79,11 @@
   - 7개 섹션 전부 사양대로 동작. 발견 11건, QUALITY_SCORE 첫 측정 74/100, 승격 큐 첫 가동(no-console 횟수 1)
   - scope 제한 준수 확인 — 적용 5건 모두 문서·데이터, 코드 수정은 TECH_DEBT 8건으로 TDD 위임. 스킬 갭 없음
   - 2회차 관찰 포인트: CLEANUP_LOG 경과 시간 기반 루틴 판별, 승격 큐 누적 → 승격 제안 발동
-- **Session 25 (06-12)**: 1.5.0 — superpowers 옵트인 통합 (TODO-73)
+- **Session 25 (06-12)**: 1.5.0 — superpowers 옵트인 통합 (TODO-73, E2E까지 종결)
   - PRD 구체화: 미결정 이슈 6건 해소 + 실물 검증 (v5.1.0, 스킬 14종 — 초안 스킬명 3건 정정), F2.2 버전 매트릭스 폐기 → 실존 검증
   - 구현: `integrations.superpowers` 선택 필드, Step 1.6 감지(installed_plugins.json + 폴백), § 5.16 렌더링(실존 검증→제외 필터→AGENTS.md 보조 스킬 섹션), `{{INTEGRATION_NOTES}}` 26번째 플레이스홀더(managed 템플릿 조건부 텍스트의 정규 방법), U1 재감지
   - 매핑 정본: references/integrations/superpowers-mapping.md (연계 3/선택 1/제외 10)
+  - **실전 검증 완료**: 감지 표면 실물 일치 (설치 후 대조) + haja 1.2.0→1.5.0 업그레이드 E2E — 다중 홉 체인, U1 재감지 옵트인, 렌더링(69줄), {{INTEGRATION_NOTES}} 치환, harness:check "표준 하네스 가동" 승격. 관찰: 1.2.0 마이그레이션의 문서 본문 표기 미수정 잔존을 업그레이드가 자기 치유 (doc-stale 마찰 기록)
 
 **현재 버전: 1.5.0** (superpowers 옵트인 통합)
 

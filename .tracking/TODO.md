@@ -530,7 +530,7 @@
 ## Session 25: superpowers 옵트인 통합 — 1.5.0 (2026-06-12)
 
 ### TODO-73: superpowers 옵트인 통합 (PRD 구체화 + M1~M3 구현)
-- **상태**: [x] 완료 (2026-06-12, 1.5.0) — 단, 옵트인 경로 실전 테스트는 superpowers 설치 환경 확보 후
+- **상태**: [x] 완료 (2026-06-12, 1.5.0 — 옵트인 E2E 실전 검증까지 종결)
 - **파일**: `.tracking/prd-superpowers-integration.md` (Confirmed→Implemented), `references/integrations/superpowers-mapping.md` (신규), `SKILL.md` Step 1.6/§ 4.2~4.4/§ 5/§ 12.3, `harness-scaffold/SKILL.md` § 4/§ 5.1/§ 5.11.3/§ 5.16(신설)/§ 5.13/§ 6.15/§ 7, `templates/rules/session-routine.md`
 - **PRD 구체화**: 미결정 이슈 6건 전부 해소 (감지=installed_plugins.json `superpowers@*` 키 + skills 폴백 / 버전=plugin manifest / 매핑 위치=references/integrations/ / 스킬명 영어 / 삭제 시 안내문 잔류 / 규약 일반화는 2번째 통합 때). 실물 검증: v5.1.0, 스킬 14종 전수 — 초안의 스킬명 3건 부정확 정정. F2.2 버전 매트릭스 폐기 → F1.7 실존 검증으로 대체
 - **구현**:
@@ -540,4 +540,9 @@
   - `{{INTEGRATION_NOTES}}` (26번째 플레이스홀더): managed 템플릿에 조건부 텍스트를 넣는 정규 방법 확립 — scaffold 임의 삽입은 § 12.6 자동 감지를 깨뜨림
   - U1 외부 통합 재감지 (신규 감지 → 추가 제안, 기존 → 실존 재검증/제거 지원). 마이그레이션 등록 불필요
 - **감지 표면 실물 검증 완료** (2026-06-12, superpowers v5.1.0 사용자 범위 설치 후): 감지 키 `superpowers@claude-plugins-official`·version·installPath 추출 ✓, `{installPath}/skills/{스킬명}/` 구조 ✓ (14개 디렉토리 — 매핑 정본 실명 전부 일치), 연계 3종 실존 ✓, Step 1.6 grep 명령 그대로 동작 ✓
-- **남은 검증** (TODO-53과 함께): 옵트인 E2E — 실제 셋업/업그레이드에서 질문 → 렌더링 → AGENTS.md 100줄 예산. 추천 경로: haja 업그레이드 (1.2.0 → 1.5.0 마이그레이션 체인 + U1 재감지의 통합 추가 제안 경로를 한 번에 검증)
+- **옵트인 E2E 실전 검증 완료** (2026-06-12, haja-web-fe 1.2.0 → 1.5.0 업그레이드):
+  - ✅ 다중 홉 마이그레이션 체인 (1.2.0→1.3.0→1.4.0→1.5.0): sharedDirs 조건부 스킵(layer-based), CLAUDE.md cleanup 안내 1줄, manifest 1.5.0 + profile.integrations 보존
+  - ✅ U1 재감지 → superpowers 통합 옵트인 → AGENTS.md "보조 스킬" 섹션이 매핑 정본 문구 그대로 렌더링 (69줄 ≤ 100)
+  - ✅ session-routine 재생성(managed 자동 감지)에서 `{{INTEGRATION_NOTES}}`가 writing-plans 연계 문구로 치환 — 미치환 플레이스홀더 0건
+  - ✅ harness:check 7항목 전체 통과 → **"표준 하네스 가동"** (이전 MVH에서 승격 — 품질 실패 2건이 그 사이 해결됨)
+  - 관찰: 업그레이드가 CLAUDE.md/AGENTS.md의 watch 체인 표기 잔존(1.2.0 마이그레이션이 package.json만 수정하고 문서 본문 표기는 미수정)을 발견·정정하고 doc-stale 마찰로 기록 — 마찰 루프의 자기 치유 사례. 1회 발생이라 스킬 변경 없음 (반복 시 harness-feedback 경유 검토)
