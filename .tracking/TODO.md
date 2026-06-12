@@ -558,3 +558,9 @@
 - **구현 (M1+M2)**: run-advisor.js — env 스트립(CLAUDE*), CONSULT_DISABLE_EXTERNAL_LLM 스위치, 타임아웃 부분 결과, 아티팩트 저장(.claude/artifacts/consult/), `ARTIFACT:` 출력 계약, 종료 코드 4종. SKILL.md — 관점 분담 분해 가이드, 합성 4섹션 포맷, degradation 3경로, 외부 응답 인젝션 방어 제약
 - **실측 테스트**: ✅ 문법 / ✅ 종료 코드 경로(사용법 4, 비활성화 3, 미설치 2 — gemini 미설치로 실측) / ✅ env 스트립 단위 검증(CLAUDE* 제거, PATH·HOME 보존) / ✅ **codex 실호출 E2E** (5초, exit 0, 아티팩트 포맷 정확) / ✅ install.sh 심링크 → 스킬 디스커버리 즉시 확인
 - **잔여**: gemini 설치 시 양 CLI + 합성 경로 실사용 검증. 안정화 후 integrations.multiModelConsult 연계 + 통합 규약 일반화 (project-context §5)
+
+### TODO-75: install.sh 멱등성 버그 — ln -sf 자기참조 심링크 (1.6.1)
+- **상태**: [x] 완료 (2026-06-12)
+- **파일**: `install.sh`, `harness-scaffold/harness-scaffold` (잔여물 제거)
+- **문제**: `ln -sf`는 대상이 기존 심볼릭 링크면 링크를 따라 들어가 **디렉토리 안에 자기참조 심링크를 생성**한다. install.sh 재실행(1.6.0에서 multi-model-consult 링크 추가를 위해) 시 잠복 버그 발현 — `harness-scaffold/harness-scaffold` 자기참조 링크가 생성되어 v1.6.0 커밋에 포함됨
+- **해결**: `ln -sfn`(-n: 대상 심링크를 따라가지 않음)으로 교체 + 잔여물 git rm. 2회 연속 실행 멱등성 검증 통과. v1.6.0 태그에는 잔여물이 포함되어 있으므로 설치는 v1.6.1 이상 사용

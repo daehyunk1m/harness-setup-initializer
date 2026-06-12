@@ -5,6 +5,15 @@
 
 ---
 
+## [1.6.1] — 2026-06-12 (install.sh 멱등성 수정)
+
+### 수정됨 (Fixed) — Session 26 (2026-06-12)
+- install.sh: `ln -sf` → `ln -sfn` — 대상 심링크가 이미 존재할 때 링크를 따라 들어가 디렉토리 안에 자기참조 심링크를 만드는 함정 수정 (TODO-75). 재실행 멱등성 2회 검증
+- harness-scaffold/harness-scaffold: v1.6.0 커밋에 포함된 자기참조 심링크 잔여물 제거 — 설치는 v1.6.1 이상 사용 권장
+- 프로필 스키마 version "1.6.1" 동기 (계약 변경 없음)
+
+---
+
 ## [1.6.0] — 2026-06-12 (multi-model-consult 컴패니언 스킬)
 
 > PRD 구체화(미결정 5건 해소 + CLI 실물 검증) 후 M1+M2 구현 (TODO-74). Public API 변경 없음 — 버전 단일화 원칙으로 스키마 version만 동기 (업그레이드 no-op)

@@ -90,7 +90,9 @@
   - 실측: 종료 코드 4경로 + env 스트립 단위 + codex 실호출 E2E(5초) + 디스커버리 확인. gemini 미설치 → degradation 경로 실측 검증
   - Public API 변경 없음 — 스키마 version 1.6.0 동기만 (업그레이드 no-op). 하네스 연계는 안정화 후
 
-**현재 버전: 1.6.0** (multi-model-consult 컴패니언 스킬)
+  - 1.6.1 (핫픽스): install.sh `ln -sf` → `ln -sfn` 멱등성 수정 — 재실행 시 자기참조 심링크 생성 버그 (v1.6.0 커밋에 잔여물 포함됐었음, 제거 완료). 설치는 v1.6.1 이상
+
+**현재 버전: 1.6.1** (multi-model-consult + install.sh 멱등성 수정)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

@@ -243,6 +243,9 @@
 - **업그레이드**: U1에 외부 통합 재감지 (신규 감지 시 추가 제안, 기존 통합 제거 지원). 마이그레이션 등록 불필요 (생략이 기본값, 템플릿 변경은 자동 감지)
 - Phase 3 검증 14 → 15항목 (6.15 연계/옵트아웃 양방향 검증)
 
+### 1.6.1 (install.sh 멱등성 수정)
+- `ln -sf` → `ln -sfn`: 대상 심링크 존재 시 따라 들어가 자기참조 심링크를 만드는 함정 수정. v1.6.0 커밋에 포함된 `harness-scaffold/harness-scaffold` 잔여물 제거. 2회 연속 실행 멱등성 검증
+
 ### 1.6.0 (multi-model-consult 컴패니언 스킬)
 - **PRD 구체화** (.tracking/prd-multi-model-consult.md): 미결정 이슈 5건 해소 (배치=companion+심링크, 하네스 연계=안정화 후, 아티팩트=수동 관리, 타임아웃=180s+env, 경로=기본 노출). CLI 실물 검증 — codex 0.134.0 로컬 실측으로 **위험 플래그 폐기** (`--dangerously-bypass-approvals-and-sandbox` → `-s read-only --ephemeral`, gemini `--yolo` 제거), `-o` 최종 응답 캡처 발견, 병렬은 Claude 병렬 도구 호출로 달성 (async 인프라 불필요)
 - **구현 (M1+M2)**: `companion-skills/multi-model-consult/` — SKILL.md(분해 가이드 + 합성 포맷 + degradation 3경로 + 인젝션 방어 제약) + scripts/run-advisor.js (env 스트립, 비활성화 스위치, 타임아웃 부분 결과, 아티팩트 저장, `ARTIFACT:` 출력 계약). install.sh에 글로벌 심링크 추가
