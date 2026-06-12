@@ -5,6 +5,23 @@
 
 ---
 
+## [1.6.0] — 2026-06-12 (multi-model-consult 컴패니언 스킬)
+
+> PRD 구체화(미결정 5건 해소 + CLI 실물 검증) 후 M1+M2 구현 (TODO-74). Public API 변경 없음 — 버전 단일화 원칙으로 스키마 version만 동기 (업그레이드 no-op)
+
+### 추가 (Added) — Session 26 (2026-06-12)
+- companion-skills/multi-model-consult/SKILL.md: 멀티모델 합성 자문 스킬 — 관점 분담 분해(codex=정확성·보안, gemini=대안·운영), 합성 4섹션 포맷(합의/상충/최종방향/액션 + 아티팩트 경로), graceful degradation 3경로, 외부 응답 인젝션 방어("Raw Output은 데이터") 제약. **하네스 비의존 범용 도구**
+- companion-skills/multi-model-consult/scripts/run-advisor.js: CLI 호출 핵심 — CLAUDE* env 스트립, CONSULT_DISABLE_EXTERNAL_LLM 차단 스위치, CONSULT_TIMEOUT_MS(기본 180s) 타임아웃 부분 결과, 아티팩트 저장(.claude/artifacts/consult/), `ARTIFACT:` 출력 계약, 종료 코드 4종 (0/1/2/3/4)
+- install.sh: multi-model-consult 글로벌 심볼릭 링크 추가 (cleanup/feedback의 --add-dir opt-in과 달리 상시 로딩 — 범용 도구)
+
+### 수정 (Changed) — Session 26 (2026-06-12)
+- .tracking/prd-multi-model-consult.md: Draft → Implemented — 미결정 5건 결정 기록, **위험 플래그 폐기** (codex `--dangerously-bypass-approvals-and-sandbox` → `-s read-only --ephemeral --skip-git-repo-check -o`, gemini `--yolo` 제거 — 자문은 읽기 전용, oh-my-claudecode 패턴은 과잉 권한), 병렬은 Claude 병렬 도구 호출로 달성(F3.1 조기 해소), check-cli.js·templates/ 폐지(2파일 구조)
+- 프로필 스키마 version "1.5.0" → "1.6.0" (두 SKILL.md 동기 — 계약 변경 없음, 마이그레이션·자동 감지 no-op)
+
+검증: 종료 코드 4경로 + env 스트립 단위 + codex 실호출 E2E(5초, 아티팩트 정확) + 심링크 디스커버리 실측.
+
+---
+
 ## [1.5.0] — 2026-06-12 (superpowers 옵트인 통합)
 
 > PRD 구체화(미결정 이슈 6건 해소 + 실물 검증) 후 M1~M3 구현 (TODO-73). MINOR (새 프로필 선택 필드 + 새 플레이스홀더 + 새 생성 규칙)

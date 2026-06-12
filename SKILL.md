@@ -512,7 +512,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.5.0",
+  "version": "1.6.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -624,8 +624,8 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 ```json
 {
   "mode": "upgrade",
-  "fromVersion": "1.4.0",
-  "toVersion": "1.5.0",
+  "fromVersion": "1.5.0",
+  "toVersion": "1.6.0",
   "migrations": [],
   "fileActions": {
     "agents/architect.md": { "action": "overwrite", "reason": "템플릿 변경 감지, 사용자 수정 없음", "source": "auto-detect" },

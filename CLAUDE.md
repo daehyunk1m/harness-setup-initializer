@@ -26,6 +26,7 @@
 | `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
 | `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
 | `companion-skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
+| `companion-skills/multi-model-consult/` | 멀티모델 합성 자문 스킬 (구현됨 — codex/gemini 자문 + Claude 합성. **하네스 비의존 범용 도구**, install.sh 심링크로 글로벌 로딩) | 가끔 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
 | `references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
 | `references/integrations/*.md` | 외부 패키지 연계 매핑 정본 (superpowers 등 — 분기 리뷰) | 가끔 |

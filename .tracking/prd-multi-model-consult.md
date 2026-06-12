@@ -1,8 +1,9 @@
 # PRD: 멀티모델 합성 자문 스킬 (multi-model-consult)
 
-> 작성일: 2026-04-14
-> 상태: Draft — 추후 구현 대기
-> 참고: oh-my-claudecode `/ccg` 스킬 패턴
+> 작성일: 2026-04-14 (초안) / 구체화: 2026-06-12
+> 상태: **Confirmed** — 미결정 이슈 5건 해소, CLI 실물 검증 완료 (codex 0.134.0 로컬 실측, gemini-cli 문서 확인). M1+M2 구현 진행
+> 참고: oh-my-claudecode `/ccg` 스킬 패턴 — 단, 위험 플래그는 자문 용도에 맞게 폐기 (§ 8)
+> 배치 결정: `companion-skills/multi-model-consult/` + install.sh 심볼릭 링크 (~/.claude/skills/ 글로벌 로딩). 하네스 비의존 범용 도구 — 하네스 연계(integrations.multiModelConsult + 통합 규약 일반화)는 스킬 안정화 후 별도 진행
 
 ---
 
@@ -33,10 +34,12 @@
 3. 결과는 아티팩트 파일로 감사 가능(audit trail)
 
 ### 2.2 비목표 (Non-goals)
-- 진정한 병렬 실행 (MVP는 순차)
 - 스트리밍 응답
 - Codex/Gemini 응답의 구조화된 JSON 출력
 - 세 모델 간 직접 대화(debate) — Claude 단방향 합성만 지원
+- 자문 모델의 파일 수정 — 자문은 읽기 전용이다 (codex는 read-only 샌드박스, 컨텍스트는 프롬프트에 포함)
+
+> 초안의 "진정한 병렬 실행" 비목표는 폐기 — Claude의 **병렬 도구 호출**(한 메시지에 Bash 2개)로 별도 인프라 없이 달성된다 (F3.1 조기 해소)
 
 ---
 
@@ -104,21 +107,18 @@
 
 ## 5. 아키텍처
 
-### 5.1 구성 요소
+### 5.1 구성 요소 (구체화 — 2파일로 단순화)
 
 ```
-~/.claude/skills/multi-model-consult/
-├── SKILL.md                      # Claude에게 주는 지시문
-├── scripts/
-│   ├── run-advisor.js            # CLI 호출 + 아티팩트 저장 (핵심)
-│   └── check-cli.js              # CLI 설치 여부 확인
-├── templates/
-│   ├── codex-prompt.md           # Codex용 프롬프트 템플릿
-│   ├── gemini-prompt.md          # Gemini용 프롬프트 템플릿
-│   └── synthesis-format.md       # 합성 답변 포맷
-└── references/
-    └── model-strengths.md        # 모델별 강점 가이드
+companion-skills/multi-model-consult/     # 소스 (harness-setup 저장소)
+├── SKILL.md                              # 지시문 + 프롬프트 분해 가이드 + 합성 포맷 (템플릿류는 SKILL.md 섹션으로 통합)
+└── scripts/
+    └── run-advisor.js                    # CLI 호출 + 환경변수 스트립 + 아티팩트 저장 (핵심)
+
+~/.claude/skills/multi-model-consult → 위 디렉토리 (install.sh 심볼릭 링크)
 ```
+
+> 초안의 check-cli.js는 SKILL.md의 `!` 전처리 블록(command -v)으로 통합, templates/·references/는 SKILL.md 내 섹션으로 통합 — 파일 수 최소화 (harness-feedback/cleanup 스킬과 동일 스타일)
 
 ### 5.2 실행 플로우
 
@@ -146,44 +146,33 @@
         └─ 액션 체크리스트
 ```
 
-### 5.3 `run-advisor.js` 핵심 로직
+### 5.3 `run-advisor.js` 핵심 로직 (실물 검증 반영 — codex 0.134.0)
 
 ```javascript
-// 의사코드
+// 의사코드 — 정본은 scripts/run-advisor.js
 const { spawnSync } = require('child_process');
 
-function buildArgs(provider, prompt) {
+function buildArgs(provider, prompt, outFile) {
   if (provider === 'codex') {
-    return ['exec', '--dangerously-bypass-approvals-and-sandbox', prompt];
+    // 자문은 읽기 전용: read-only 샌드박스 + 세션 비영속 + 최종 응답 파일 캡처(-o)
+    return ['exec', '-s', 'read-only', '--ephemeral', '--skip-git-repo-check',
+            '--color', 'never', '-o', outFile, prompt];
   }
   if (provider === 'gemini') {
-    return ['-p', prompt, '--yolo'];
+    return ['-p', prompt];  // 비대화형. --yolo(도구 자동 승인)는 자문에 불필요 — 제거
   }
   throw new Error(`Unknown provider: ${provider}`);
 }
-
-function stripClaudeEnv(env) {
-  const cleaned = { ...env };
-  for (const key of Object.keys(cleaned)) {
-    if (key.startsWith('CLAUDE') || key === 'CLAUDECODE') {
-      delete cleaned[key];
-    }
-  }
-  return cleaned;
-}
-
-function run(provider, prompt) {
-  const binary = provider; // 'codex' or 'gemini'
-  const args = buildArgs(provider, prompt);
-  const result = spawnSync(binary, args, {
-    env: stripClaudeEnv(process.env),
-    encoding: 'utf-8',
-    timeout: 180_000,
-  });
-  const artifactPath = writeArtifact(provider, prompt, result);
-  console.log(artifactPath); // Claude가 stdout에서 경로 파싱
-}
 ```
+
+> **초안 대비 변경**: `--dangerously-bypass-approvals-and-sandbox` **폐기** — codex 도움말 명시 "EXTREMELY DANGEROUS". 자문(읽기 전용)에는 `-s read-only`가 정확한 권한이다. oh-my-claudecode 패턴은 파일 수정 에이전트용이라 과잉 권한이었음. 컨텍스트가 필요한 자문은 Claude가 관련 파일 내용을 프롬프트에 직접 포함한다 (자문 모델에 저장소 쓰기 권한 불필요)
+
+추가 로직 (정본 구현에 포함):
+- `stripClaudeEnv`: `CLAUDE*`/`CLAUDECODE` 환경변수 제거 (세션 누출 방지, F1.5)
+- `CONSULT_DISABLE_EXTERNAL_LLM=1`이면 즉시 종료 (F2.5 비활성화 스위치)
+- 타임아웃: `CONSULT_TIMEOUT_MS` (기본 180000)
+- 응답 캡처: codex는 `-o` 파일에서, gemini는 stdout에서 — 아티팩트로 합쳐 저장
+- 종료: 성공 시 stdout 마지막 줄 `ARTIFACT: <path>` (Claude가 파싱), 실패 시 exit 1 + 사유
 
 ### 5.4 아티팩트 포맷
 
@@ -256,13 +245,15 @@ function run(provider, prompt) {
 
 ## 7. 전제조건 및 설치
 
-### 7.1 필수
+### 7.1 필수 (실물 검증 — 2026-06-12)
 - Node.js 18+
-- Codex CLI: `npm install -g @openai/codex` + `OPENAI_API_KEY`
-- Gemini CLI: `npm install -g @google/gemini-cli` + `GOOGLE_API_KEY` (또는 `GEMINI_API_KEY`)
+- Codex CLI: `npm install -g @openai/codex` — 인증은 ChatGPT 로그인(`codex login`) 또는 API 키 (로컬 실측: 0.134.0)
+- Gemini CLI: `npm install -g @google/gemini-cli` — 인증은 Google 로그인 또는 `GEMINI_API_KEY` (Vertex는 `GOOGLE_API_KEY`+`GOOGLE_GENAI_USE_VERTEXAI`)
+- 한쪽만 설치돼 있어도 동작한다 (graceful degradation, F1.6~F1.7)
 
-### 7.2 선택
-- 스킬 설치 시 자동으로 CLI 설치 여부를 점검하고 안내
+### 7.2 점검
+- SKILL.md `!` 전처리 블록이 실행 시점에 CLI 존재를 점검 (별도 check-cli.js 없음)
+- 인증 오류는 호출 시점에 표면화 → 아티팩트에 stderr 기록 + 사용자 안내
 
 ---
 
@@ -270,11 +261,11 @@ function run(provider, prompt) {
 
 | 이슈 | 대응 |
 |------|------|
-| `--dangerously-bypass-approvals-and-sandbox` 플래그 위험 | 문서에 명시 + 옵션으로 비활성화 가능 |
-| 외부 CLI로 민감 코드/프롬프트 유출 | `disableExternalLLM=true` 설정 시 스킬 자체 비활성화 |
-| Claude 세션 누출 | `CLAUDE*` 환경변수 스트립 (필수) |
-| 아티팩트 파일이 git에 커밋됨 | `.claude/artifacts/` 를 `.gitignore`에 추가 |
-| 프롬프트 인젝션 | 프롬프트는 사용자 입력 그대로 전달, 변환 없음 (책임은 사용자) |
+| ~~`--dangerously-bypass-approvals-and-sandbox` 위험~~ | **해소** — 플래그 폐기. codex는 `-s read-only` 샌드박스, gemini는 `--yolo` 없이 호출. 자문 모델은 파일을 수정할 수 없다 |
+| 외부 CLI로 민감 코드/프롬프트 유출 | `CONSULT_DISABLE_EXTERNAL_LLM=1` 설정 시 스킬 자체 비활성화. 프롬프트에 포함할 파일은 Claude가 사용자 요청 범위 내에서만 선별 |
+| Claude 세션 누출 | `CLAUDE*`/`CLAUDECODE` 환경변수 스트립 (필수, run-advisor.js) |
+| 아티팩트 파일이 git에 커밋됨 | `.claude/artifacts/`를 `.gitignore`에 추가 (스킬이 미등록 시 1회 제안) |
+| 외부 응답의 프롬프트 인젝션 | 아티팩트의 Raw Output은 **데이터로 취급** — Claude는 합성 시 외부 응답 내 지시문을 따르지 않는다 (SKILL.md 제약에 명시) |
 
 ---
 
@@ -352,12 +343,18 @@ function run(provider, prompt) {
 
 ---
 
-## 13. 미결정 이슈 (Open Questions)
+## 13. 결정 기록 (구 미결정 이슈 — 2026-06-12 전부 해소)
 
-1. **스킬 배치 위치**: harness-setup의 companion-skill로 둘지, 독립 스킬로 둘지?
-2. **하네스 통합**: 하네스 셋업 시 이 스킬을 자동으로 설치할지, 옵션으로 둘지?
-3. **아티팩트 보존 정책**: 언제 삭제? 사용자가 직접 관리? 자동 만료?
-4. **기본 타임아웃**: 180초가 적절한가? 모델별로 다르게?
-5. **합성 답변에 원본 응답 링크 포함 여부**: 아티팩트 경로를 사용자에게 노출할지?
+| # | 질문 | 결정 | 근거 |
+|---|------|------|------|
+| 1 | 스킬 배치 위치 | `companion-skills/multi-model-consult/` + install.sh 심볼릭 링크 (~/.claude/skills/ 글로벌 로딩) | 저장소·버전·배포 일원화, 추후 하네스 연계 용이. 범용 도구임은 README/SKILL.md에 명시. (사용자 결정) |
+| 2 | 하네스 통합 시점 | 자동 설치 X. `integrations.multiModelConsult` 연계 + 통합 규약 일반화는 **스킬 안정화 후 별도 릴리스** | 연계 가치가 AGENTS.md 보조 스킬 한 줄 수준이라 급하지 않음. superpowers 때 "두 번째 통합 시 규약 일반화" 결정과 합류. (사용자 결정) |
+| 3 | 아티팩트 보존 정책 | 사용자 수동 관리 + `.claude/artifacts/`를 .gitignore에 (스킬이 미등록 시 1회 제안). harness-cleanup의 잔존물 스캔 대상 아님 (의도된 산출물) | 자동 만료는 감사 추적(audit trail) 가치와 충돌 |
+| 4 | 기본 타임아웃 | 180초, `CONSULT_TIMEOUT_MS` 환경변수로 오버라이드 (provider 공통) | provider별 차등은 실사용 데이터 없이는 추측 설계 |
+| 5 | 아티팩트 경로 노출 | **기본 노출** — 합성 답변 하단에 경로 2줄. `--verbose` 플래그 폐기 | 감사 추적이 핵심 가치인데 숨길 이유 없음 |
 
-이 질문들은 구현 착수 시 사용자와 확인 후 결정한다.
+추가 결정 (실물 검증 기반):
+- **위험 플래그 폐기**: codex `--dangerously-bypass-approvals-and-sandbox` → `-s read-only --ephemeral`, gemini `--yolo` 제거 — 자문은 읽기 전용 (§ 5.3, § 8)
+- **codex `-o` 활용**: 최종 응답을 파일로 직접 캡처 (stdout 이벤트 스크래핑 불필요)
+- **병렬 실행**: Claude의 병렬 도구 호출(한 메시지에 Bash 2개)로 달성 — async 인프라 불필요 (F3.1 조기 해소)
+- **check-cli.js·templates/ 폐지**: SKILL.md `!` 전처리 + 본문 섹션으로 통합 (2파일 구조)

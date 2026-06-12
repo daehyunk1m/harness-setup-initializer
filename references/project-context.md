@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-12 (1.5.0 — superpowers 옵트인 통합)
+> 마지막 업데이트: 2026-06-12 (1.6.0 — multi-model-consult 컴패니언 스킬)
 
 ---
 
@@ -55,9 +55,10 @@
 │   └── rules/                    # .claude/rules/ 템플릿
 │       ├── session-routine.md    # TDD 오케스트레이션 플로우
 │       └── coding-standards.md   # 아키텍처/네이밍 규칙
-├── companion-skills/             # 운용 컴패니언 스킬 (--add-dir opt-in)
-│   ├── harness-feedback/         # 마찰 로그 분석 → GitHub Issue
-│   └── harness-cleanup/          # 엔트로피 정리 — 운영 사이클(주간/격주/월간) 실행 주체
+├── companion-skills/             # 컴패니언 스킬
+│   ├── harness-feedback/         # 마찰 로그 분석 → GitHub Issue (--add-dir opt-in)
+│   ├── harness-cleanup/          # 엔트로피 정리 — 운영 사이클 실행 주체 (--add-dir opt-in)
+│   └── multi-model-consult/      # 멀티모델 합성 자문 — 하네스 비의존 범용 (install.sh 심링크, 글로벌)
 └── references/                   # 배경 문서 (스킬 실행 시 자동 로드 안 됨)
     ├── harness-guide.md          # Anthropic + OpenAI 통합 가이드
     ├── harness-checklist.md      # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
@@ -113,6 +114,9 @@
 | 외부 통합 메커니즘 | 프로필 선택 필드 `integrations.<name>` — 감지 시에만 질문(옵트인), 생략 = 미적용, 코어 충돌 영역 제외, 매핑 정본은 references/integrations/ | 코어 자급자족 유지. eslintAssist의 "감지 → 옵트인 → 생략 = 미적용" 패턴 재사용. 규약 문서화는 두 번째 통합 구현 시 일반화 (선례 1개로 규약화 안 함) |
 | superpowers 드리프트 대응 | 버전 호환 매트릭스 대신 **스캐폴딩 시점 스킬 실존 검증** (installPath/skills/{name} 확인 → 드롭+경고) | semver 범위 검사는 스킬 이름 변경을 못 잡는다. 실존 검증이 드리프트를 직접 잡음. detectedVersion은 정보용만 |
 | 통합의 managed 템플릿 처리 | 조건부 텍스트는 scaffold 임의 삽입이 아니라 **템플릿 플레이스홀더**(`{{INTEGRATION_NOTES}}`, 미연계 시 빈 문자열)로 | scaffold가 템플릿 밖 텍스트를 삽입하면 § 12.6 자동 감지(재렌더링 해시 비교)가 깨진다. 재렌더링 재현성 유지 |
+| multi-model-consult 배치 | companion-skills/ + **install.sh 심볼릭 링크** (글로벌 상시 로딩 — cleanup/feedback의 --add-dir opt-in과 다름) | 하네스 비의존 범용 도구라 프로젝트 무관 상시 가용이 맞음. 저장소·버전·배포는 일원화 (사용자 결정) |
+| 자문 CLI 권한 최소화 | codex `-s read-only --ephemeral`, gemini `--yolo` 없이 — oh-my-claudecode의 dangerous 플래그 패턴 폐기 | 자문은 읽기 전용. 컨텍스트는 Claude가 프롬프트에 포함 (자문 모델에 저장소 쓰기 권한 불필요). codex `-o`로 최종 응답 파일 캡처 |
+| 외부 응답의 인젝션 방어 | 아티팩트 Raw Output은 데이터 — 합성 시 외부 응답 내 지시문 비추종 (SKILL.md 제약 명시) | 외부 모델 출력은 신뢰 경계 밖 |
 
 ---
 
@@ -239,6 +243,13 @@
 - **업그레이드**: U1에 외부 통합 재감지 (신규 감지 시 추가 제안, 기존 통합 제거 지원). 마이그레이션 등록 불필요 (생략이 기본값, 템플릿 변경은 자동 감지)
 - Phase 3 검증 14 → 15항목 (6.15 연계/옵트아웃 양방향 검증)
 
+### 1.6.0 (multi-model-consult 컴패니언 스킬)
+- **PRD 구체화** (.tracking/prd-multi-model-consult.md): 미결정 이슈 5건 해소 (배치=companion+심링크, 하네스 연계=안정화 후, 아티팩트=수동 관리, 타임아웃=180s+env, 경로=기본 노출). CLI 실물 검증 — codex 0.134.0 로컬 실측으로 **위험 플래그 폐기** (`--dangerously-bypass-approvals-and-sandbox` → `-s read-only --ephemeral`, gemini `--yolo` 제거), `-o` 최종 응답 캡처 발견, 병렬은 Claude 병렬 도구 호출로 달성 (async 인프라 불필요)
+- **구현 (M1+M2)**: `companion-skills/multi-model-consult/` — SKILL.md(분해 가이드 + 합성 포맷 + degradation 3경로 + 인젝션 방어 제약) + scripts/run-advisor.js (env 스트립, 비활성화 스위치, 타임아웃 부분 결과, 아티팩트 저장, `ARTIFACT:` 출력 계약). install.sh에 글로벌 심링크 추가
+- **실측 테스트**: 종료 코드 4경로(사용법/비활성화/미설치/성공) + env 스트립 단위 검증 + **codex 실호출 E2E 성공** (5초, 아티팩트 포맷 정확). gemini 미설치 환경이라 degradation 경로가 실측으로 검증됨
+- Public API(프로필/매니페스트/프리셋/생성 파일) 변경 없음 — 버전 단일화 원칙에 따라 스키마 version만 1.6.0 동기 (업그레이드 시 마이그레이션·자동 감지 모두 no-op)
+- 하네스 연계(integrations.multiModelConsult + 통합 규약 일반화)는 스킬 안정화 후 별도 릴리스
+
 ### 1.4.0 (harness-cleanup 컴패니언 스킬)
 - **harness-cleanup 신설** (`companion-skills/harness-cleanup/SKILL.md`): 운영 사이클(체크리스트 § 6.3)의 실행 주체 — P10 엔트로피 관리가 "범위 밖"에서 "컴패니언 스킬로 커버"로 전환
   - 루틴: 주간(doc:check, QUALITY_SCORE 재측정, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 점검 — 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증, 종합 판정)
@@ -258,7 +269,8 @@
 | ~~Cleanup 스킬~~ | ~~엔트로피 관리 — 주기적 정리 루프~~ — **구현 완료** (1.4.0, companion-skills/harness-cleanup) | ~~보통~~ |
 | ~~추가 프리셋~~ | ~~react-vite.json, express-api.json~~ — **구현 완료** (1.3.0) | ~~보통~~ |
 | ~~superpowers 옵트인 통합~~ | ~~옵트인 연계 레이어~~ — **구현 완료** (1.5.0) | ~~보통~~ |
-| 멀티모델 합성 자문 | Codex + Gemini + Claude 합성 자문 (Session 19 PRD 초안 — 구체화 대기) | 보통 |
+| ~~멀티모델 합성 자문~~ | ~~Codex + Gemini + Claude 합성 자문~~ — **구현 완료** (1.6.0, multi-model-consult) | ~~보통~~ |
+| 외부 통합 규약 일반화 | integrations.multiModelConsult 연계 + 통합 규약 문서화 (통합 선례 2개 확보됨 — consult 스킬 안정화 후) | 낮음 |
 
 ---
 
@@ -270,7 +282,7 @@
 2. **에이전트 템플릿 실전 조정** — TDD subagent 프롬프트 최적화 (실전 피드백 기반)
 3. **eslintAssist legacy JS 형식 전략** (TODO-67) — 폴백 발동률 관찰 후 결정
 4. **harness-check 검사 항목 확장 검토** (TODO-68) — 체크리스트 §6 엔트로피 항목 (harness-cleanup M1과 역할 중복 주의 — 스크립트는 기계 검사, 스킬은 판단 검사)
-5. **멀티모델 합성 자문 PRD 구체화** — Session 19 초안 (superpowers 통합은 1.5.0에서 완료 — `integrations.<name>` 메커니즘 재사용 가능). 두 번째 통합 구현 시 "외부 패키지 통합 규약" 일반화 검토
+5. **multi-model-consult 실사용 안정화** — 실전 자문 사용 후 피드백 반영 (gemini 설치 시 양 CLI 경로 추가 검증). 안정화 후 integrations.multiModelConsult 연계 + "외부 패키지 통합 규약" 일반화 (선례 2개 확보됨)
 
 ---
 

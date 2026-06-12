@@ -546,3 +546,15 @@
   - ✅ session-routine 재생성(managed 자동 감지)에서 `{{INTEGRATION_NOTES}}`가 writing-plans 연계 문구로 치환 — 미치환 플레이스홀더 0건
   - ✅ harness:check 7항목 전체 통과 → **"표준 하네스 가동"** (이전 MVH에서 승격 — 품질 실패 2건이 그 사이 해결됨)
   - 관찰: 업그레이드가 CLAUDE.md/AGENTS.md의 watch 체인 표기 잔존(1.2.0 마이그레이션이 package.json만 수정하고 문서 본문 표기는 미수정)을 발견·정정하고 doc-stale 마찰로 기록 — 마찰 루프의 자기 치유 사례. 1회 발생이라 스킬 변경 없음 (반복 시 harness-feedback 경유 검토)
+
+---
+
+## Session 26: multi-model-consult 컴패니언 스킬 — 1.6.0 (2026-06-12)
+
+### TODO-74: 멀티모델 합성 자문 스킬 (PRD 구체화 + M1+M2 구현)
+- **상태**: [x] 완료 (2026-06-12, 1.6.0)
+- **파일**: `.tracking/prd-multi-model-consult.md` (Draft→Confirmed→Implemented), `companion-skills/multi-model-consult/SKILL.md` + `scripts/run-advisor.js` (신규), `install.sh` (심링크 추가)
+- **PRD 구체화**: 미결정 이슈 5건 해소 — 배치(companion+심링크, 사용자 결정), 하네스 연계(안정화 후, 사용자 결정), 아티팩트(수동 관리+.gitignore 제안), 타임아웃(180s+CONSULT_TIMEOUT_MS), 경로(기본 노출). 실물 검증 기반 추가 결정: **위험 플래그 폐기**(codex `-s read-only --ephemeral`, gemini `--yolo` 제거 — oh-my-claudecode 패턴은 자문에 과잉 권한), codex `-o` 최종 응답 캡처, 병렬=Claude 병렬 도구 호출, check-cli.js/templates/ 폐지(2파일 구조)
+- **구현 (M1+M2)**: run-advisor.js — env 스트립(CLAUDE*), CONSULT_DISABLE_EXTERNAL_LLM 스위치, 타임아웃 부분 결과, 아티팩트 저장(.claude/artifacts/consult/), `ARTIFACT:` 출력 계약, 종료 코드 4종. SKILL.md — 관점 분담 분해 가이드, 합성 4섹션 포맷, degradation 3경로, 외부 응답 인젝션 방어 제약
+- **실측 테스트**: ✅ 문법 / ✅ 종료 코드 경로(사용법 4, 비활성화 3, 미설치 2 — gemini 미설치로 실측) / ✅ env 스트립 단위 검증(CLAUDE* 제거, PATH·HOME 보존) / ✅ **codex 실호출 E2E** (5초, exit 0, 아티팩트 포맷 정확) / ✅ install.sh 심링크 → 스킬 디스커버리 즉시 확인
+- **잔여**: gemini 설치 시 양 CLI + 합성 경로 실사용 검증. 안정화 후 integrations.multiModelConsult 연계 + 통합 규약 일반화 (project-context §5)
