@@ -633,3 +633,40 @@
   - ✅ 해시 재현성 일치(AGENTS.md·session-routine.md 재렌더), 미치환 플레이스홀더 0, harness:check "표준 하네스 가동"
   - ✅ **1.5.0~1.6.4 구간 마이그레이션 불필요 실증** — 컴패니언/인프라 변경뿐이라 생성 하네스에 작업 0, M-1.6.4-to-1.7.0 한 개만 적용. 레지스트리 안내(§10.3)가 실전과 일치
   - 스킬 갭 없음 — 규약 일반화가 단일→다중 통합 전환에서 사양대로 동작
+
+---
+
+## Session 32: 깃 이슈 정리 — 1.7.1 (2026-06-13)
+
+> 열린 이슈 5건을 1.7.0 기준 대조. 해결 2건 닫기(#7·#8), 미해결 3건 구현 항목 등록(#4·#9·#6).
+
+### TODO-82: 부트스트랩 버전 정책 정정 (구 Issue #7) — 1.7.1
+- **상태**: [x] 완료 (2026-06-13, 이슈 #7 닫기)
+- **파일**: `references/upgrade-system-design.md` §5, `SKILL.md` §12.4
+- **문제**: 이슈 #7(1.0.0 시점) — 부트스트랩 시 profile "3.3" + manifest "1.0.0" 어긋남. semver 전환으로 정규 사양(SKILL.md)은 1.0.0 통일됐으나 upgrade-system-design.md §5가 "v0→v3.3", harness.version="3.3"으로 스테일 잔존
+- **해결**: §5 부트스트랩을 "v0 → 1.0.0"으로 정정, harness.version="1.0.0" + profile.version도 1.0.0 명시. SKILL.md §12.4에 profile/manifest 버전 일치 명문화. 실질 버그는 semver 전환으로 해결됨 — 문서 스테일만 정정
+
+### TODO-83: 컴패니언 스킬 글로벌 링크 (구 Issue #8) — 1.7.1
+- **상태**: [x] 완료 (2026-06-13, 이슈 #8 닫기)
+- **파일**: `install.sh`, `harness-scaffold/SKILL.md` §7, `references/project-context.md`
+- **문제**: 이슈 #8 — install.sh가 scaffold·multi-model-consult만 링크. harness-feedback/cleanup 누락 → 생성 CLAUDE.md "하네스 피드백 분석해줘" 안내와 디스커버리 불일치
+- **해결**: install.sh를 `companion-skills/*` 루프로 전환 (SKILL.md 있는 디렉토리만, ln -sfn 멱등). feedback·cleanup·multi-model-consult 전부 글로벌 링크. §7 운용 스킬 안내를 --add-dir → 자연어 호출로 정정. project-context 설계 결정 갱신(opt-in → 글로벌 일원화). 2회 멱등 + 자기참조 없음 실측
+
+### TODO-84: TDD 마찰 자동 기록 메커니즘 (구 Issue #9) — 구현 항목
+- **상태**: [ ] 미완료 (구현 항목 — 설계 필요)
+- **파일**: `templates/rules/session-routine.md`, (검토 시) Stop hook 또는 카운터 메커니즘
+- **문제**: 이슈 #9 — HARNESS_FRICTION.md 자동 기록이 산문 지시 의존. TDD 이벤트(implementer-retry 등) 자동 append 없어 마찰 로그 항상 비어 있고 harness-feedback 분석 데이터 0. (cleanup이 doc-stale 일부만 커버). multi-model-consult 자문에서 codex가 지적한 "LLM 산문 실행" 약점의 구체 사례
+- **해결 후보**: ① session-routine.md에 "Implementer 호출 직후 attempt 카운터 → ≥2면 HARNESS_FRICTION.md append"를 더 강한 명령형으로 (산문 강화, 저비용) ② Stop hook + friction-detect 스크립트로 claude-progress.txt/transcript 파싱 자동 append (강제, 복잡·hook 신뢰성 검증 필요) — 이슈 제안. **신중**: hook 복잡도 vs 산문 강화 trade-off, 실제 마찰 누적 데이터로 효과 측정. TODO-77(해시 결정화)과 같은 "LLM 산문 실행 약점" 계열
+
+### TODO-85: 인프라/설정 작업 트랙 (구 Issue #6) — 구현 항목
+- **상태**: [ ] 미완료 (부분 해결 — infra 트랙 미구현)
+- **파일**: `harness-scaffold/SKILL.md` §5.3(feature_list), `templates/rules/session-routine.md`
+- **문제**: 이슈 #6 — Plan 모드로 인프라 작업 시 TDD 우회. **세션 루틴 우회는 Plan 모드 통합(Issue #5, 1.0.0)으로 차단됨**(회귀체크·feature_list·완료처리 필수 명시). 잔존: feature_list에 infra category 부재, 설정 작업(30줄 미만 다파일)에 RED→GREEN TDD 부적합
+- **해결 후보**: feature_list 생성 규칙에 `category: "infra"` 가이드 + session-routine 간소화 조건에 "인프라/설정 작업: Architect·Test Engineer 스킵, 통합 검증(빌드+실동작)으로 대체" 트랙 추가. 단 TDD 우회 남용 방지 장치 필요 (infra 판정 기준 명확화)
+
+### TODO-86: 자동 커밋&푸시 confirm 모드 (구 Issue #4) — 구현 항목 (방향 확정)
+- **상태**: [ ] 미완료 (구현 항목 — confirm 모드 선택됨)
+- **파일**: 프로필 스키마(두 SKILL.md), `templates/rules/git-workflow.md`, `templates/rules/session-routine.md`, SKILL.md §4.2
+- **문제**: 이슈 #4(feat) — TDD 완료 시 자동 커밋&푸시. 현재 "제안만"("git commit 자동 안 함" 절대 규칙)
+- **결정** (사용자, 2026-06-13): **confirm 모드 옵션 구현**. 프로필 선택 필드 `autoCommit: { enabled, mode: confirm|auto|off, pushAfterCommit }`, 기본 생략=off(기존 제안만). confirm=diff+메시지 보여주고 승인 시 commit+push, auto=승인 없이. "승인 없이 git 실행 금지" 제약과 confirm은 호환
+- **해결 후보**: 새 플레이스홀더 `{{AUTO_COMMIT_MODE}}`(기본 off) → git-workflow.md "## 자동 커밋 정책" 섹션. session-routine 종료 절차가 모드 참조. §4.2 옵트인 질문. MINOR

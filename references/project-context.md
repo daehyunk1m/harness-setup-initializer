@@ -56,8 +56,8 @@
 │       ├── session-routine.md    # TDD 오케스트레이션 플로우
 │       └── coding-standards.md   # 아키텍처/네이밍 규칙
 ├── companion-skills/             # 컴패니언 스킬
-│   ├── harness-feedback/         # 마찰 로그 분석 → GitHub Issue (--add-dir opt-in)
-│   ├── harness-cleanup/          # 엔트로피 정리 — 운영 사이클 실행 주체 (--add-dir opt-in)
+│   ├── harness-feedback/         # 마찰 로그 분석 → GitHub Issue (install.sh 글로벌 링크)
+│   ├── harness-cleanup/          # 엔트로피 정리 — 운영 사이클 실행 주체 (install.sh 글로벌 링크)
 │   └── multi-model-consult/      # 멀티모델 합성 자문 — 하네스 비의존 범용 (install.sh 심링크, 글로벌)
 └── references/                   # 배경 문서 (스킬 실행 시 자동 로드 안 됨)
     ├── harness-guide.md          # Anthropic + OpenAI 통합 가이드
@@ -92,7 +92,7 @@
 | 배포 위치 | `~/.claude/skills/` | 글로벌 스킬, 모든 프로젝트에서 사용 |
 | 실행 모델 | 분석: 메인 세션 / 스캐폴딩: 메인 세션 (fork 제거) | fork는 권한/디렉토리/타임아웃 문제로 Skill 도구 체이닝 비호환. 두 스킬 모두 메인 세션에서 실행 |
 | 피드백 수집 | session-routine 지시 기반 (hook 아님) | TDD 내부 이벤트에 hook 불가, 오케스트레이터 지시로 충분 |
-| 컴패니언 스킬 배치 | companion-skills/ + --add-dir opt-in | 자동 활성화 않고 사용자 선택권 보장 |
+| 컴패니언 스킬 배치 | companion-skills/ + **install.sh 글로벌 링크** (1.7.1~ — 구 Issue #8) | 초기엔 --add-dir opt-in이었으나, 생성 CLAUDE.md가 "하네스 피드백 분석해줘"를 안내하는데 스킬이 디스커버 안 되는 불일치 발생. install.sh가 companion-skills/* 전부를 ~/.claude/skills/에 루프 링크하여 자연어 호출 가능 (사용자 결정) |
 | 업그레이드 시스템 | A(마이그레이션 레지스트리) + B(파일 카테고리 분리) | 사용자 커스터마이징 보존 + managed 파일 자동 갱신. 상세: `references/upgrade-system-design.md` |
 | 버전 추적 | `.harness-manifest.json` (단일 파일) | 파일별 주석 스탬프 대신 하나의 JSON으로 전체 상태 파악. 전체 profile 저장으로 재스캔 없이 재치환 |
 | 실전 테스트 전 준비도 | 전수 분석 후 바로 실행 가능 판정 | SKILL.md 100%, 템플릿 17/17, 플레이스홀더 21/21 매핑 완료. 7개 리스크는 TODO-45~51로 추적 |
@@ -109,12 +109,12 @@
 | detection.exclude 필드 | 프리셋 detection에 선택 필드 `exclude` — 나열된 패키지가 존재하면 후보 제외 | required가 범용 패키지(react, vite)인 프리셋이 더 구체적인 스택(next, react-router)을 오매칭하는 것을 방지. react-vite/express-api 프리셋 추가의 전제 조건 |
 | domain-based 검증 템플릿 | 동적 생성 → `templates/structural-test-domain.ts` 템플릿 채택. 도메인 목록은 실행 시점에 srcRoot 하위 디렉토리에서 발견 | 템플릿이 있어야 § 12.6 자동 감지가 동작 (해시 추적). 도메인 목록을 하드코딩하지 않아 도메인 추가/삭제 시 스크립트 수정 불필요. 공유 모듈은 프로필 `sharedDirs`(기본 ["shared"])로 치환. custom 유형만 동적 생성으로 남김 (자동 감지 제외) |
 | feature_list 추론 정책 | 라우트 기반(1순위) → 기능 모듈 기반(2순위) → 빈 배열(폴백). 상한 15개, 초과분은 보고에 명시 | 추론 기준이 모호하면 스캐폴딩마다 결과가 달라진다. 라우트가 사용자 관점 기능 단위와 가장 가깝고, 침묵 누락 금지 원칙(no silent caps) 적용 |
-| Cleanup 스킬 배치 | `companion-skills/harness-cleanup/` (별도 저장소 아님) | harness-feedback과 동일한 배포/호출 모델 (--add-dir opt-in). "별도 스킬" 결정(P10 범위 분리)은 유지하되 저장소는 단일화 — 설치·버전 관리 일원화 |
+| Cleanup 스킬 배치 | `companion-skills/harness-cleanup/` (별도 저장소 아님) | harness-feedback과 동일한 배포/호출 모델. "별도 스킬" 결정(P10 범위 분리)은 유지하되 저장소는 단일화. 1.7.1부터 install.sh 글로벌 링크 |
 | Cleanup 스킬 scope | 하네스 문서·상태 필드·잔존 산출물만 직접 수정. 소스 코드 동작 변경은 TECH_DEBT/feature_list 항목화로 TDD 사이클에 위임 | 정리 루프가 코드를 직접 고치면 TDD 파이프라인(테스트 우선)을 우회하게 된다. oh-my-claudecode ai-slop-cleaner의 "삭제 우선 + scope 제한" 패턴 채용. 루틴 판별은 docs/CLEANUP_LOG.md 경과 시간 기반 |
 | 외부 통합 메커니즘 | 프로필 선택 필드 `integrations.<name>` — 감지 시에만 질문(옵트인), 생략 = 미적용, 코어 충돌 영역 제외, 매핑 정본은 references/integrations/ | 코어 자급자족 유지. eslintAssist의 "감지 → 옵트인 → 생략 = 미적용" 패턴 재사용. 규약 문서화는 두 번째 통합 구현 시 일반화 (선례 1개로 규약화 안 함) |
 | superpowers 드리프트 대응 | 버전 호환 매트릭스 대신 **스캐폴딩 시점 스킬 실존 검증** (installPath/skills/{name} 확인 → 드롭+경고) | semver 범위 검사는 스킬 이름 변경을 못 잡는다. 실존 검증이 드리프트를 직접 잡음. detectedVersion은 정보용만 |
 | 통합의 managed 템플릿 처리 | 조건부 텍스트는 scaffold 임의 삽입이 아니라 **템플릿 플레이스홀더**(`{{INTEGRATION_NOTES}}`, 미연계 시 빈 문자열)로 | scaffold가 템플릿 밖 텍스트를 삽입하면 § 12.6 자동 감지(재렌더링 해시 비교)가 깨진다. 재렌더링 재현성 유지 |
-| multi-model-consult 배치 | companion-skills/ + **install.sh 심볼릭 링크** (글로벌 상시 로딩 — cleanup/feedback의 --add-dir opt-in과 다름) | 하네스 비의존 범용 도구라 프로젝트 무관 상시 가용이 맞음. 저장소·버전·배포는 일원화 (사용자 결정) |
+| multi-model-consult 배치 | companion-skills/ + **install.sh 심볼릭 링크** (글로벌 상시 로딩) | 하네스 비의존 범용 도구라 프로젝트 무관 상시 가용이 맞음. 저장소·버전·배포는 일원화 (사용자 결정). 1.7.1에서 feedback/cleanup도 같은 글로벌 링크로 일원화 (구 Issue #8) |
 | 자문 CLI 권한 최소화 | codex `-s read-only --ephemeral`, gemini `--yolo` 없이 — oh-my-claudecode의 dangerous 플래그 패턴 폐기 | 자문은 읽기 전용. 컨텍스트는 Claude가 프롬프트에 포함 (자문 모델에 저장소 쓰기 권한 불필요). codex `-o`로 최종 응답 파일 캡처 |
 | 외부 응답의 인젝션 방어 | 아티팩트 Raw Output은 데이터 — 합성 시 외부 응답 내 지시문 비추종 (SKILL.md 제약 명시) | 외부 모델 출력은 신뢰 경계 밖 |
 

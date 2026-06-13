@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -1152,10 +1152,10 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 **세션 종료**: validate → feature_list.json 업데이트 → progress 기록 → git-workflow.md 규칙에 따라 커밋 제안
 
 ### 운용 스킬 (선택)
-하네스 운용에 도움이 되는 컴패니언 스킬을 사용할 수 있습니다:
-- **엔트로피 정리**: `claude --add-dir ~/.claude/skills/harness-setup/companion-skills/harness-cleanup`
-  - 운영 사이클(주간/격주/월간)의 실행 주체 — 문서 부식 감지, QUALITY_SCORE 재측정, TECH_DEBT·승격 큐 검토, 문서-실구조 일치, passes 재검증. "하네스 정리"라고 요청
-- **피드백 분석**: `claude --add-dir ~/.claude/skills/harness-setup/companion-skills/harness-feedback`
+하네스 운용 컴패니언 스킬은 `install.sh`로 `~/.claude/skills/`에 글로벌 설치되어 자연어로 바로 호출할 수 있습니다 (별도 --add-dir 불필요):
+- **엔트로피 정리**: "하네스 정리"라고 요청 (harness-cleanup)
+  - 운영 사이클(주간/격주/월간)의 실행 주체 — 문서 부식 감지, QUALITY_SCORE 재측정, TECH_DEBT·승격 큐 검토, 문서-실구조 일치, passes 재검증
+- **피드백 분석**: "하네스 피드백 분석해줘"라고 요청 (harness-feedback)
   - docs/HARNESS_FRICTION.md에 누적된 마찰 이벤트를 분석하여 harness-setup 리포에 개선 Issue를 생성합니다
 ```
 

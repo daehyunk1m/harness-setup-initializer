@@ -5,6 +5,23 @@
 
 ---
 
+## [1.7.1] — 2026-06-13 (깃 이슈 정리: #7·#8 해결)
+
+> 열린 이슈 5건을 1.7.0 기준 대조 — 해결 2건 수정·닫기, 미해결 3건 구현 항목 등록. PATCH (버그 수정 + 인프라)
+
+### 수정됨 (Fixed) — Session 32 (2026-06-13)
+- install.sh: `companion-skills/*` 루프로 전환 (구 Issue #8) — harness-feedback·harness-cleanup도 글로벌 링크. 생성 CLAUDE.md의 "하네스 피드백 분석해줘" 안내와 디스커버리 일치. SKILL.md 있는 디렉토리만, ln -sfn 멱등. harness-scaffold §7 운용 스킬 안내 --add-dir → 자연어 호출 정정 (TODO-83)
+- references/upgrade-system-design.md §5 + SKILL.md §12.4: 부트스트랩 버전 정책 "v0→v3.3"/harness.version="3.3" 스테일 → "1.0.0" 통일, profile/manifest 버전 일치 명문화 (구 Issue #7 — 실질 버그는 semver 전환으로 해결됨, 문서 스테일 정정) (TODO-82)
+- 프로필 스키마 version "1.7.1" 동기 (계약 변경 없음)
+- references/project-context.md: 컴패니언 배치 설계 결정 갱신 (opt-in → install.sh 글로벌 링크 일원화)
+
+### 구현 항목 등록 (미해결 이슈) — Session 32
+- TODO-84 (Issue #9): TDD 마찰 자동 기록 — 산문 강화 vs Stop hook, 신중 설계
+- TODO-85 (Issue #6): 인프라/설정 작업 트랙 — 세션 루틴 우회는 Plan 통합으로 차단됨(부분 해결), infra category·TDD 적합성 잔존
+- TODO-86 (Issue #4): 자동 커밋 confirm 모드 — 방향 확정(confirm/auto/off), autoCommit 프로필 필드 + {{AUTO_COMMIT_MODE}}
+
+---
+
 ## [1.7.0] — 2026-06-13 (외부 통합 규약 일반화 + multi-model-consult 등록)
 
 > superpowers·multi-model-consult 두 선례에서 공통 패턴 추출 → `integrations.<name>` 메커니즘 일반화 (TODO-81). MINOR (새 통합 등록 + 규약 신설 + 마이그레이션)

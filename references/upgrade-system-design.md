@@ -343,9 +343,11 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 
 ---
 
-## 5. 부트스트랩 마이그레이션 (v0 → v3.3)
+## 5. 부트스트랩 마이그레이션 (v0 → 1.0.0)
 
 manifest 없이 셋업된 기존 프로젝트를 버전 관리 체계에 편입시키는 절차.
+
+> **정책**: semver 전환(1.0.0) 이후 부트스트랩은 profile/manifest 모두 `"1.0.0"`으로 통일한다. 정규 사양은 `SKILL.md § 12.4`. pre-versioning "3.3" 표기는 폐기됐다 (구 Issue #7의 profile/manifest 버전 어긋남 해결).
 
 ### 5.1 흐름
 
@@ -364,7 +366,7 @@ Step 2: 프로필 추론
   추론 실패 시 → 사용자에게 질문 (재스캔 아닌 포커스드 질문)
 
 Step 3: 초기 manifest 생성
-  - harness.version = "3.3" (마지막 pre-versioning 릴리스)
+  - harness.version = "1.0.0" (semver 시작 버전) — profile.version도 동일하게 "1.0.0"
   - 모든 기존 파일의 현재 내용을 해시하여 templateHash로 기록
   - 카테고리는 § 2.2 테이블에 따라 할당
 
@@ -373,7 +375,7 @@ Step 4: 사용자 확인
    .harness-manifest.json을 생성합니다."
   추론된 프로필 표시 → 사용자 확인/수정
 
-Step 5: manifest 쓰기 → 정상 업그레이드 플로우 (3.3 → current) 진입
+Step 5: manifest 쓰기 → 정상 업그레이드 플로우 (1.0.0 → current) 진입
 ```
 
 ### 5.2 설계 결정

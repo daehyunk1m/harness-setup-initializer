@@ -526,7 +526,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.7.0",
+  "version": "1.7.1",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -1000,7 +1000,7 @@ Step 2: 프로필 추론
   추론 실패 시 → 사용자에게 포커스드 질문
 
 Step 3: 초기 manifest 생성
-  - harness.version = "1.0.0" (semver 시작 버전)
+  - harness.version = "1.0.0" (semver 시작 버전) — 업그레이드 시 저장하는 profile.version도 "1.0.0"으로 통일한다 (profile/manifest 버전 일치 — 구 Issue #7 해결)
   - 모든 기존 파일의 현재 내용을 해시하여 templateHash로 기록
   - 카테고리는 § 12.2 테이블에 따라 할당
 
