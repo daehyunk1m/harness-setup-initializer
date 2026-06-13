@@ -512,7 +512,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.6.2",
+  "version": "1.6.3",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",

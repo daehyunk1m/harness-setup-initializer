@@ -95,8 +95,12 @@
   - **multi-model-consult 첫 실사용**: 자문 대상 = 이 스킬 구조 자체. codex(결함 관점, 61초) + Claude(대안 관점) 합성, gemini 부재 degradation 경로 실동작. 10개 권고 중 4건 선별 수용 — "판단은 LLM, 계약-임계 역학은 코드" 경계
   - 적용: Stop hook `approved` 검사 (TODO-76, 5케이스 시뮬레이션), § 5.15 ESLint 비실행 원칙 (TODO-78), .gitignore에 .claude/artifacts/
   - 등록: TODO-77 (§ 12.6 해시 재현성 결정화 — 오탐 마찰 누적 시 착수), TODO-53에 픽스처 매트릭스 병합
+- **Session 28 (06-13)**: 1.6.3 — gemini trust 게이트 수정 + 첫 3중 합성 (TODO-77/79)
+  - **gemini CLI 설치 후 첫 3중 합성**: 자문 대상 = TODO-77 설계 결정. gemini 헤드리스 trusted-directory 게이트(exit 55) 갭 발견·수정 (TODO-79: `--approval-mode plan --skip-trust`, plan=codex -s read-only 대응). 실측 exit 55→0
+  - **TODO-77 C안 확정**: 3중 합성(codex source-fingerprint + gemini 멱등성)이 단일 모델의 A/B 이분법보다 나은 제3안 도출. `templateSourceHash`로 템플릿 변경 판정 → LLM 재렌더링 암묵 계약 제거. 구현은 별도 (manifest 스키마 MINOR)
+  - 도그푸딩 성과: 자문 스킬이 자기 설계 결정에 실제로 기여 + 자기 갭을 발견
 
-**현재 버전: 1.6.2** (멀티모델 자문 권고 반영)
+**현재 버전: 1.6.3** (gemini trust 게이트 수정 + 첫 3중 합성)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

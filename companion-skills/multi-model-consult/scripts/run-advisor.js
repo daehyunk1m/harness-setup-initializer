@@ -32,14 +32,18 @@ function stripClaudeEnv(env) {
   return cleaned;
 }
 
-// 자문은 읽기 전용이다 — 위험 플래그(--dangerously-*, --yolo)를 쓰지 않는다
+// 자문은 읽기 전용이다 — 위험 플래그(--dangerously-*, --yolo)를 쓰지 않는다.
+//   codex:  -s read-only (샌드박스)
+//   gemini: --approval-mode plan (read-only 모드, codex -s read-only 대응)
+//           --skip-trust 는 헤드리스 trusted-directory 게이트를 세션 한정으로 통과시킨다.
+//           자문은 파일을 수정하지 않고(plan 모드) 컨텍스트는 프롬프트에 포함되므로 안전하다.
 function buildArgs(provider, prompt, outFile) {
   if (provider === 'codex') {
     return ['exec', '-s', 'read-only', '--ephemeral', '--skip-git-repo-check',
             '--color', 'never', '-o', outFile, prompt];
   }
   if (provider === 'gemini') {
-    return ['-p', prompt];
+    return ['-p', prompt, '--approval-mode', 'plan', '--skip-trust'];
   }
   throw new Error(`unknown provider: ${provider}`);
 }

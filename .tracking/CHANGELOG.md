@@ -5,6 +5,20 @@
 
 ---
 
+## [1.6.3] — 2026-06-13 (gemini trust 게이트 수정 + 첫 3중 합성)
+
+> gemini CLI 설치 후 첫 3중 합성 테스트(자문 대상: TODO-77 설계 결정)에서 실제 스킬 갭 발견·수정. PATCH (버그 수정)
+
+### 수정됨 (Fixed) — Session 28 (2026-06-13)
+- companion-skills/multi-model-consult/scripts/run-advisor.js: gemini buildArgs에 `--approval-mode plan --skip-trust` 추가 (TODO-79) — gemini v0.46.0의 헤드리스 trusted-directory 게이트(exit 55)로 비신뢰 디렉토리 자문이 전부 실패하던 버그. plan 모드는 codex `-s read-only` 대응(읽기 전용), skip-trust는 세션 한정. 실측: exit 55 → exit 0
+- SKILL.md 제약: gemini 읽기전용/trust 처리 명문화
+- 프로필 스키마 version "1.6.3" 동기 (계약 변경 없음)
+
+### 변경 (Changed) — Session 28 (2026-06-13)
+- TODO-77 방향 확정: **3중 합성 자문 결과로 C안(templateSourceHash) 채택** — 초안의 A/B 이분법 폐기. codex의 source-fingerprint 통찰(비교 대상을 "재렌더링 결과"에서 "소스 템플릿 파일 해시"로 → LLM 재렌더링 암묵 계약 제거) + gemini 멱등성 통찰 흡수, "자동 감지 폐기"는 거부(TODO-58 회귀). 첫 3중 합성이 단일 모델의 A/B 이분법보다 나은 제3안 도출 — 도그푸딩 성과
+
+---
+
 ## [1.6.2] — 2026-06-12 (멀티모델 자문 권고 반영)
 
 > multi-model-consult 첫 실사용 — 자문 대상은 이 스킬 구조 자체 (codex 결함 관점 61초 + Claude 대안 관점 합성). 10개 권고 중 4건 선별 수용 ("판단은 LLM, 계약-임계 역학은 코드" 경계 유지). PATCH (규칙 명확화 + hook 보강)

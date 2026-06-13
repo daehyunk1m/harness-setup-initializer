@@ -578,14 +578,25 @@
 - **문제**: Stop hook이 "프로필 존재+매니페스트 부재"만 검사 — 승인 전 초안, 손상, 수동 작성 프로필에서도 scaffold를 강제할 수 있음 (codex 자문 지적 #3)
 - **해결**: hook 조건에 `grep -Eq '"approved"\s*:\s*true'` 추가. 승인은 § 4 Step 5에서만 기록되므로 정상 플로우 동작 동일. 5케이스 시뮬레이션 검증 (승인+무매니페스트→BLOCK, 미승인/필드없음/매니페스트존재/둘다없음→ALLOW)
 
-### TODO-77: 템플릿 재렌더링 해시 재현성 결정화 검토
-- **상태**: [ ] 미완료
-- **파일**: `SKILL.md` § 12.6, (검토 시) `scripts/render-template.*` 신규
-- **문제**: § 12.6 자동 감지가 "LLM이 템플릿을 바이트 단위로 동일하게 재렌더링한다"에 의존 — 산문 실행 중 가장 기계적 정밀성이 필요한 급소 (codex 자문 #1·#4, Claude도 동의한 유일한 코드화 후보). 공백/줄바꿈/치환 미세 차이가 오탐(템플릿 변경으로 오판)을 만들 수 있음
-- **해결 후보**: ① § 12.6에 LF 정규화 + 비교 전 정규화 규칙 명시 (저비용) ② 치환 전용 결정적 스크립트(sed/node) 도입 — 렌더링만 코드화하고 판단은 LLM 유지 ("판단은 LLM, 계약-임계 역학은 코드" 경계). 실전 업그레이드에서 오탐 마찰이 기록되면 ② 착수, 그 전에는 ①만
+### TODO-77: 템플릿 변경 감지를 source fingerprint로 전환 (§ 12.6) — C안 확정
+- **상태**: [ ] 미완료 (방향 확정 — 3중 합성 자문 결과, 2026-06-13)
+- **파일**: `SKILL.md` § 12.6 / § 5(manifest 스키마), `harness-scaffold/SKILL.md` § 5.13(manifest 생성)
+- **문제**: § 12.6 자동 감지가 "LLM이 템플릿을 바이트 단위로 동일하게 재렌더링한다"(expectedHash)에 의존 — 산문 실행 중 가장 기계적 정밀성이 필요한 급소. 공백/줄바꿈/치환 미세 차이가 "템플릿 변경" 오탐을 유발 가능 (현재까지 실제 마찰 0건 — 이론적)
+- **3중 합성 자문 결론 (codex+gemini+Claude, 아티팩트 2026-06-13T03-10)**: 초안의 A/B 이분법 폐기. **C안 채택** —
+  - codex 핵심 통찰: 비교 대상이 틀렸다. "재렌더링 결과 vs 과거 배포 파일"은 *소스 템플릿 변경*과 *렌더링 재현 실패*를 섞는다 → 구조적 false positive. 대신 **manifest에 `templateSourceHash`(생성 당시 소스 템플릿 *파일*의 해시) 추가**, 템플릿 변경 = `현재 소스 템플릿 해시 ≠ templateSourceHash` → **LLM 재렌더링 자체가 불필요**. `templateHash`는 사용자 수정 감지용(currentFileHash 비교)으로 유지
+  - gemini 통찰 흡수: "미수정 파일은 재렌더링 비교가 무의미 — 덮어쓸 거면 그냥 덮어쓴다" → C안이 자연 달성 (덮어쓸 때 실제 쓴 파일에서 새 templateHash 계산)
+  - gemini "자동 감지 전체 폐기"는 **거부** — TODO-58(빈 레지스트리에서도 템플릿 변경 감지) 회귀이므로
+  - A(LF 정규화)는 폐기 아님 — templateHash/currentFileHash 비교(사용자 수정 판정)의 보조 규칙으로 잔존. B(전체 렌더러 코드화)는 트리거 조건부 보류 (해시 오탐 2건 이상 재현 / 플레이스홀더 30개 초과 / profile만으로 정밀 재렌더 요구 / CI 렌더 비결정성 관찰)
+- **구현 범위** (착수 시): manifest 스키마에 `templateSourceHash` + 선택 `renderSpecVersion` 추가 (MINOR), § 12.6 판정식 교체, legacy manifest 호환(templateSourceHash 없으면 backfill 경로 — 깨끗한 상태면 현재 소스 해시 backfill, 사용자 수정 상태면 기존 판정 1회). § 12.6.1 매핑(배포파일↔소스템플릿)이 이미 있으므로 source 해시 계산 기반은 확보됨
 
 ### TODO-78: ESLint 설정 비실행 원칙 명문화
 - **상태**: [x] 완료 (2026-06-12, 1.6.2)
 - **파일**: `harness-scaffold/SKILL.md` § 5.15
 - **문제**: 폴백 규칙은 있었으나 "삽입 지점 탐색을 위해 설정 JS를 실행/평가하지 않는다"가 명문화되지 않음 (codex 자문 #8 — codex·Claude 합의)
 - **해결**: 비실행 원칙 추가 (import/require/eval 금지, 텍스트 파싱만). 수정 후 프로젝트 자체 eslint 실행은 validate와 동급으로 허용 — 경계 명시
+
+### TODO-79: gemini trusted-directory 게이트 갭 수정 (1.6.3)
+- **상태**: [x] 완료 (2026-06-13)
+- **파일**: `companion-skills/multi-model-consult/scripts/run-advisor.js`, `SKILL.md`(제약)
+- **문제**: gemini CLI v0.46.0이 헤드리스 실행 시 "trusted-directory" 게이트로 차단 (exit 55, "not running in a trusted directory"). codex `-s read-only`에 대응하는 gemini 쪽 읽기전용/신뢰 처리가 buildArgs에 누락 — gemini는 `['-p', prompt]`만 전달해 모든 비신뢰 디렉토리에서 자문 실패. 첫 3중 합성 테스트에서 발견
+- **해결**: gemini buildArgs에 `--approval-mode plan`(읽기전용 — codex -s read-only 대응) + `--skip-trust`(세션 한정 trust 게이트 통과) 추가. plan 모드라 파일 수정 불가 + 컨텍스트는 프롬프트 포함이라 안전. 실측 검증: 수정 전 exit 55 → 수정 후 exit 0, 응답 정상. SKILL.md 제약에 명문화
