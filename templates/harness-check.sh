@@ -99,7 +99,8 @@ fi
 echo ""
 echo "═══ 판정 ═══"
 if [ "$STRUCT_FAIL" -eq 0 ] && [ "$QUALITY_FAIL" -eq 0 ]; then
-  echo "✅ 표준 하네스 가동 — 모든 필수 항목 통과"
+  echo "✅ 표준 하네스 가동 — 구조·실행 항목 통과"
+  echo "ℹ️ 이 판정은 구조 설치+실행 가능성만 확인합니다 — 문서·규칙의 의미 정확성(분류·의존성 규칙이 옳은지)은 별도 검토 권장"
   exit 0
 elif [ "$STRUCT_FAIL" -eq 0 ]; then
   echo "⚠️ 하네스 구조 정상 — 프로젝트 품질 검증 실패 (④⑤ 항목 확인)"
