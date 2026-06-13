@@ -118,7 +118,11 @@
   - #8: install.sh companion-skills/* 루프 → feedback/cleanup 글로벌 링크 (CLAUDE.md 안내와 일치). #7: 부트스트랩 "3.3"→"1.0.0" 문서 정정
   - 미해결 3건 구현 항목: TODO-84(마찰 자동 기록), TODO-85(인프라 트랙), TODO-86(자동 커밋 confirm 모드 — 방향 확정)
 
-**현재 버전: 1.7.1** (깃 이슈 정리: #7·#8 해결)
+- **Session 33 (06-13)**: 1.8.0 — 자동 커밋 confirm 모드 (TODO-86, 이슈 #4)
+  - 프로필 선택 필드 `autoCommit`(mode off/confirm/auto + pushAfterCommit), 생략=off(기존 제안만). 새 플레이스홀더 2종(26→28), git-workflow.md 자동 커밋 정책 섹션
+  - "승인 없이 git 실행 금지" 절대 규칙과 호환: confirm=승인이 곧 확인, auto=명시 옵트인, 위험 작업은 항상 제안. 마이그레이션 불필요(managed 자동 감지 + 생략 기본)
+
+**현재 버전: 1.8.0** (자동 커밋 confirm 모드)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

@@ -5,6 +5,24 @@
 
 ---
 
+## [1.8.0] — 2026-06-13 (자동 커밋 confirm 모드)
+
+> 구 Issue #4(자동 커밋&푸시) 구현 — TODO-86. MINOR (새 프로필 선택 필드 + 새 플레이스홀더 2종 + git-workflow 정책)
+
+### 추가 (Added) — Session 33 (2026-06-13)
+- 프로필 선택 필드 `autoCommit: { mode: off|confirm|auto, pushAfterCommit }` (두 SKILL.md 동기) — 생략=off(기존 제안만). confirm=커밋 메시지+diff 보여주고 승인 후 commit+push, auto=승인 없이, off=제안만
+- 새 플레이스홀더 `{{AUTO_COMMIT_MODE}}`·`{{AUTO_COMMIT_PUSH}}` (26→28개) → templates/rules/git-workflow.md "## 자동 커밋 정책" 섹션 (모드별 동작 명세). harness-scaffold §5.11.3 치환 테이블
+- SKILL.md §4.2 자동 커밋 옵트인 질문(우선순위 5) + §5 필드규칙 + §4.4 기본값(off) + §4.3 완성 항목
+
+### 수정 (Changed) — Session 33 (2026-06-13)
+- templates/rules/git-workflow.md 금지사항: "사용자 확인 없이 git 실행 금지(제안만)" → autoCommit 모드 조건부화. off=제안만, confirm/auto=정책 따름, force/reset/no-verify는 모드 무관 항상 금지 ("승인 없이 git 실행 금지" 절대 규칙과 호환)
+- templates/rules/session-routine.md: 기능 완료 처리·세션 종료 커밋 단계가 자동 커밋 정책 모드 참조
+- manifest profile 보존 목록(§5.13)에 autoCommit 추가, 프로필 스키마 version "1.8.0" 동기
+- 마이그레이션 불필요: git-workflow.md(managed)는 자동 감지 전파(기존 하네스에 mode=off 섹션 무해 추가), 프로필 생략=off 기본 (§10.3 판단 기준 안내 보강)
+- **안전 가드레일** (적대적 검증 반영): 위험 작업(push --force·reset --hard·no-verify·대규모 변경·의존성)은 auto 모드에서도 항상 사용자 승인 — git-workflow.md 금지 사항·session-routine 커밋 단계·§4.2 옵트인 질문 3곳에 명시. autoCommit이 자동화하는 것은 정상 TDD 커밋뿐
+
+---
+
 ## [1.7.1] — 2026-06-13 (깃 이슈 정리: #7·#8 해결)
 
 > 열린 이슈 5건을 1.7.0 기준 대조 — 해결 2건 수정·닫기, 미해결 3건 구현 항목 등록. PATCH (버그 수정 + 인프라)

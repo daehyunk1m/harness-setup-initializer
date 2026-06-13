@@ -664,9 +664,18 @@
 - **문제**: 이슈 #6 — Plan 모드로 인프라 작업 시 TDD 우회. **세션 루틴 우회는 Plan 모드 통합(Issue #5, 1.0.0)으로 차단됨**(회귀체크·feature_list·완료처리 필수 명시). 잔존: feature_list에 infra category 부재, 설정 작업(30줄 미만 다파일)에 RED→GREEN TDD 부적합
 - **해결 후보**: feature_list 생성 규칙에 `category: "infra"` 가이드 + session-routine 간소화 조건에 "인프라/설정 작업: Architect·Test Engineer 스킵, 통합 검증(빌드+실동작)으로 대체" 트랙 추가. 단 TDD 우회 남용 방지 장치 필요 (infra 판정 기준 명확화)
 
-### TODO-86: 자동 커밋&푸시 confirm 모드 (구 Issue #4) — 구현 항목 (방향 확정)
-- **상태**: [ ] 미완료 (구현 항목 — confirm 모드 선택됨)
+### TODO-86: 자동 커밋&푸시 confirm 모드 (구 Issue #4)
+- **상태**: [x] 완료 (2026-06-13, 1.8.0 — 이슈 #4 닫기)
 - **파일**: 프로필 스키마(두 SKILL.md), `templates/rules/git-workflow.md`, `templates/rules/session-routine.md`, SKILL.md §4.2
 - **문제**: 이슈 #4(feat) — TDD 완료 시 자동 커밋&푸시. 현재 "제안만"("git commit 자동 안 함" 절대 규칙)
 - **결정** (사용자, 2026-06-13): **confirm 모드 옵션 구현**. 프로필 선택 필드 `autoCommit: { enabled, mode: confirm|auto|off, pushAfterCommit }`, 기본 생략=off(기존 제안만). confirm=diff+메시지 보여주고 승인 시 commit+push, auto=승인 없이. "승인 없이 git 실행 금지" 제약과 confirm은 호환
 - **해결 후보**: 새 플레이스홀더 `{{AUTO_COMMIT_MODE}}`(기본 off) → git-workflow.md "## 자동 커밋 정책" 섹션. session-routine 종료 절차가 모드 참조. §4.2 옵트인 질문. MINOR
+
+### TODO-86 구현 결과 (1.8.0)
+- 프로필 선택 필드 `autoCommit: { mode: off|confirm|auto, pushAfterCommit }` — 생략=off(기존 제안만), enabled 필드는 제거(mode로 통일)
+- 새 플레이스홀더 2종 `{{AUTO_COMMIT_MODE}}`·`{{AUTO_COMMIT_PUSH}}` (26→28개) → git-workflow.md "## 자동 커밋 정책" 섹션
+- git-workflow.md: 자동 커밋 정책 섹션(모드별 동작) + 금지사항 조건부화("off면 제안만, confirm/auto는 정책 따름, force/reset은 모드 무관 금지")
+- session-routine.md: 기능 완료 처리·세션 종료 커밋 단계가 자동 커밋 정책 모드 참조
+- SKILL.md §4.2 옵트인 질문 + §5 필드규칙 + §4.4 기본값 + §4.3 완성 항목, 두 SKILL.md 스키마 동기
+- "승인 없이 git 실행 금지" 절대 규칙과 호환: off=제안만, confirm=승인이 곧 확인, auto=명시 옵트인=사전 포괄 승인. 위험 작업은 어느 모드든 항상 제안
+- 마이그레이션 불필요: git-workflow.md(managed) 변경은 자동 감지 전파, 프로필 생략=off 기본

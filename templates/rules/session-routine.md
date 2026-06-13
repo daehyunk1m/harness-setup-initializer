@@ -213,9 +213,10 @@ TDD 사이클이 성공적으로 완료되면:
    - TDD STATE 블록 제거 (사이클 완료)
    - 세션 요약 추가
 
-3. git commit 제안 (git-workflow.md 규칙 참조):
+3. git commit (git-workflow.md 규칙 참조):
    - "feat({scope}): {description} - {featureID}"
    - scope는 git-workflow.md의 커밋 스코프에서 선택
+   - **커밋 실행 방식은 git-workflow.md § 자동 커밋 정책의 모드를 따른다** (off=제안만 / confirm=승인 후 / auto=자동). 단 위험 작업(force/reset/no-verify·대규모 변경·의존성)은 모드 무관 항상 제안만 한다 (git-workflow.md § 금지 사항)
 ```
 
 ---
@@ -229,7 +230,7 @@ TDD 사이클이 성공적으로 완료되면:
 4. 진행 중인 TDD 사이클이 있으면:
    - TDD STATE 블록 저장
    - 마찰 로그 기록 (session-incomplete)
-5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 제안:
+5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 (§ 자동 커밋 정책 모드: off=제안 / confirm=승인 후 / auto=자동):
    - TDD 사이클 완료: feat 커밋
    - 사이클 미완료: checkpoint 커밋 (chore({scope}): checkpoint — {상태})
    - 코드는 반드시 빌드 가능한 상태여야 한다

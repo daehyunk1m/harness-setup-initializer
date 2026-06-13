@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.7.1",
+  "version": "1.8.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -129,6 +129,10 @@ fi
     "branchPrefixes": ["feature/", "fix/", "docs/", "refactor/", "chore/"],
     "mainBranch": "main"
   },
+  "autoCommit": {
+    "mode": "confirm",
+    "pushAfterCommit": true
+  },
   "docFreshnessDays": 14,
   "eslintAssist": {
     "enabled": true,
@@ -169,6 +173,7 @@ fi
 - `scripts.test`는 **비대화형(단발 실행) 명령**이다 — watch 기본 러너(예: `vitest` 단독)는 분석 단계에서 `npm run test:run` 형태로 기록되며, § 5.5가 `test:run` 키를 package.json에 추가한다. `{{TEST_COMMAND}}`와 `{{VALIDATE_COMMAND}}`의 안전성이 이 규칙에 의존한다.
 - `sharedDirs`는 **domain-based 전용** 선택 필드다 — structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]`.
 - `integrations`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드, `integrations.<name>` 구조). 생략 시 외부 연계 산출물을 생성하지 않는다 (§ 5.16). 통합 메커니즘 규약: `references/integrations/_protocol.md`. 각 통합의 연계 내용은 `references/integrations/<name>-mapping.md`가 정본. superpowers의 `linkedSkills`는 매핑 정본의 연계/선택 목록에 있는 것만 렌더링된다.
+- `autoCommit`은 사용자가 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 `mode: "off"`로 간주하여 git-workflow.md의 `{{AUTO_COMMIT_MODE}}`를 `off`로 치환한다 (제안만 — 기존 동작).
 - `extras`의 각 항목은 문답에서 확인된 경우에만 존재한다. 없는 키는 해당 섹션 생략을 의미한다.
 - `eslintAssist`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드 — 프리셋 비대상, 감지+문답 전용). 생략 시 ESLint 설정을 수정하지 않는다 (§ 5.15). `configFormat`은 설정 파일 형식: `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*).
 - `existingFiles`에 포함된 파일은 이미 프로젝트에 존재하는 파일이다.
@@ -746,6 +751,8 @@ git-workflow.md:
 | `{{BRANCH_PREFIX_POLICY_FORMATTED}}` | 프로필 git.branchPrefixes 배열을 줄바꿈 + 주석 형식으로 렌더 | `feature/  # 새 기능`\n`fix/  # 버그 수정`\n`docs/  # 문서 변경`\n`refactor/  # 구조 개선`\n`chore/  # 설정/도구` |
 | `{{MAIN_BRANCH}}` | 프로필 git.mainBranch 또는 `git branch` 감지 | `main` |
 | `{{VALIDATE_COMMAND}}` | 프로필 scripts.validate | `npm run validate` |
+| `{{AUTO_COMMIT_MODE}}` | 프로필 autoCommit.mode | `off` |
+| `{{AUTO_COMMIT_PUSH}}` | 프로필 autoCommit.pushAfterCommit → 라벨 (`true` → `예 (커밋 후 자동 push)`, `false` → `아니오 (push는 수동)`) | `예 (커밋 후 자동 push)` |
 
 #### 5.11.4 CLAUDE.md와의 역할 분리
 
@@ -821,6 +828,10 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
       "branchPrefixes": ["feature/", "fix/", "docs/", "refactor/", "chore/"],
       "mainBranch": "main"
     },
+    "autoCommit": {
+      "mode": "confirm",
+      "pushAfterCommit": true
+    },
     "docFreshnessDays": 14,
     "eslintAssist": {
       "enabled": true,
@@ -862,7 +873,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 
 #### 생성 규칙
 
-1. **profile 저장**: `.harness-profile.json`의 프로필 데이터 중 다음 필드를 `profile`에 저장한다 — 모든 플레이스홀더 재치환과 업그레이드 외과 수정의 원천이다: `architectureType`, `srcRoot`, `pathAlias`, `layers`, `naming`, `devServer`, `scripts`, `tdd`, `git`, `docFreshnessDays`, `eslintAssist`(있는 경우만), `sharedDirs`(있는 경우만), `integrations`(있는 경우만).
+1. **profile 저장**: `.harness-profile.json`의 프로필 데이터 중 다음 필드를 `profile`에 저장한다 — 모든 플레이스홀더 재치환과 업그레이드 외과 수정의 원천이다: `architectureType`, `srcRoot`, `pathAlias`, `layers`, `naming`, `devServer`, `scripts`, `tdd`, `git`, `autoCommit`, `docFreshnessDays`, `eslintAssist`(있는 경우만), `sharedDirs`(있는 경우만), `integrations`(있는 경우만).
 2. **해시 계산**: 각 생성 파일의 내용을 SHA-256으로 해싱하여 `files.{path}.templateHash`에 기록한다.
    ```bash
    node -e "const c=require('crypto'),f=require('fs'); console.log('sha256:'+c.createHash('sha256').update(f.readFileSync(process.argv[1],'utf8')).digest('hex'))" {file}
@@ -1510,6 +1521,8 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
    - 기본값: 미연계 (생략) — 자동 추가하지 않음
 
 > 새 버전을 추가할 때 마이그레이션이 필요한지 판단 기준: ① custom 파일 외과 수정 ② [new]/[remove] 파일 ③ [profile] 기본값 있는 새 필드 ④ [data] 스키마 변경 — 이 중 하나라도 해당하면 등록한다. managed 템플릿 변경·컴패니언 스킬·인프라 수정은 등록하지 않는다.
+>
+> **1.7.1**(이슈 정리·install.sh 인프라)과 **1.8.0**(autoCommit)도 위 기준상 마이그레이션이 없다 — autoCommit은 git-workflow.md(managed)에 `{{AUTO_COMMIT_MODE}}` 추가이므로 § 12.6 자동 감지로 전파되고(기존 하네스는 mode=off 섹션이 덧붙음, 무해), 프로필 필드는 생략=off라 기존 프로필에 추가 불필요.
 
 ### 10.4 엣지 케이스
 

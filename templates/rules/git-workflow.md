@@ -84,6 +84,21 @@ type(scope): 설명
 
 ---
 
+## 자동 커밋 정책
+
+- **모드**: {{AUTO_COMMIT_MODE}}  (off | confirm | auto)
+- **커밋 후 푸시**: {{AUTO_COMMIT_PUSH}}
+
+모드별 동작 (커밋 시점은 § 체크포인트 커밋·§ 세션 종료와 동일):
+
+- **off** (기본): 커밋을 **제안만** 한다. 실제 commit/push는 사용자가 직접 실행한다 (§ 금지 사항 따름).
+- **confirm**: 커밋 시점에 커밋 메시지와 `git diff --stat`을 보여주고, 사용자 승인(y) 후 commit한다. "커밋 후 푸시"가 예이면 commit 직후 push까지. 사용자가 메시지 수정을 요청하면 반영 후 재확인. 승인 거부 시 제안 상태로 남긴다.
+- **auto**: 사용자 확인 없이 commit한다 ("커밋 후 푸시"가 예이면 push까지). 사용자가 명시적으로 auto를 옵트인한 경우에만 활성이다.
+
+> 모드가 off가 아니어도 § 금지 사항의 안전 규칙(force/reset/no-verify 금지)과 "위험 작업(대규모 리팩터링·의존성 변경·force)은 모드 무관 항상 제안만"은 변하지 않는다.
+
+---
+
 ## 세션 경계
 
 ### 세션 시작
@@ -92,11 +107,11 @@ type(scope): 설명
 3. claude-progress.txt의 TDD STATE 블록과 git 이력의 정합성 확인
 
 ### 세션 종료
-1. 미커밋 변경이 있으면 커밋을 제안한다:
+1. 미커밋 변경이 있으면 § 자동 커밋 정책의 모드에 따라 커밋한다:
    - TDD 사이클 완료 시: feat 커밋
    - 사이클 미완료 시: checkpoint 커밋
 2. 코드는 반드시 빌드 가능한 상태여야 한다
-3. `{{VALIDATE_COMMAND}}` 통과 후 커밋 제안
+3. `{{VALIDATE_COMMAND}}` 통과 후 커밋 (off 모드면 제안)
 
 ---
 
@@ -106,4 +121,5 @@ type(scope): 설명
 - `git reset --hard` 무단 사용 금지
 - `--no-verify` 옵션 사용 금지
 - `.claude/settings.local.json` 커밋 금지
-- 사용자 확인 없이 git 명령을 실행하지 않는다 (제안만 한다)
+- **autoCommit 모드가 off(기본)이면 git commit/push를 제안만 한다** — 사용자 확인 없이 실행하지 않는다. confirm/auto 모드는 § 자동 커밋 정책을 따른다.
+- **위험 작업은 autoCommit 모드와 무관하게 항상 사용자 승인을 받는다 (auto 모드도 예외 없음)**: `push --force`·`reset --hard`·`--no-verify`는 어느 모드에서도 자동 실행하지 않으며, 대규모 변경(5+ 파일, 100+ 줄)·의존성 변경·브랜치 삭제도 모드 무관 제안만 한다. autoCommit이 자동화하는 것은 **정상 TDD 사이클/세션 종료의 일반 커밋**뿐이다.
