@@ -24,6 +24,7 @@
 | `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
 | `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
 | `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
+| `test/` | **스킬 자체 검증** — structural-test 골든 픽스처 + 러너(`run-fixtures.sh`). 템플릿이 허용/금지 import를 정확히 구분하는지 검증. 생성 프로젝트와 무관 | 낮음 |
 | `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
 | `companion-skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
 | `companion-skills/multi-model-consult/` | 멀티모델 합성 자문 스킬 (구현됨 — codex/gemini 자문 + Claude 합성. **하네스 비의존 범용 도구**, install.sh 심링크로 글로벌 로딩) | 가끔 |
@@ -103,6 +104,9 @@ cd ~/Desktop/side-project/haja-web-fe && claude
 # 2. 템플릿의 {{...}} 패턴이 harness-scaffold/SKILL.md 치환 규칙에 모두 정의되어 있는가
 # 3. harness-scaffold/SKILL.md의 생성 파일 목록과 실제 templates/ 구조가 일치하는가
 # 4. 프리셋의 필드가 SKILL.md 프리셋 스키마와 일치하는가
+
+# 골든 픽스처 (structural-test 템플릿 회귀 — 템플릿 또는 harness-scaffold §5.4 수정 시 릴리스 전 실행)
+bash test/run-fixtures.sh   # 3 아키텍처 × (src-pass 통과 / src-fail 차단) 검증
 ```
 
 ## 세션 종료 — 트래킹

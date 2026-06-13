@@ -5,6 +5,28 @@
 
 ---
 
+## [1.9.0] — 2026-06-14 (보장 정직화 + 의미검증 — 멀티모델 자문 반영)
+
+> codex+gemini 멀티모델 자문 결론("구조만 보장, 의미 정확성 비보장") 반영. MINOR (새 플레이스홀더 + 새 매니페스트 필드 2종 + 새 검사·게이트 + 스킬 자체 테스트). 마이그레이션 불필요.
+
+### 추가 (Added) — Session 34 (2026-06-14)
+- 새 플레이스홀더 `{{Q2_ENFORCEMENT}}` (28→29개) — structural-test 헤더 마커(`enforced`/`unenforced`). harness-scaffold §5.4 산정 규칙(layer/fsd 빈 규칙·custom 폴백 → unenforced)
+- manifest `harness.structuralTestEnforcement`(enforced/unenforced) + `harness.semanticApprovalAt`(의미 게이트 승인 시각|null) — §5.13 스키마·필드설명·생성규칙 7·8
+- harness-check.sh ④-b: Q2 강제 마커 grep → 미강제 시 "MVH 가동 (Q2 미강제)" 강등(exit 0). Phase 3 §6.9b 마커 치환 검증
+- scaffold Phase 4 "아키텍처 정확성 확인" 게이트 (생성 핵심 제약 재요약+사용자 확인, 비차단). SKILL.md Step 5에 "두 승인 구분" 노트
+- `test/` — structural-test 골든 픽스처 3종(layer/fsd/domain, src-pass/src-fail) + `run-fixtures.sh`. **6/6 통과 실측**. CLAUDE.md 테스트 섹션·파일 맵 등록
+
+### 수정 (Changed) — Session 34 (2026-06-14)
+- "표준 하네스 가동" 판정 정직화: 구조 설치+실행 가능성만 의미한다는 캐비엇 (harness-checklist §7, scaffold Phase 4 단계 판정, harness-check.sh 성공 메시지). 과장 표현("구조 위반이 기계적으로 차단") 완화
+- 표준 하네스 전제에 체크리스트 §3.2(규칙 강제) 충족 명문화 — Q2 미강제는 MVH 강등
+- 프로필 스키마 version 1.8.0 → 1.9.0 (두 SKILL.md 동기). 현재시제 플레이스홀더 카운트 28→29 (SKILL.md §전체프로필저장, upgrade-system-design §1.3, versioning-policy §1·§2)
+- §10.3 마이그레이션 판단: 1.9.0 무마이그레이션 근거 추가 (managed 자동 감지 + 마커/필드 기본값, custom 마커 부재 시 enforced 안전 간주)
+
+### 보류 (Deferred) — Session 34 (2026-06-14)
+- 프로필 JSON Schema 검증(gemini 제안): 1.6.2 "과한 코드화" 비수용 유지 — 계약 드리프트 마찰 누적 시 재검토 (project-context §3 설계결정 기록)
+
+---
+
 ## [1.8.0] — 2026-06-13 (자동 커밋 confirm 모드)
 
 > 구 Issue #4(자동 커밋&푸시) 구현 — TODO-86. MINOR (새 프로필 선택 필드 + 새 플레이스홀더 2종 + git-workflow 정책)

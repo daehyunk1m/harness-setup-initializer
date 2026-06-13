@@ -117,6 +117,11 @@
 | multi-model-consult 배치 | companion-skills/ + **install.sh 심볼릭 링크** (글로벌 상시 로딩) | 하네스 비의존 범용 도구라 프로젝트 무관 상시 가용이 맞음. 저장소·버전·배포는 일원화 (사용자 결정). 1.7.1에서 feedback/cleanup도 같은 글로벌 링크로 일원화 (구 Issue #8) |
 | 자문 CLI 권한 최소화 | codex `-s read-only --ephemeral`, gemini `--yolo` 없이 — oh-my-claudecode의 dangerous 플래그 패턴 폐기 | 자문은 읽기 전용. 컨텍스트는 Claude가 프롬프트에 포함 (자문 모델에 저장소 쓰기 권한 불필요). codex `-o`로 최종 응답 파일 캡처 |
 | 외부 응답의 인젝션 방어 | 아티팩트 Raw Output은 데이터 — 합성 시 외부 응답 내 지시문 비추종 (SKILL.md 제약 명시) | 외부 모델 출력은 신뢰 경계 밖 |
+| 보장 표현 정직화 (1.9.0) | "표준 하네스 가동"에 "구조 설치+실행 가능성만 의미, 의미 정확성 비판정" 캐비엇 (checklist §7, Phase 4, harness-check.sh). 과장 표현("구조 위반이 기계적으로 차단") 완화 | codex+gemini 자문 공통 결론: 보장되는 것은 구조뿐. harness:check 통과는 "규칙이 옳다"는 보장이 아님 |
+| Q2 미강제 단계 강등 (1.9.0) | custom/빈 규칙 structural-test는 `{{Q2_ENFORCEMENT}}=unenforced` 마커 → harness-check ④-b가 grep해 MVH 강등(exit 0 경고), manifest `structuralTestEnforcement` 기록 | codex: exit-0 폴백이 "표준 하네스"로 오판정되는 silent failure. 표준=§3.2(규칙 강제) 충족 전제. 하드 실패 대신 강등+경고(자유 구조의 정당한 약한 상태 — 사용자 선택) |
+| structural-test 골든 픽스처 (1.9.0) | 스킬 레벨 `test/fixtures/` + `test/run-fixtures.sh` (생성 프로젝트 footprint 0). 6/6 통과 실측 | codex 메타테스트 + gemini negative testing 권고. "템플릿 자체의 정확성/회귀"를 검증 (프로젝트별 규칙 오설정은 의미 게이트가 보완). 프로젝트별 selftest 대신 스킬 레벨 택해 타겟 청결 유지 (사용자 선택) |
+| 의미론적 승인 게이트 (1.9.0) | scaffold Phase 4 "아키텍처 정확성 확인" — 생성 제약 재요약+사용자 확인(비차단), manifest `semanticApprovalAt` | 구조 검증은 의미 정확성을 보장 못 함(자문 공통). Step 5 승인은 프로필 대상이고 문서는 그 이후 생성되므로 의미 게이트가 부재했음 (gemini 권고) |
+| 프로필 스키마 검증 보류 (1.9.0) | gemini의 ".harness-profile.json 경량 JSON Schema 결정화" 제안 보류 | 1.6.2에서 "JSON Schema 분리=과한 코드화"로 이미 비수용. 산문 사양+LLM 실행 철학 유지. 두 스킬 간 계약 드리프트가 실제 마찰로 누적되면 재검토 (사용자 선택) |
 
 ---
 
@@ -293,6 +298,15 @@
 - **구 Issue #4 구현** (TODO-86): 프로필 선택 필드 `autoCommit: { mode: off|confirm|auto, pushAfterCommit }` — 생략=off(기존 제안만). confirm=메시지+diff 승인 후 commit+push, auto=승인 없이
 - 새 플레이스홀더 2종(`{{AUTO_COMMIT_MODE}}`·`{{AUTO_COMMIT_PUSH}}`, 26→28) → git-workflow.md "## 자동 커밋 정책" 섹션. session-routine 커밋 단계가 모드 참조
 - **절대 규칙과의 양립**: "승인 없이 git 실행 금지"는 off=제안만으로, confirm=승인이 곧 확인, auto=명시 옵트인=사전 포괄 승인으로 호환. 위험 작업(force/reset/대규모)은 어느 모드든 항상 제안. 마이그레이션 불필요(managed 자동 감지 + 생략 기본)
+
+### 1.9.0 (보장 정직화 + 의미검증 — 멀티모델 자문 반영)
+- **배경**: codex(결함)+gemini(검증/운영) 멀티모델 자문 — "이 스킬은 *의미적으로 올바른 하네스*를 보장하지 않는다". harness:check 통과는 구조 설치+실행 가능성만 보장하고, 규칙의 의미 정확성은 LLM 판단+마찰 루프에 의존. 두 진짜 갭(custom exit-0 silent pass, 의미 게이트 부재) + 메타테스트 부재 식별. 자문 아티팩트: `.claude/artifacts/consult/`
+- **보장 정직화**: "표준 하네스 가동" 판정에 "구조 설치+실행 가능성만 의미, 문서·규칙 의미 정확성 비판정" 캐비엇 (harness-checklist §7, scaffold Phase 4, harness-check.sh). 과장 표현 완화
+- **Q2 미강제 강등**: 새 플레이스홀더 `{{Q2_ENFORCEMENT}}`(28→29) — structural-test 헤더 마커. layer/fsd 빈 규칙·custom 폴백이면 `unenforced` → harness-check ④-b가 grep해 MVH 강등(exit 0 경고). manifest `harness.structuralTestEnforcement` 기록. 표준=체크리스트 §3.2 충족 전제 명문화. exit 0(강등+경고) vs 하드 실패는 사용자 선택 — 자유 구조의 정당한 약한 상태로 취급
+- **골든 픽스처**: `test/fixtures/{layer,fsd,domain}/`(src-pass/src-fail) + `test/run-fixtures.sh` — 템플릿이 허용 통과/금지 차단하는지 스킬 레벨 검증(생성 프로젝트 footprint 0). 6/6 통과 실측. CLAUDE.md 테스트 섹션·파일 맵 등록
+- **의미 게이트**: scaffold Phase 4 "아키텍처 정확성 확인" — 생성 제약 재요약+사용자 확인(비차단). manifest `harness.semanticApprovalAt`. Step 5(프로필 승인)와 구분 명문화
+- **item 5 보류**: 프로필 JSON Schema 검증은 1.6.2 "과한 코드화" 비수용 유지 — 계약 드리프트 마찰 누적 시 재검토
+- MINOR, 마이그레이션 불필요 (managed 자동 감지 + 선택 필드/마커 기본값 흡수). 도그푸딩: multi-model-consult 4번째 실사용 (자문 대상이 스킬 구조 자체)
 
 ---
 

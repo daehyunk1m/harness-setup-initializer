@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.8.0",
+  "version": "1.9.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -462,6 +462,11 @@ plan_ref: {계획 참조}
   - `SHARED_DIRS` — 프로필의 `sharedDirs` 값으로 치환, 생략 시 `['shared']` (domain-based 전용)
   - `PATH_ALIAS` — 프로필의 `pathAlias` 값으로 치환. 배열인 경우 각 alias에 대해 regex를 생성하여 모두 검사한다 (예: `['@/', '~/']` → `@/` 또는 `~/`로 시작하는 import 모두 감지)
   - `SRC_ROOT` — 프로필의 `srcRoot` 값으로 치환
+  - `{{Q2_ENFORCEMENT}}` — **Q2(아키텍처 제약) 강제 여부**를 산정하여 `enforced` 또는 `unenforced`로 치환한다 (생성 스크립트 헤더의 `// HARNESS:Q2_ENFORCEMENT=...` 마커가 됨). 산정 규칙:
+    - layer/fsd: `layers.rules`에 비어있지 않은 제약(=금지 관계)이 1개 이상이면 `enforced`, 모든 레이어가 빈 배열이면 `unenforced`
+    - domain: 항상 `enforced` (도메인 간/역방향 금지 규칙을 코드로 보유)
+    - custom: 아래 동적 생성 알고리즘이 기계 검사 규칙을 1개 이상 만들면 `enforced`, 4번 폴백(규칙 없음)이면 `unenforced`
+    - harness-check.sh ④-b가 이 마커를 grep하여 단계 판정에 사용한다 (미강제 → MVH 강등, exit 0 경고). manifest `harness.structuralTestEnforcement`에도 같은 값을 기록한다 (§ 5.13)
 
 | 아키텍처 유형 | 사용 템플릿 | 검증 항목 |
 |--------------|-----------|----------|
@@ -474,7 +479,7 @@ plan_ref: {계획 참조}
 1. 프로필에 `layers.rules`가 있으면 → `structural-test-layer.ts`와 동일한 검사 엔진으로 생성 (LAYER_RULES 치환과 동일 효과)
 2. `extraArchitectureRules` 중 기계 검사로 변환 가능한 규칙("X에서 Y를 import하지 않는다" 패턴)을 import 검사로 추가한다
 3. 기계 검사로 변환 불가능한 규칙은 스크립트 상단 주석에 나열한다 (수동 리뷰 대상임을 명시)
-4. 1~2에 해당하는 규칙이 하나도 없으면: "ℹ️ 기계 검사 가능한 아키텍처 규칙 없음 — ARCHITECTURE.md를 수동으로 준수하세요"를 출력하고 exit 0하는 최소 스크립트를 생성한다 (validate 체인이 깨지지 않도록)
+4. 1~2에 해당하는 규칙이 하나도 없으면: "ℹ️ 기계 검사 가능한 아키텍처 규칙 없음 — ARCHITECTURE.md를 수동으로 준수하세요"를 출력하고 exit 0하는 최소 스크립트를 생성한다 (validate 체인이 깨지지 않도록). **이 폴백 스크립트 헤더에는 반드시 `// HARNESS:Q2_ENFORCEMENT=unenforced` 마커를 직접 기입한다** (1~2로 규칙을 생성한 경우는 `enforced`). 템플릿이 없으므로 마커 줄을 직접 작성한다 — harness-check이 이 마커로 Q2 미강제를 감지해 MVH로 강등한다
 5. 동적 생성된 custom용 structural-test.ts는 템플릿 매핑이 없으므로 § 12.6 자동 감지 대상에서 제외된다 — 변경이 필요하면 마이그레이션으로 처리한다
 
 - import 패턴 감지 시 다음 두 가지를 모두 검사한다:
@@ -791,7 +796,9 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
     "installedAt": "2026-04-07T09:30:00Z",
     "upgradedAt": null,
     "upgradeInProgress": false,
-    "preset": "react-next"
+    "preset": "react-next",
+    "structuralTestEnforcement": "enforced",
+    "semanticApprovalAt": null
   },
   "profile": {
     "architectureType": "layer-based",
@@ -866,6 +873,8 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 | `harness.upgradedAt` | 마지막 업그레이드 시각 (없으면 `null`) |
 | `harness.upgradeInProgress` | 업그레이드 중단 감지용 플래그 |
 | `harness.preset` | 사용된 프리셋 이름 (프리셋 없이 셋업했으면 `"custom"`) |
+| `harness.structuralTestEnforcement` | structural-test가 기계 검사 규칙을 실제로 강제하는지: `"enforced"` 또는 `"unenforced"` (§ 5.4 `{{Q2_ENFORCEMENT}}`와 동일값). 미강제면 harness:check이 MVH로 강등. 감사·업그레이드용 파생 기록 — 런타임 SSoT는 생성 스크립트 헤더 마커 |
+| `harness.semanticApprovalAt` | Phase 4 "아키텍처 정확성 확인" 게이트에서 사용자가 생성된 규칙의 의미 정확성을 승인한 시각 (ISO 8601). 미확인이면 `null`. 구조 검증이 보장 못 하는 의미 정확성의 사람 확인 기록 |
 | `profile` | 입력 프로필 중 **재치환에 필요한 부분집합** (아래 생성 규칙 1의 필드 목록). 업그레이드 시 재스캔 없이 managed 파일 재생성·custom 외과 수정에 사용 |
 | `files.{path}.category` | `managed` / `custom` / `data` (§ 10.1 참조) |
 | `files.{path}.templateHash` | 생성 시점 파일 내용의 SHA-256 해시. 사용자 수정 여부 판별 |
@@ -882,6 +891,8 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 4. **files 항목**: 생성한 모든 파일(디렉토리 제외)을 `files`에 기록한다. 키는 프로젝트 루트 기준 상대 경로이다.
 5. **version**: 프로필의 `version` 필드를 `harness.version`과 `harness.skillVersion`에 설정한다.
 6. **preset**: 프로필의 `preset` 필드를 설정한다.
+7. **structuralTestEnforcement**: § 5.4에서 산정한 `{{Q2_ENFORCEMENT}}` 값(`enforced`/`unenforced`)을 `harness.structuralTestEnforcement`에 기록한다.
+8. **semanticApprovalAt**: 생성 시 `null`로 초기화한다. Phase 4 "아키텍처 정확성 확인" 게이트(§ 7)에서 사용자가 승인하면 그 시각(ISO 8601)으로 갱신한다.
 
 #### 후처리
 
@@ -1022,6 +1033,9 @@ node -e "const pkg=require('./package.json'); for (const k of ['lint:arch','vali
 # 6.9 structural-test.ts 실행 가능 여부 (dry run)
 npx tsx scripts/structural-test.ts 2>&1 || echo "⚠️ structural-test 실행 실패 — 수동 확인 필요"
 
+# 6.9b structural-test Q2 강제 마커가 치환되었는지 확인 (enforced/unenforced 중 하나여야 함 — 미치환 {{Q2_ENFORCEMENT}} 잔존 방지)
+grep -Eq 'HARNESS:Q2_ENFORCEMENT=(enforced|unenforced)' scripts/structural-test.ts 2>/dev/null && echo "✅ Q2 강제 마커 정상" || echo "❌ Q2 강제 마커 누락/미치환 — // HARNESS:Q2_ENFORCEMENT을 enforced 또는 unenforced로 치환하세요"
+
 # 6.10 feature_list.json이 valid JSON인지 확인
 node -e "JSON.parse(require('fs').readFileSync('feature_list.json','utf8')); console.log('✅ feature_list.json valid');" 2>&1 || echo "❌ feature_list.json invalid"
 
@@ -1126,6 +1140,7 @@ grep -q "^## 보조 스킬" AGENTS.md && echo "✅ 보조 스킬 섹션 존재" 
 - ✅ 파일 경로 일관성: 통과
 - ✅ JSON 유효성: 통과
 - ✅ structural-test: 통과 (위반 {N}건)
+- ✅ Q2 강제: structural-test 규칙 활성 (또는 ⚠️ 미강제 — MVH 강등)
 - ✅ package.json scripts: 정상
 - ✅ agents/ 파일 (7개): 정상
 - ✅ .claude/rules/ 파일 (3개): 정상
@@ -1140,6 +1155,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 
 - 전체 통과 → "**표준 하네스 가동** — 하네스 골격이 설치되고 검증 명령이 정상 동작합니다"
   - ⚠️ 이 판정은 *구조 설치 + 기계적 실행 가능성*만 의미한다. 생성된 문서·아키텍처 규칙의 **의미 정확성**(분류가 맞는지, 의존성 규칙이 옳은지, feature_list 상태가 진짜인지)은 판정 대상이 아니므로, 아래 '다음 단계'의 검토 항목(②·⑤)을 반드시 함께 안내한다 (기준: `references/harness-checklist.md` § 7 "판정의 범위 — 구조 vs 의미")
+- 전체 통과(구조+품질) + Q2 미강제(structural-test 마커 `unenforced`) → "**MVH 가동 (Q2 미강제)** — 구조·실행은 통과하나 structural-test에 기계 검사 규칙이 없어 아키텍처 제약이 강제되지 않습니다 (체크리스트 §3.2 미충족 → 표준 아님). ARCHITECTURE.md 수동 준수 또는 규칙 추가 권장". harness:check은 exit 0 (자유 구조의 정당한 약한 상태)
 - 구조 항목(①②③)만 통과, 품질 항목(④⑤) 실패 → "**MVH(최소 하네스) 가동** — 실패 항목: {목록}. 기존 코드의 검증 실패가 원인이며, validate가 통과해야 표준 하네스입니다"
 - 구조 항목 실패 → 판정 보류, 실패 항목과 수정 방법 보고
 
@@ -1170,6 +1186,22 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **피드백 분석**: "하네스 피드백 분석해줘"라고 요청 (harness-feedback)
   - docs/HARNESS_FRICTION.md에 누적된 마찰 이벤트를 분석하여 harness-setup 리포에 개선 Issue를 생성합니다
 ```
+
+### 아키텍처 정확성 확인 (의미 게이트)
+
+보고를 출력한 뒤, **셋업을 종결하기 전에** 생성된 아키텍처 제약이 프로젝트 의도와 일치하는지 사용자에게 확인받는다. 구조 검증(Phase 3)과 harness:check은 "파일이 있고 스크립트가 돈다"만 보장하고 규칙의 *의미 정확성*은 보장하지 않으므로(§ 7 단계 판정 캐비엇), **이것이 유일한 의미 확인 지점이다** — Step 5 승인은 프로필(분류·계획) 대상이고, AGENTS.md/ARCHITECTURE.md 문서는 그 승인 이후 생성되기 때문이다.
+
+생성된 핵심 제약을 재요약하여 제시한다:
+- 아키텍처 유형 + 의존성 방향 한 줄 (`architectureType`, layers.order)
+- 상위 폴더 역할 2~3개 (folderRoles)
+- 핵심 추가 규칙(extraArchitectureRules)이 있으면 1~2개
+- **Q2 강제 상태** (`enforced`/`unenforced` — 미강제면 "아키텍처 제약이 기계로 강제되지 않음"을 명시)
+
+그리고 묻는다: **"이 규칙이 프로젝트의 아키텍처 의도와 일치합니까? (y / 수정 요청)"**
+
+- **y** → `.harness-manifest.json`의 `harness.semanticApprovalAt`를 현재 시각(ISO 8601)으로 갱신하고 종료
+- **수정 요청 / 불일치** → 무엇이 틀렸는지 듣고, ARCHITECTURE.md를 직접 수정하거나 `/harness-setup`을 재실행하여 분류를 교정하도록 안내한다. `docs/HARNESS_FRICTION.md`에 의미 불일치를 기록하도록 권유한다(마찰 루프 입력). `semanticApprovalAt`는 `null`로 둔다
+- 사용자가 응답 없이 종료하면 `semanticApprovalAt`는 `null`(미확인)로 남는다 — **비차단** (게이트는 강제가 아니라 권유)
 
 ---
 
@@ -1524,6 +1556,8 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 > 새 버전을 추가할 때 마이그레이션이 필요한지 판단 기준: ① custom 파일 외과 수정 ② [new]/[remove] 파일 ③ [profile] 기본값 있는 새 필드 ④ [data] 스키마 변경 — 이 중 하나라도 해당하면 등록한다. managed 템플릿 변경·컴패니언 스킬·인프라 수정은 등록하지 않는다.
 >
 > **1.7.1**(이슈 정리·install.sh 인프라)과 **1.8.0**(autoCommit)도 위 기준상 마이그레이션이 없다 — autoCommit은 git-workflow.md(managed)에 `{{AUTO_COMMIT_MODE}}` 추가이므로 § 12.6 자동 감지로 전파되고(기존 하네스는 mode=off 섹션이 덧붙음, 무해), 프로필 필드는 생략=off라 기존 프로필에 추가 불필요.
+>
+> **1.9.0**(보장 정직화+의미검증)도 마이그레이션이 없다 — `{{Q2_ENFORCEMENT}}` 마커와 manifest 필드(`structuralTestEnforcement`/`semanticApprovalAt`)는 managed 템플릿(structural-test의 layer/fsd/domain, harness-check.sh)과 manifest 재렌더에 § 12.6 자동 감지로 전파된다. custom structural-test(자동 감지 제외)에 마커가 없으면 harness-check ④-b는 안전하게 `enforced`로 간주(기존 동작 유지). 골든 픽스처는 스킬 내부 테스트(test/)라 생성 하네스와 무관.
 
 ### 10.4 엣지 케이스
 
