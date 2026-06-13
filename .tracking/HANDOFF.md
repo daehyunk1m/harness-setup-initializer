@@ -126,6 +126,7 @@
   - codex(결함)+gemini(검증/운영) 자문 결론 "구조만 보장, 의미 정확성 비보장" → 4 구현 + 1 보류 + 1 후속. 진짜 갭 2건(custom exit-0 silent pass, 의미 게이트 부재) 폐기
   - Q2 미강제 강등(`{{Q2_ENFORCEMENT}}` 마커 28→29, manifest `structuralTestEnforcement`, harness-check ④-b → MVH 강등 exit 0), 골든 픽스처(`test/`, **6/6 통과 실측**), 의미 게이트(Phase 4 "아키텍처 정확성 확인" + `semanticApprovalAt`), 보장 문구 정직화
   - item 5(프로필 JSON Schema 검증) 보류(1.6.2 비수용 유지). MINOR, 마이그레이션 불필요. 도그푸딩 4회차(자문 대상=스킬 구조 자체)
+  - **실전 검증 완료** (1.7.0→1.9.0 업그레이드 E2E, 사용자 실행): 마이그레이션 0 — 1.7.1·1.8.0·1.9.0 모두 managed 자동 감지로 전파, 영향 managed 4개 사용자 수정 없어 재생성 + 해시 재현성 일치. harness:check "표준 하네스 가동" + "Q2 강제"(enforced 프로젝트). auto 모드 자동 커밋(190fbef). **검증 범위 한계**: enforced+업그레이드 경로라 Q2 미강제 강등·setup 의미 게이트는 미발동(시뮬레이션 검증 유지). **관찰**: 업그레이드 경로(U1~U5)는 의미 게이트 미경유 → `semanticApprovalAt=null` 유지(규칙 불변이라 의도된 동작, TODO-92 검토)
 
 **현재 버전: 1.9.0** (보장 정직화 + 의미검증)
 
