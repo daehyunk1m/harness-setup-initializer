@@ -5,6 +5,25 @@
 
 ---
 
+## [1.7.0] — 2026-06-13 (외부 통합 규약 일반화 + multi-model-consult 등록)
+
+> superpowers·multi-model-consult 두 선례에서 공통 패턴 추출 → `integrations.<name>` 메커니즘 일반화 (TODO-81). MINOR (새 통합 등록 + 규약 신설 + 마이그레이션)
+
+### 추가 (Added) — Session 30 (2026-06-13)
+- references/integrations/_protocol.md: 외부 통합 규약 정본 — integrations.<name> 스키마(공통 4필드 enabled/source/detectedVersion/installPath + 통합별), 통합 추가 4단계 절차(감지→질문→매핑정본→렌더링), 불변 원칙 8개, AGENTS.md "보조 스킬" 다중 통합 합산 형식, 등록 통합 표
+- references/integrations/multi-model-consult-mapping.md: consult 연계 정본 — 감지(심링크+CLI 1개 이상), AGENTS.md 연계 1줄, session-routine 연계, 제외/충돌 회피
+- **multiModelConsult 통합 등록**: 두 번째 integration — `integrations.multiModelConsult` (source: companion). SKILL.md Step 1.6 감지 + §4.2 옵트인 질문 + §5 스키마(두 SKILL.md 동기) + §4.4 기본값
+- harness-scaffold/SKILL.md §10.3: M-1.6.4-to-1.7.0 마이그레이션 — 기존 superpowers 옵트인 하네스의 "## 보조 스킬 (superpowers 연계)" → "## 보조 스킬" 정규화 + 항목 출처 표기 + consult U1 재감지 추가 제안 (멱등)
+
+### 수정 (Changed) — Session 30 (2026-06-13)
+- harness-scaffold/SKILL.md §5.16: "superpowers 연계 렌더링" → "외부 통합 연계 렌더링" 일반화 — enabled인 각 통합 순회, 실존 검증(다중 스킬/단일 CLI 분기), 단일 "## 보조 스킬" 섹션 합산, {{INTEGRATION_NOTES}} 다중 통합 합산
+- AGENTS.md 보조 스킬 섹션 형식: "## 보조 스킬 (superpowers 연계)" → "## 보조 스킬" + 항목별 (출처) 표기 (§5.1·§5.16·§6.15 일관)
+- SKILL.md Step 1.6·§4.2·§5 필드규칙·§4.4·§12.3 U1: superpowers 하드코딩 → 다중 통합 일반화. {{INTEGRATION_NOTES}} 치환 규칙(§5.11.3) 합산 형식
+- CLAUDE.md 파일맵: integrations/_protocol.md + *-mapping.md 행 분리
+- 프로필 스키마 version "1.7.0" 동기
+
+---
+
 ## [1.6.4] — 2026-06-13 (누적 정합성 감사)
 
 > 1.0.0→1.6.3 13회 연속 릴리스의 누적 드리프트를 워크플로 적대적 감사(5개 관점 병렬)로 전수 점검 (TODO-80). PATCH (문서 정합성 교정)

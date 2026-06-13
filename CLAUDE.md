@@ -29,7 +29,8 @@
 | `companion-skills/multi-model-consult/` | 멀티모델 합성 자문 스킬 (구현됨 — codex/gemini 자문 + Claude 합성. **하네스 비의존 범용 도구**, install.sh 심링크로 글로벌 로딩) | 가끔 |
 | `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
 | `references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
-| `references/integrations/*.md` | 외부 패키지 연계 매핑 정본 (superpowers 등 — 분기 리뷰) | 가끔 |
+| `references/integrations/_protocol.md` | 외부 통합 규약 (integrations.<name> 메커니즘 정본 — 통합 추가 4단계 절차) | 낮음 |
+| `references/integrations/*-mapping.md` | 통합별 연계 매핑 정본 (superpowers, multi-model-consult — 분기 리뷰) | 가끔 |
 | `references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
 | `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |

@@ -612,3 +612,17 @@
   - harness-scaffold §10.3 마이그레이션 레지스트리: "M-1.4.0 이후 불필요" 안내 추가 — 미래 메인테이너가 "왜 1.3.0→1.4.0에서 멈췄나" 오해 방지 + 마이그레이션 등록 판단 기준 명시
 - **감사 오탐 3건 (수정 안 함, 역사 기록·논리)**: 버전 히스토리/CHANGELOG/세션별 HANDOFF의 "24개·21→24·12→14"는 그 시점 사실(역사 기록). "15항목"은 6.0(디렉토리 준비)을 제외한 6.1~6.15=15로 정확(감사자가 6.0 포함해 16으로 오판). 마이그레이션 "누락"은 1.4.0 이후 의도적 불필요(자동 감지/Public API 무변경)
 - **교훈**: 빠른 연속 릴리스는 ① 현재 시제 카운트 스테일 ② 버전 히스토리 순서 ③ 누락 항목 ④ 교차참조 모호성을 쌓는다. 감사는 "현재 시제 서술 vs 역사 기록"을 구분해야 함(감사 에이전트는 이 구분에 약함 — 오탐의 원천). 워크플로 적대적 감사가 도그푸딩의 연장
+
+### TODO-81: 외부 통합 규약 일반화 + multi-model-consult 등록 — 1.7.0
+- **상태**: [x] 완료 (2026-06-13)
+- **파일**: `references/integrations/_protocol.md`(신규), `references/integrations/multi-model-consult-mapping.md`(신규), `SKILL.md` Step 1.6/§4.2/§4.4/§5/§11/§12.3, `harness-scaffold/SKILL.md` §4/§5.1/§5.11.3/§5.16/§6.15/§10.3/§11, `CLAUDE.md`
+- **문제**: superpowers 통합(1.5.0)이 Step 1.6/§4.2/§5.16에 "superpowers" 하드코딩으로 구현됨. 두 번째 통합 추가 시 패턴 재사용 불가. project-context에 "선례 2개 확보 시 일반화"로 계획됨
+- **구현**:
+  - **규약 정본** `_protocol.md`: integrations.<name> 스키마(공통 4필드 + 통합별), 통합 추가 4단계 절차(감지→질문→매핑정본→렌더링), 불변 원칙 8개, AGENTS.md "보조 스킬" 다중 통합 합산 형식, 등록 통합 표
+  - **§5.16 일반화**: "superpowers 연계 렌더링" → "외부 통합 연계 렌더링" — enabled인 각 통합 순회, 실존 검증(다중 스킬/단일 CLI 분기), 단일 "## 보조 스킬" 섹션 합산, `{{INTEGRATION_NOTES}}` 다중 통합 합산
+  - **multi-model-consult 등록**: `integrations.multiModelConsult` (source: companion, CLI 1개 이상 필요). 감지(Step 1.6)·질문(§4.2)·연계 정본(multi-model-consult-mapping.md)·스키마(두 SKILL.md 동기)
+  - **AGENTS.md 섹션 형식**: "## 보조 스킬 (superpowers 연계)" → "## 보조 스킬" + 항목별 (출처) 표기 (다중 통합 대응)
+  - **마이그레이션** M-1.6.4-to-1.7.0: 기존 superpowers 옵트인 하네스의 섹션 제목 정규화 + consult U1 재감지 추가 제안 (멱등)
+- **검증 기준**: superpowers(복잡·14종 화이트리스트)와 consult(단순·단일 연계)가 같은 규약으로 표현됨 — 규약 일반화 실증
+- **적대적 검증** (4관점): protocol-flow·protocol-doc PASS, 발견 4건 반영(§1 개요 일반화, §5.16 렌더링 순서 규칙 superpowers→consult, §6.15 옵트인/옵트아웃 양방향 검증, §5.1 dual 9줄 예산 명시), 과요구 2건 거부(예산 산술표·TODO 강제완료)
+- **잔여**: 신규 셋업/업그레이드 실전에서 두 통합 동시 옵트인 시 보조 스킬 섹션 합산·100줄 예산 검증 (TODO-53과 함께). haja 1.6.4→1.7.0 업그레이드로 M-1.6.4-to-1.7.0 + consult 추가 제안 경로 검증 가능
