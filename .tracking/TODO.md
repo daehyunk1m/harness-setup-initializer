@@ -679,3 +679,39 @@
 - SKILL.md §4.2 옵트인 질문 + §5 필드규칙 + §4.4 기본값 + §4.3 완성 항목, 두 SKILL.md 스키마 동기
 - "승인 없이 git 실행 금지" 절대 규칙과 호환: off=제안만, confirm=승인이 곧 확인, auto=명시 옵트인=사전 포괄 승인. 위험 작업은 어느 모드든 항상 제안
 - 마이그레이션 불필요: git-workflow.md(managed) 변경은 자동 감지 전파, 프로필 생략=off 기본
+
+---
+
+## Session 34 (2026-06-14): 보장 정직화 + 의미검증 (1.9.0) — 멀티모델 자문 반영
+
+> codex(결함)+gemini(검증/운영) 자문 결론("구조만 보장, 의미 정확성 비보장") → 액션 6항목.
+> MINOR 1.9.0, 마이그레이션 불필요. 자문 아티팩트: `.claude/artifacts/consult/codex-*`·`gemini-*`
+
+### TODO-87: "표준 하네스 가동" 판정 문구 정직화
+- **상태**: [x] 완료 (2026-06-14, 1.9.0)
+- **파일**: `references/harness-checklist.md` §7, `harness-scaffold/SKILL.md` §7 단계 판정, `templates/harness-check.sh`
+- **해결**: "구조 설치+실행 가능성만 의미, 의미 정확성 비판정" 캐비엇. 과장 표현("구조 위반이 기계적으로 차단") 완화
+
+### TODO-88: custom exit-0 폴백 Q2 미강제 강등
+- **상태**: [x] 완료 (2026-06-14, 1.9.0)
+- **파일**: `templates/structural-test-{layer,fsd,domain}.ts`, `harness-scaffold/SKILL.md` §5.4·§5.13·§6.9b·§7, `templates/harness-check.sh`, `references/harness-checklist.md` §7
+- **해결**: 새 플레이스홀더 `{{Q2_ENFORCEMENT}}` 마커 + manifest `structuralTestEnforcement`. harness-check ④-b 미강제 감지 → MVH 강등(exit 0). codex 지적 silent failure 폐기
+
+### TODO-89: structural-test 골든 픽스처 (TODO-53 픽스처 매트릭스 실현)
+- **상태**: [x] 완료 (2026-06-14, 1.9.0)
+- **파일**: `test/fixtures/{layer-based,fsd,domain}/`, `test/run-fixtures.sh`, `test/README.md`, `CLAUDE.md`
+- **해결**: 스킬 레벨 골든 픽스처 — 템플릿이 허용 통과/금지 차단하는지 검증. **6/6 통과 실측**. 프로젝트별 selftest 대신 스킬 레벨(타겟 footprint 0). codex 메타테스트 + gemini negative testing
+
+### TODO-90: 의미론적 승인 게이트 (Phase 4)
+- **상태**: [x] 완료 (2026-06-14, 1.9.0)
+- **파일**: `harness-scaffold/SKILL.md` §7·§5.13, `SKILL.md` Step 5
+- **해결**: Phase 4 "아키텍처 정확성 확인" — 생성 제약 재요약+사용자 확인(비차단), manifest `semanticApprovalAt`. gemini 권고
+
+### TODO-91: 프로필 계약 JSON Schema 검증 (보류)
+- **상태**: [ ] 보류 (재검토 대기)
+- **문제**: gemini가 ".harness-profile.json 경량 스키마 결정화" 제안 — 두 스킬 간 계약 드리프트 방어
+- **결정**: 보류 — 1.6.2 "JSON Schema 분리=과한 코드화" 비수용 유지. 계약 드리프트가 실제 마찰로 누적되면 재검토 (TODO-77 해시 결정화와 같은 "산문 실행 약점" 계열)
+
+### TODO-92: 1.9.0 실전 E2E + README 정직화 (다음 세션)
+- **상태**: [ ] 미완료
+- **문제**: ① haja-web-fe 등에서 1.9.0 `harness upgrade` E2E — Q2 마커 재렌더·의미 게이트·강등 판정 실증 ② README.md:25 "표준 하네스 가동" 언급에 의미 정확성 캐비엇 반영 (릴리스 문서 패스)

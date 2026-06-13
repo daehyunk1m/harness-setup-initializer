@@ -10,6 +10,7 @@
 
 STRUCT_FAIL=0
 QUALITY_FAIL=0
+Q2_UNENFORCED=0
 
 echo "═══ 하네스 자가진단 ═══"
 echo ""
@@ -64,6 +65,15 @@ else
   echo "❌ 아키텍처 검증 실패"
   QUALITY_FAIL=1
 fi
+# ④-b Q2 강제 여부 — structural-test에 실질 검사 규칙이 있는가 (lint:arch 통과 ≠ 규칙 존재)
+if [ -f scripts/structural-test.ts ]; then
+  if grep -q "HARNESS:Q2_ENFORCEMENT=unenforced" scripts/structural-test.ts 2>/dev/null; then
+    echo "⚠️ Q2 미강제 — structural-test에 기계 검사 규칙 없음 (아키텍처 제약이 문서뿐)"
+    Q2_UNENFORCED=1
+  elif grep -q "HARNESS:Q2_ENFORCEMENT=enforced" scripts/structural-test.ts 2>/dev/null; then
+    echo "✅ Q2 강제 — structural-test 규칙 활성"
+  fi
+fi
 
 # ⑤ 전체 검증 (exit code 전파)
 echo ""
@@ -99,6 +109,12 @@ fi
 echo ""
 echo "═══ 판정 ═══"
 if [ "$STRUCT_FAIL" -eq 0 ] && [ "$QUALITY_FAIL" -eq 0 ]; then
+  if [ "$Q2_UNENFORCED" -eq 1 ]; then
+    echo "⚠️ MVH 가동 (Q2 미강제) — structural-test에 기계 검사 규칙이 없습니다"
+    echo "   아키텍처 제약이 문서에만 있고 기계적으로 강제되지 않습니다 (체크리스트 §3.2 미충족 → 표준 아님)"
+    echo "   → ARCHITECTURE.md를 수동 준수하거나 layers.rules/extraArchitectureRules로 검사 규칙을 추가하세요"
+    exit 0
+  fi
   echo "✅ 표준 하네스 가동 — 구조·실행 항목 통과"
   echo "ℹ️ 이 판정은 구조 설치+실행 가능성만 확인합니다 — 문서·규칙의 의미 정확성(분류·의존성 규칙이 옳은지)은 별도 검토 권장"
   exit 0
