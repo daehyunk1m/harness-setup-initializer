@@ -1,9 +1,11 @@
 # harness-setup
 
+> 현재 버전: **1.8.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
+
 Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 자동으로 셋업하는 Claude Code 스킬.
 
 소스 코드를 분석하고, 사용자와 문답을 거쳐, 프로젝트에 맞는 문서/설정/검증 스크립트를 생성한다.
-기존 소스 코드는 절대 수정하지 않는다.
+기존 소스 코드는 수정하지 않는다 (옵트인한 설정 보강 제외 — 아래 [설계 결정](#기존-코드-무수정-원칙) 참조).
 
 ---
 
@@ -12,14 +14,17 @@ Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 
 에이전트가 프로젝트를 **이해하고, 작업하고, 검증하고, 정리**할 수 있도록 돕는 작업 환경 전체.
 
 하네스가 없는 프로젝트에서 에이전트는 매 세션마다 프로젝트를 처음부터 파악해야 한다. 하네스가 있으면:
-- AGENTS.md로 프로젝트 맥락을 즉시 파악
-- CLAUDE.md로 작업 규칙과 명령어를 확인
+- AGENTS.md로 프로젝트 맥락 + 명령어를 즉시 파악 (명령어의 source of truth)
+- CLAUDE.md로 작업 규칙·에이전트 디스패치·운영 사이클을 확인
 - ARCHITECTURE.md로 아키텍처 규칙을 준수
 - `.claude/rules/`로 세션 루틴, 코딩 표준, Git 규칙을 자동 적용
 - `agents/*.md`로 TDD subagent 파이프라인을 구동
 - feature_list.json으로 진행 상태를 추적
-- structural-test.ts로 아키텍처 위반을 자동 감지
+- structural-test.ts로 아키텍처 위반을 자동 감지 (exit 1)
 - init.sh로 개발 환경을 한 번에 초기화
+- `npm run harness:check`로 하네스 상태를 자가진단 ("표준 하네스 가동" 판정)
+
+그리고 운영 단계에서는 **컴패니언 스킬**이 정리·피드백·교차 자문을 돕는다 (아래 [컴패니언 스킬](#컴패니언-스킬) 참조).
 
 ---
 
@@ -127,33 +132,33 @@ stateDiagram-v2
 
 | 카테고리 | 파일 | 역할 |
 |----------|------|------|
-| **문서** | `AGENTS.md` | 프로젝트 개요, 스택, 아키텍처 링크, 문서 맵 (100줄 이내) |
-| | `CLAUDE.md` | 명령어, 에이전트 디스패치, 세션 루틴, 금지 사항 |
+| **문서** | `AGENTS.md` | 프로젝트 개요, **명령어(source of truth)**, 아키텍처 링크, 주요 규칙, 문서 맵 (100줄 이내) |
+| | `CLAUDE.md` | 에이전트 디스패치, 세션 루틴, 운영 사이클, 금지 사항 (`@AGENTS.md` import) |
 | | `ARCHITECTURE.md` | 레이어/슬라이스 규칙, 의존성 방향, 네이밍 규칙 |
 | **규칙** | `.claude/rules/session-routine.md` | TDD 오케스트레이션 상세 |
-| | `.claude/rules/coding-standards.md` | 코드 규칙 (프로필 기반) |
-| | `.claude/rules/git-workflow.md` | Git 커밋/브랜치 규칙 |
+| | `.claude/rules/coding-standards.md` | 코드 규칙 + 검증 레벨 (프로필 기반) |
+| | `.claude/rules/git-workflow.md` | Git 커밋/브랜치 규칙 + 자동 커밋 정책 |
 | **에이전트** | `agents/architect.md` | Pre-Red: 설계 + 테스트 계획 |
 | | `agents/test-engineer.md` | Red: 테스트 작성 |
 | | `agents/implementer.md` | Green: 구현 |
-| | `agents/reviewer.md` | Post-Green: 코드 리뷰 |
+| | `agents/reviewer.md` | Post-Green: 코드 리뷰 + 자동 검사 승격 후보 표시 |
 | | `agents/simplifier.md` | Refactor: 단순화 |
 | | `agents/debugger.md` | On-demand: 디버깅 |
 | | `agents/security-reviewer.md` | Post-Green: 보안 리뷰 |
-| **추적** | `feature_list.json` | 기능 목록 + 검증 상태 추적 |
+| **추적** | `feature_list.json` | 기능 목록 + 검증 상태 추적 (steps ↔ E2E 1:1) |
 | | `claude-progress.txt` | 세션별 작업 기록 + TDD STATE |
 | **스크립트** | `init.sh` | 의존성 설치 + 개발 서버 실행 + 준비 확인 |
-| | `scripts/structural-test.ts` | 아키텍처 의존성 규칙 자동 검증 |
+| | `scripts/structural-test.ts` | 아키텍처 의존성 규칙 자동 검증 (위반 시 exit 1) |
 | | `scripts/doc-freshness.ts` | 문서 최신성 검사 |
+| | `scripts/harness-check.sh` | 하네스 자가진단 7항목 (`npm run harness:check`) |
 | **품질** | `docs/QUALITY_SCORE.md` | 6개 카테고리 품질 점수표 |
-| | `docs/TECH_DEBT.md` | 기술 부채 추적 (4단계 심각도) |
+| | `docs/TECH_DEBT.md` | 기술 부채 추적 (4단계 심각도) + 자동 검사 승격 대기 큐 |
 | | `docs/HARNESS_FRICTION.md` | 마찰 로그 (피드백 수집) |
-| **기타** | `docs/product-specs/` | 제품 요구사항 문서 디렉토리 |
-| | `docs/design-docs/` | 설계 결정 기록 디렉토리 |
-| | `docs/exec-plans/` | 작업별 실행 계획 디렉토리 |
-| | `docs/references/` | 참고 자료 디렉토리 |
-| | `package.json` | `lint:arch`, `validate`, `doc:check` 스크립트 추가 |
+| **기타** | `docs/product-specs/` 외 3개 | 제품 요구사항·설계 결정·실행 계획·참고 자료 디렉토리 |
+| | `package.json` | `lint:arch`, `validate`, `doc:check`, `harness:check` 스크립트 추가 |
 | | `.harness-manifest.json` | 버전 추적 매니페스트 |
+
+> **옵트인 산출물** (문답에서 동의한 경우만): AGENTS.md "보조 스킬" 섹션(외부 통합 연계), ESLint 보조 규칙(설정 파일에 마커 블록), `test:run` 스크립트(watch 러너 가드), 자동 커밋 정책. 동의하지 않으면 어떤 흔적도 생성되지 않는다.
 
 ---
 
@@ -163,8 +168,8 @@ stateDiagram-v2
 |------|----------|----------|
 | **레이어 기반** (`layer-based`) | types/, lib/, services/, hooks/, components/ 등 | 레이어 의존성 방향 |
 | **FSD** (`fsd`) | app/, pages/, widgets/, features/, entities/, shared/ | 레이어 + cross-slice + public API |
-| **도메인 기반** (`domain-based`) | 도메인명 폴더 아래 components, hooks 등 | 도메인 간 직접 import 금지 |
-| **자유 구조** (`custom`) | 위 패턴에 해당 안 됨 | 문답에서 확인된 규칙만 |
+| **도메인 기반** (`domain-based`) | 도메인명 폴더 아래 components, hooks 등 | 도메인 간 직접 import 금지 + 공유→도메인 역방향 금지 |
+| **자유 구조** (`custom`) | 위 패턴에 해당 안 됨 | 프로필에서 기계 검사 가능한 규칙만 (동적 생성) |
 
 ---
 
@@ -176,21 +181,49 @@ stateDiagram-v2
 
 | 프리셋 | 스택 | 아키텍처 |
 |--------|------|---------|
-| `react-next` | React 19 + Next.js 15 (App Router) | 8레이어 (types→...→app) |
-| `react-router-fsd` | React + React Router v7 | FSD 6레이어 (shared→...→app) |
+| `react-next` | React 19 + Next.js 15 (App Router) | layer-based 8레이어 (types→…→app) |
+| `react-router-fsd` | React + React Router v7 | FSD 6레이어 (shared→…→app) |
+| `react-vite` | React + Vite (SPA) | layer-based 7레이어 |
+| `express-api` | Express + TypeScript (Node 백엔드) | layer-based 8레이어 (routes→controllers→services→models) |
 
 ### 매칭 로직
 
 1. `detection.required` 패키지 전부 존재하는지 확인
-2. `detection.versionConstraints`로 버전 범위 체크 (있을 경우)
-3. `architecture.type`이 딥스캔 결과와 일치하는지 확인
-4. 여러 후보 → optional 매칭 수 → required 수 → 사용자 선택
+2. `detection.exclude` 패키지가 존재하면 후보에서 제외 (범용 required의 오매칭 방지)
+3. `detection.versionConstraints`로 버전 범위 체크 (있을 경우)
+4. `architecture.type`이 딥스캔 결과와 일치하는지 확인
+5. 여러 후보 → optional 매칭 수 → required 수 → 사용자 선택
 
 ### 커스텀 프리셋 추가
 
 `presets/` 폴더에 JSON 파일을 만들면 자동으로 매칭 대상에 포함된다.
 필수 필드: `name`, `displayName`, `detection.required`, `architecture.type`, `architecture.layers`, `scripts.lint:arch`, `devServer`, `pathAlias`, `srcRoot`.
 기존 프리셋을 복사하여 수정하는 것이 가장 빠르다.
+
+---
+
+## 컴패니언 스킬
+
+`install.sh`가 아래 스킬을 `~/.claude/skills/`에 글로벌 링크하여 자연어로 바로 호출할 수 있다.
+
+| 스킬 | 트리거 | 역할 |
+|------|--------|------|
+| **harness-cleanup** | "하네스 정리" | 운영 사이클(주간/격주/월간) 실행 — 문서 부식·QUALITY_SCORE 재측정·TECH_DEBT·승격 큐·passes 재검증. 소스 코드는 수정하지 않고 TDD 사이클에 위임 |
+| **harness-feedback** | "하네스 피드백 분석해줘" | HARNESS_FRICTION.md 마찰 로그를 분석해 반복 패턴을 식별하고 이 리포에 개선 Issue 생성 |
+| **multi-model-consult** | "멀티모델 자문" / "교차 자문" | Codex·Gemini CLI에 관점을 분담해 자문하고 Claude가 합성(합의/상충/최종방향/액션). 읽기 전용, 하네스 비의존 범용 도구 |
+
+---
+
+## 외부 통합 (옵트인)
+
+셋업 시 외부 보조 스킬이 감지되면 연계 여부를 묻는다 (미감지 시 질문 자체를 생략). 동의하면 AGENTS.md "보조 스킬" 섹션에 호출 안내가 1줄씩 추가된다. 메커니즘 규약: [`references/integrations/_protocol.md`](references/integrations/_protocol.md).
+
+| 통합 | 감지 | 연계 영역 (코어 충돌 영역은 제외) |
+|------|------|----------------------------------|
+| **superpowers** | 플러그인/스킬 | brainstorming(설계 결정), systematic-debugging(버그 추적), writing-plans(계획 문서) |
+| **multiModelConsult** | 컴패니언 + CLI | 복잡한 설계 결정·트레이드오프의 교차 자문 |
+
+> TDD·코드 리뷰·검증·git 워크플로는 항상 하네스 자체 워크플로가 source of truth다.
 
 ---
 
@@ -223,7 +256,7 @@ claude --add-dir ~/.claude/skills/harness-setup
 > 하네스 셋업해줘
 ```
 
-> 설치 후 `install.sh`를 실행하면 `harness-scaffold` 심볼릭 링크가 자동 생성되어 두 스킬이 함께 로딩된다.
+> 설치 후 `install.sh`를 실행하면 `harness-scaffold`와 모든 컴패니언 스킬(cleanup·feedback·multi-model-consult)이 `~/.claude/skills/`에 심볼릭 링크되어 함께 로딩된다 (멱등 — 재실행 안전).
 > ```bash
 > git clone <repo> ~/.claude/skills/harness-setup && ~/.claude/skills/harness-setup/install.sh
 > ```
@@ -238,42 +271,39 @@ harness-setup/
 ├── README.md                         # 이 파일
 ├── harness-scaffold/
 │   └── SKILL.md                      # 스캐폴딩 스킬 (Phase 2~4, 심볼릭 링크로 디스커버리)
-├── install.sh                        # 심볼릭 링크 생성 스크립트
-├── presets/
-│   ├── react-next.json               # React + Next.js (App Router, 레이어 기반)
-│   └── react-router-fsd.json         # React Router v7 + FSD
+├── install.sh                        # 심볼릭 링크 생성 스크립트 (scaffold + 컴패니언 전부)
+├── presets/                          # 스택별 프리셋 (4종)
+│   ├── react-next.json               # React + Next.js (App Router, layer-based)
+│   ├── react-router-fsd.json         # React Router v7 + FSD
+│   ├── react-vite.json               # React + Vite SPA (layer-based)
+│   └── express-api.json              # Express + TypeScript API (layer-based)
 ├── templates/
 │   ├── agents/                       # TDD subagent 정의 템플릿 (7개)
-│   │   ├── architect.md
-│   │   ├── test-engineer.md
-│   │   ├── implementer.md
-│   │   ├── reviewer.md
-│   │   ├── simplifier.md
-│   │   ├── debugger.md
-│   │   └── security-reviewer.md
-│   ├── rules/                        # .claude/rules/ 템플릿 (3개)
-│   │   ├── session-routine.md
-│   │   ├── coding-standards.md
-│   │   └── git-workflow.md
+│   ├── rules/                        # .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow)
 │   ├── structural-test-layer.ts      # 레이어 기반 아키텍처 검증 템플릿
 │   ├── structural-test-fsd.ts        # FSD 아키텍처 검증 템플릿
+│   ├── structural-test-domain.ts     # 도메인 기반 아키텍처 검증 템플릿
+│   ├── harness-check.sh              # 하네스 자가진단 템플릿
 │   ├── init.sh                       # 환경 초기화 스크립트 템플릿
 │   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트 템플릿
 │   ├── QUALITY_SCORE.md              # 품질 점수표 템플릿
 │   ├── TECH_DEBT.md                  # 기술 부채 문서 템플릿
 │   └── HARNESS_FRICTION.md           # 마찰 로그 템플릿
-├── companion-skills/
-│   └── harness-feedback/             # 피드백 분석→Issue 스킬 (향후)
+├── companion-skills/                 # 컴패니언 스킬 (install.sh 글로벌 링크)
+│   ├── harness-cleanup/              # 엔트로피 정리 — 운영 사이클 실행
+│   ├── harness-feedback/             # 마찰 로그 분석 → GitHub Issue
+│   └── multi-model-consult/          # 멀티모델 합성 자문 (codex/gemini + Claude)
 ├── references/
 │   ├── harness-guide.md              # 하네스 엔지니어링 이론 (P1~P10)
+│   ├── harness-checklist.md          # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
+│   ├── versioning-policy.md          # semver 버전 관리 정책
+│   ├── upgrade-system-design.md      # 업그레이드 시스템 설계
+│   ├── integrations/                 # 외부 통합 규약 + 매핑 정본
+│   │   ├── _protocol.md
+│   │   ├── superpowers-mapping.md
+│   │   └── multi-model-consult-mapping.md
 │   └── project-context.md            # 설계 결정 기록 + 버전 히스토리
-├── .claude/
-│   ├── commands/
-│   │   ├── gc.md                     # /gc — git commit 커맨드
-│   │   └── gs.md                     # /gs — git sync 커맨드
-│   ├── rules/
-│   │   └── git-workflow.md           # Git 워크플로 규칙 (패시브)
-│   └── settings.local.json           # 권한 설정 (WebSearch, WebFetch, git)
+├── .claude/                          # 이 리포 자체의 개발 환경 (커맨드/규칙/설정)
 └── .tracking/
     ├── CHANGELOG.md                  # 변경 이력
     ├── TODO.md                       # 작업 추적
@@ -296,21 +326,27 @@ harness-setup/
 ## 주요 설계 결정
 
 ### 기존 코드 무수정 원칙
-이 스킬은 문서와 설정 파일만 추가한다. 기존 `.ts`, `.tsx`, `.js`, `.css`, `tsconfig.json`, `eslint` 등은 절대 건드리지 않는다. package.json도 `scripts` 필드에 항목을 추가하는 것만 허용한다.
+이 스킬은 문서와 설정 파일만 추가한다. 기존 `.ts`, `.tsx`, `.js`, `.css`, `tsconfig.json` 등 소스/설정은 건드리지 않는다. **명시적 예외**(사용자가 문답에서 옵트인한 경우에만): package.json `scripts` 필드 추가, ESLint 설정에 보조 규칙 마커 블록 삽입(파싱 불가 시 권고 스니펫으로 폴백, 설정 JS는 실행하지 않음). tsconfig는 어떤 경우에도 수정하지 않고 검사만 한다.
 
 ### 2-스킬 분리
-분석(harness-setup)과 생성(harness-scaffold)을 분리하여 각 스킬의 컨텍스트 윈도우를 효율적으로 사용한다. Stop hook이 자동 체이닝을 보장하므로 사용자 경험은 단일 스킬과 동일하다.
+분석(harness-setup)과 생성(harness-scaffold)을 분리하여 각 스킬의 컨텍스트 윈도우를 효율적으로 사용한다. Stop hook이 자동 체이닝을 보장하므로 사용자 경험은 단일 스킬과 동일하다. hook은 프로필의 `approved: true`를 확인한 뒤에만 발동한다.
 
 ### 소크라테스 문답
-고정된 설문지가 아니라, 스캔 결과에서 불확실한 부분만 골라 질문한다. 이미 코드에서 확인된 것은 묻지 않고, 한 번에 3개 이내만 묻는다. 최대 3라운드 후 미확정 항목은 추론값을 사용한다.
+고정된 설문지가 아니라, 스캔 결과에서 불확실한 부분만 골라 질문한다. 이미 코드에서 확인된 것은 묻지 않고, 한 번에 3개 이내만 묻는다. 최대 3라운드 후 미확정 항목은 추론값을 사용한다. 옵트인 항목(ESLint 보조 규칙·외부 통합·자동 커밋)은 감지됐을 때만 묻고, 거부하면 어떤 산출물도 만들지 않는다.
 
 ### AGENTS.md vs CLAUDE.md 분리
-- **AGENTS.md** = "이 프로젝트는 무엇인가" (맥락) — 프로젝트 개요, 아키텍처 설명, 문서 맵
-- **CLAUDE.md** = "어떻게 작업할 것인가" (행동) — 명령어, 코드 규칙, 세션 루틴, 금지 사항
-- 동일 정보를 중복하지 않는다. CLAUDE.md에서 `@AGENTS.md`로 import.
+- **AGENTS.md** = "이 프로젝트는 무엇인가" (맥락) — 프로젝트 개요, **명령어(source of truth)**, 아키텍처 설명, 주요 규칙, 문서 맵
+- **CLAUDE.md** = "어떻게 작업할 것인가" (행동) — 에이전트 디스패치, 세션 루틴, 운영 사이클, 금지 사항
+- 동일 정보를 중복하지 않는다. CLAUDE.md에서 `@AGENTS.md`로 import. 명령어를 AGENTS.md에 두는 이유는 CLAUDE.md를 읽지 않는 범용 에이전트도 명령을 알 수 있어야 하기 때문이다.
 
 ### 프리셋 우선, 문답 보완
 프리셋이 매칭되면 초기 프로필로 사용하고, 문답은 미세 조정에만 사용한다. 매칭 안 되면 문답으로 처음부터 구성한다.
+
+### 옵트인 자동 커밋 (1.8.0)
+기본은 "커밋 제안만"이다. 원하면 `confirm`(메시지+diff 승인 후 commit+push) 또는 `auto` 모드를 옵트인할 수 있다. 단 위험 작업(`push --force`·`reset --hard`·대규모 변경·의존성)은 어느 모드에서도 항상 사용자 승인을 받는다 — 자동화 대상은 정상 TDD 커밋뿐이다.
+
+### 추측 설계 금지
+실제 마찰/데이터가 없는 기능은 만들지 않는다. 외부 통합 규약은 두 선례(superpowers·multi-model-consult)가 확보된 뒤에야 일반화했고, 해시 재현성 같은 개선은 방향만 확정하고 실제 오탐이 누적될 때 구현하기로 둔다.
 
 ---
 
