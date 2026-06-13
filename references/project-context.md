@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-12 (1.6.0 — multi-model-consult 컴패니언 스킬)
+> 마지막 업데이트: 2026-06-13 (1.6.4 — 누적 정합성 감사)
 
 ---
 
@@ -234,6 +234,14 @@
 - **마이그레이션**: M-1.2.0-to-1.3.0 ([profile] sharedDirs, domain-based 한정)
 - **TODO 정리**: TODO-50(harness-feedback)은 Session 14에 이미 구현 완료 — 상태 누락 정정. TODO-51(기록 체계), TODO-54(스키마 정합성), TODO-70(멱등성 — haja 1.2.0 업그레이드로 검증) 종결
 
+### 1.4.0 (harness-cleanup 컴패니언 스킬)
+- **harness-cleanup 신설** (`companion-skills/harness-cleanup/SKILL.md`): 운영 사이클(체크리스트 § 6.3)의 실행 주체 — P10 엔트로피 관리가 "범위 밖"에서 "컴패니언 스킬로 커버"로 전환
+  - 루틴: 주간(doc:check, QUALITY_SCORE 재측정, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 점검 — 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증, 종합 판정)
+  - 루틴 판별: `docs/CLEANUP_LOG.md` 경과 시간 기반 자동 + 사용자 명시 우선
+  - 원칙: 삭제 우선·승인 필수·scope 제한(소스 동작 변경은 TDD 위임)·기록 보존
+- **scaffold 연계**: Phase 4 운용 스킬 안내에 추가, CLAUDE.md 운영 사이클에 안내 1줄, M-1.3.0-to-1.4.0 ([custom] 안내 추가, 멱등)
+- **정정**: 저장소 CLAUDE.md의 harness-feedback "(스텁)" 표기 → 구현됨
+
 ### 1.5.0 (superpowers 옵트인 통합)
 - **PRD 구체화** (.tracking/prd-superpowers-integration.md): 미결정 이슈 6건 해소 — 감지 경로(installed_plugins.json 1순위 + skills 폴백), 버전 추출(plugin manifest), 매핑 위치(references/integrations/), 스킬명 영어 유지, 삭제 시 안내문 잔류, 규약 일반화 보류. 실물 검증: superpowers v5.1.0, 스킬 14종 전수 (초안의 debugging/using-skills/code-review는 부정확한 이름이었음 — systematic-debugging/using-superpowers/requesting·receiving-code-review로 정정)
 - **프로필 선택 필드 `integrations`**: superpowers — enabled/source/detectedVersion/installPath/linkedSkills. 생략 = 미연계
@@ -243,14 +251,6 @@
 - **업그레이드**: U1에 외부 통합 재감지 (신규 감지 시 추가 제안, 기존 통합 제거 지원). 마이그레이션 등록 불필요 (생략이 기본값, 템플릿 변경은 자동 감지)
 - Phase 3 검증 14 → 15항목 (6.15 연계/옵트아웃 양방향 검증)
 
-### 1.6.2 (멀티모델 자문 권고 반영)
-- **multi-model-consult 첫 실사용** — 자문 대상은 이 스킬 구조 자체 (도그푸딩). codex 결함 관점 + Claude 대안 관점 합성, gemini 부재 degradation 실동작 확인
-- 선별 수용 4건: Stop hook `approved: true` 검사 (초안/손상 프로필 오발동 방지), § 5.15 ESLint 비실행 원칙 명문화, .gitignore에 .claude/artifacts/, TODO-77(§ 12.6 해시 재현성 결정화 검토 — codex·Claude 합의된 유일한 코드화 후보) + TODO-53 픽스처 매트릭스 병합
-- 비수용 (추측 설계 금지): 전면 코드화·JSON Schema 분리·마이그레이션 executable화·프리셋 confidence 모델 — 스킬 철학(산문 사양 + LLM 실행 + 마찰 루프 안전망)과 비용 대비 과함. 실전 마찰 누적 시 재검토
-
-### 1.6.1 (install.sh 멱등성 수정)
-- `ln -sf` → `ln -sfn`: 대상 심링크 존재 시 따라 들어가 자기참조 심링크를 만드는 함정 수정. v1.6.0 커밋에 포함된 `harness-scaffold/harness-scaffold` 잔여물 제거. 2회 연속 실행 멱등성 검증
-
 ### 1.6.0 (multi-model-consult 컴패니언 스킬)
 - **PRD 구체화** (.tracking/prd-multi-model-consult.md): 미결정 이슈 5건 해소 (배치=companion+심링크, 하네스 연계=안정화 후, 아티팩트=수동 관리, 타임아웃=180s+env, 경로=기본 노출). CLI 실물 검증 — codex 0.134.0 로컬 실측으로 **위험 플래그 폐기** (`--dangerously-bypass-approvals-and-sandbox` → `-s read-only --ephemeral`, gemini `--yolo` 제거), `-o` 최종 응답 캡처 발견, 병렬은 Claude 병렬 도구 호출로 달성 (async 인프라 불필요)
 - **구현 (M1+M2)**: `companion-skills/multi-model-consult/` — SKILL.md(분해 가이드 + 합성 포맷 + degradation 3경로 + 인젝션 방어 제약) + scripts/run-advisor.js (env 스트립, 비활성화 스위치, 타임아웃 부분 결과, 아티팩트 저장, `ARTIFACT:` 출력 계약). install.sh에 글로벌 심링크 추가
@@ -258,13 +258,24 @@
 - Public API(프로필/매니페스트/프리셋/생성 파일) 변경 없음 — 버전 단일화 원칙에 따라 스키마 version만 1.6.0 동기 (업그레이드 시 마이그레이션·자동 감지 모두 no-op)
 - 하네스 연계(integrations.multiModelConsult + 통합 규약 일반화)는 스킬 안정화 후 별도 릴리스
 
-### 1.4.0 (harness-cleanup 컴패니언 스킬)
-- **harness-cleanup 신설** (`companion-skills/harness-cleanup/SKILL.md`): 운영 사이클(체크리스트 § 6.3)의 실행 주체 — P10 엔트로피 관리가 "범위 밖"에서 "컴패니언 스킬로 커버"로 전환
-  - 루틴: 주간(doc:check, QUALITY_SCORE 재측정, 코드 엔트로피 스캔, harness:check) / 격주(TECH_DEBT 검토, 승격 큐 점검 — 횟수 ≥ 2 승격 제안) / 월간(문서-실구조 일치, passes 재검증, 종합 판정)
-  - 루틴 판별: `docs/CLEANUP_LOG.md` 경과 시간 기반 자동 + 사용자 명시 우선
-  - 원칙: 삭제 우선·승인 필수·scope 제한(소스 동작 변경은 TDD 위임)·기록 보존
-- **scaffold 연계**: Phase 4 운용 스킬 안내에 추가, CLAUDE.md 운영 사이클에 안내 1줄, M-1.3.0-to-1.4.0 ([custom] 안내 추가, 멱등)
-- **정정**: 저장소 CLAUDE.md의 harness-feedback "(스텁)" 표기 → 구현됨
+### 1.6.1 (install.sh 멱등성 수정)
+- `ln -sf` → `ln -sfn`: 대상 심링크 존재 시 따라 들어가 자기참조 심링크를 만드는 함정 수정. v1.6.0 커밋에 포함된 `harness-scaffold/harness-scaffold` 잔여물 제거. 2회 연속 실행 멱등성 검증
+
+### 1.6.2 (멀티모델 자문 권고 반영)
+- **multi-model-consult 첫 실사용** — 자문 대상은 이 스킬 구조 자체 (도그푸딩). codex 결함 관점 + Claude 대안 관점 합성, gemini 부재 degradation 실동작 확인
+- 선별 수용 4건: Stop hook `approved: true` 검사 (초안/손상 프로필 오발동 방지), § 5.15 ESLint 비실행 원칙 명문화, .gitignore에 .claude/artifacts/, TODO-77(§ 12.6 해시 재현성 결정화 검토 — codex·Claude 합의된 유일한 코드화 후보) + TODO-53 픽스처 매트릭스 병합
+- 비수용 (추측 설계 금지): 전면 코드화·JSON Schema 분리·마이그레이션 executable화·프리셋 confidence 모델 — 스킬 철학(산문 사양 + LLM 실행 + 마찰 루프 안전망)과 비용 대비 과함. 실전 마찰 누적 시 재검토
+
+### 1.6.3 (gemini trust 게이트 수정 + 첫 3중 합성)
+- **multi-model-consult 첫 3중 합성** — gemini CLI(v0.46.0) 설치 후. 자문 대상은 TODO-77 설계 결정. codex(source-fingerprint) + gemini(멱등성·운영) + Claude(합성)가 단일 모델의 A/B 이분법보다 나은 C안 도출 — 도그푸딩 성과
+- **gemini trust 게이트 갭 수정** (TODO-79): 헤드리스 trusted-directory 게이트(exit 55)로 비신뢰 디렉토리 자문이 전부 실패하던 버그. `--approval-mode plan`(읽기전용 — codex `-s read-only` 대응) + `--skip-trust`(세션 한정). 실측 exit 55→0
+- **TODO-77 C안 확정**: 템플릿 변경 판정을 "LLM 재렌더링 해시"에서 "소스 템플릿 파일 해시(`templateSourceHash`)"로 → LLM 바이트 재현 암묵 계약 제거. 구현은 별도 (manifest 스키마 MINOR), 실제 해시 오탐 마찰 누적 시 착수
+- Public API 변경 없음 — 스키마 version 1.6.3 동기만
+
+### 1.6.4 (누적 정합성 감사)
+- **워크플로 적대적 감사** (TODO-80): 1.0.0→1.6.3 13회 릴리스 누적 드리프트를 기계적 사실 수집 → 5개 관점 병렬(카운트/섹션참조/계약동기화/파일인벤토리/트래킹일관성) 점검. 도그푸딩의 연장 (multi-model-consult에 이은 자기 검증 패턴)
+- 진짜 드리프트 4건 수정: 현재 시제 "24개"→26개, SKILL.md 교차참조 명확화, 버전 히스토리 순서 재정렬+1.6.3 누락 추가, 마이그레이션 레지스트리 "1.4.0 이후 불필요" 안내
+- **감사 방법론 교훈**: 감사 에이전트는 "현재 시제 서술 vs 역사 기록(버전 히스토리/CHANGELOG/세션 기록의 그 시점 사실)"을 구분 못 해 오탐을 낸다(이번 3건). 카운트 감사 시 이 구분이 핵심 — 자동 감사 결과는 맥락 검증 후 수용
 
 ---
 

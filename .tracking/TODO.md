@@ -600,3 +600,15 @@
 - **파일**: `companion-skills/multi-model-consult/scripts/run-advisor.js`, `SKILL.md`(제약)
 - **문제**: gemini CLI v0.46.0이 헤드리스 실행 시 "trusted-directory" 게이트로 차단 (exit 55, "not running in a trusted directory"). codex `-s read-only`에 대응하는 gemini 쪽 읽기전용/신뢰 처리가 buildArgs에 누락 — gemini는 `['-p', prompt]`만 전달해 모든 비신뢰 디렉토리에서 자문 실패. 첫 3중 합성 테스트에서 발견
 - **해결**: gemini buildArgs에 `--approval-mode plan`(읽기전용 — codex -s read-only 대응) + `--skip-trust`(세션 한정 trust 게이트 통과) 추가. plan 모드라 파일 수정 불가 + 컨텍스트는 프롬프트 포함이라 안전. 실측 검증: 수정 전 exit 55 → 수정 후 exit 0, 응답 정상. SKILL.md 제약에 명문화
+
+### TODO-80: 누적 정합성 감사 (1.0.0→1.6.3) — 1.6.4
+- **상태**: [x] 완료 (2026-06-13)
+- **파일**: `references/upgrade-system-design.md`, `references/project-context.md`, `SKILL.md`, `harness-scaffold/SKILL.md`
+- **문제**: 13회 연속 릴리스(1.0.0→1.6.3)가 누적 드리프트를 쌓음. 워크플로 적대적 감사(기계적 사실 수집 → 5개 관점 병렬: 카운트/섹션참조/계약동기화/파일인벤토리/트래킹일관성)로 전수 점검
+- **진짜 드리프트 4건 수정**:
+  - upgrade-system-design.md §1.3: "플레이스홀더 24개" → 26개 (현재 시제 설계 설명)
+  - SKILL.md §7 파일 보호: "scaffold §5.5/§5.15" → "harness-scaffold/SKILL.md §5.5/§5.15" (교차참조 명확화 — SKILL.md엔 §5.5/§5.15 없음)
+  - project-context.md §4 버전 히스토리: 순서 뒤섞임 재정렬(1.4.0이 맨 아래, 1.6.x 역순) → 오름차순 + **1.6.3 항목 누락 추가**
+  - harness-scaffold §10.3 마이그레이션 레지스트리: "M-1.4.0 이후 불필요" 안내 추가 — 미래 메인테이너가 "왜 1.3.0→1.4.0에서 멈췄나" 오해 방지 + 마이그레이션 등록 판단 기준 명시
+- **감사 오탐 3건 (수정 안 함, 역사 기록·논리)**: 버전 히스토리/CHANGELOG/세션별 HANDOFF의 "24개·21→24·12→14"는 그 시점 사실(역사 기록). "15항목"은 6.0(디렉토리 준비)을 제외한 6.1~6.15=15로 정확(감사자가 6.0 포함해 16으로 오판). 마이그레이션 "누락"은 1.4.0 이후 의도적 불필요(자동 감지/Public API 무변경)
+- **교훈**: 빠른 연속 릴리스는 ① 현재 시제 카운트 스테일 ② 버전 히스토리 순서 ③ 누락 항목 ④ 교차참조 모호성을 쌓는다. 감사는 "현재 시제 서술 vs 역사 기록"을 구분해야 함(감사 에이전트는 이 구분에 약함 — 오탐의 원천). 워크플로 적대적 감사가 도그푸딩의 연장

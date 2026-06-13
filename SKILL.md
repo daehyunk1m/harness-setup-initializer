@@ -512,7 +512,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 
 ```json
 {
-  "version": "1.6.3",
+  "version": "1.6.4",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -750,7 +750,7 @@ presets/
 
 ### 파일 보호
 - 기존 소스 코드 (.ts, .tsx, .js, .jsx, .css 등)를 수정하지 않는다
-- 기존 설정 파일을 덮어쓰지 않는다 — 이 스킬은 어떤 파일도 수정하지 않는다. 옵트인된 수정은 `/harness-scaffold`가 수행한다 (package.json scripts: scaffold § 5.5, ESLint 보조 규칙: 옵트인 질문은 이 파일 § 4.2, 실행은 scaffold § 5.15)
+- 기존 설정 파일을 덮어쓰지 않는다 — 이 스킬은 어떤 파일도 수정하지 않는다. 옵트인된 수정은 `/harness-scaffold`가 수행한다 (package.json scripts: harness-scaffold/SKILL.md § 5.5, ESLint 보조 규칙: 옵트인 질문은 이 파일 § 4.2, 실행은 harness-scaffold/SKILL.md § 5.15)
 - 이미 존재하는 하네스 파일을 덮어쓰지 않는다 (사용자 확인 없이)
 - node_modules, .git, 프레임워크 캐시 디렉토리(.next, dist 등)에 접근하지 않는다
 
