@@ -17,7 +17,8 @@
 | Post-Green | Reviewer | `agents/reviewer.md` | 항상 |
 | Post-Green | Security Reviewer | `agents/security-reviewer.md` | feature.category가 {{SECURITY_CATEGORIES}}일 때 |
 | Refactor | Simplifier | `agents/simplifier.md` | Reviewer가 NEEDS_REFACTOR 반환 시 |
-| On-demand | Debugger | `agents/debugger.md` | validate {{MAX_IMPLEMENTER_ATTEMPTS}}회 실패 시 |
+| Post-Verify | VERIFY(E2E) | (오케스트레이터 단계 — 에이전트 아님) | `e2e.enabled` AND Test Engineer E2E status=created |
+| On-demand | Debugger | `agents/debugger.md` | validate {{MAX_IMPLEMENTER_ATTEMPTS}}회 실패 시 / E2E 실패 시 |
 
 ### Subagent 호출 방법
 
@@ -185,6 +186,24 @@ feature.category가 {{SECURITY_CATEGORIES}} 중 하나일 때만 실행.
 - PASS → Complete
 - BLOCK → Phase 3 (Green) 재진입 (보안 수정사항을 Implementer에 전달)
 
+### Phase 4.7: VERIFY(E2E) (조건부)
+
+REVIEW·SECURITY·(조건부 REFACTOR)가 모두 끝난 뒤, **기능 완료 직전**에 실행한다.
+
+**게이트** (`profile.e2e.enabled`가 참일 때만 평가):
+- Test Engineer E2E 판정이 `created` → 실행한다.
+- `skipped` / `not_applicable` → VERIFY를 건너뛴다 (명시적 선언이 있어야만 스킵).
+- 판정 유실/모호(재개 세션 등) → **BLOCK**: `e2e/specs`를 feature ID(`@feature:{featureID}`)로 재탐색하거나, 불명확하면 사용자에게 확인을 요청한다. 침묵은 PASS가 아니다.
+
+**실행**: 해당 feature 스펙만 선택 실행한다(전체 스위트 아님) — `{{TEST_COMMAND}}` 계열 E2E 명령에 `--grep @feature:{featureID}`를 적용. (전체 @critical 게이팅은 증분 2b의 pre-push 책임.)
+
+**분기**:
+- PASS → 기능 완료 처리.
+- FAIL(로직) → 마찰 로그 기록(`e2e-fail`) → Phase 3 (Green) 재진입, **시도 횟수 누적**(`{{MAX_IMPLEMENTER_ATTEMPTS}}` 한도 — NEEDS_FIX와 동일).
+- FAIL(플레이키니스 의심) → Debugger 브라우저 재현(§ debugger.md 0번)으로 로직 실패 vs 플레이키니스 판별. 플레이키니스 확인 시 코드 환각 수정 금지 → 보고 후 Debugger Circuit Breaker(2회 → 사용자 에스컬레이션).
+
+무한 루프는 기존 시도 한도 + Debugger Circuit Breaker가 차단한다 — VERIFY(E2E)는 독립 무한 재시도를 도입하지 않는다.
+
 ### Phase 5: REFACTOR (리팩터링, 조건부)
 
 Reviewer가 NEEDS_REFACTOR를 반환했을 때만 실행.
@@ -200,6 +219,8 @@ Reviewer가 NEEDS_REFACTOR를 반환했을 때만 실행.
 ---
 
 ## 기능 완료 처리
+
+**전제**: `e2e.enabled`이고 Test Engineer E2E status=created이면, 완료 처리 전에 **Phase 4.7 VERIFY(E2E)를 통과**해야 한다(미통과·미판정이면 완료 처리를 중단).
 
 TDD 사이클이 성공적으로 완료되면:
 
@@ -245,9 +266,11 @@ TDD 사이클이 성공적으로 완료되면:
 ```
 === TDD STATE ===
 feature: {feature ID}
-phase: {PRE-RED | RED | GREEN | REVIEW | SECURITY | REFACTOR}
+phase: {PRE-RED | RED | GREEN | REVIEW | SECURITY | REFACTOR | VERIFY(E2E)}
 attempt: {현재 시도 횟수}
 plan_ref: {Architect 계획 요약 또는 exec-plan 경로 또는 .claude/plans/ 파일 경로}
+e2e_status: {created | skipped | not_applicable | 미정}
+e2e_spec_paths: {작성한 .e2e.ts 경로 목록 또는 없음}
 === END TDD STATE ===
 ```
 
@@ -275,6 +298,7 @@ TDD 사이클 중 마찰 이벤트가 발생하면 `docs/HARNESS_FRICTION.md`의
 | `user-escalation` | Debugger도 한도 초과 → 사용자 보고 시 | critical |
 | `review-fix` | Reviewer가 NEEDS_FIX 반환 시 | medium |
 | `refactor-rollback` | Simplifier 2회 실패 → 롤백 시 | high |
+| `e2e-fail` | VERIFY(E2E)가 FAIL 반환 시 | high |
 | `session-incomplete` | TDD 사이클 미완료 상태로 세션 종료 시 | low |
 
 **규칙**:
