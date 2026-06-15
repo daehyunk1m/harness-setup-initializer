@@ -5,6 +5,26 @@
 
 ---
 
+## [1.11.0] — 2026-06-15 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
+
+> 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업을 생성. MINOR (옵트인 추가 모듈 — 신규 플레이스홀더 0개, 기본 생략). 마이그레이션 불필요.
+
+### 추가 (Added) — Session 36 (2026-06-15)
+- E2E 스캐폴드 모듈: 프론트엔드 옵트인 시 Playwright 기반 E2E 셋업(`playwright.config.ts` + `e2e/` + `test:e2e` 스크립트 + `@playwright/test` devDep) 생성. harness-scaffold §5.17 생성 단계 + package.json 머지 확장
+- 두 SKILL.md에 e2e 프로필 스키마(`e2e: { enabled }`): SKILL.md 프론트엔드 감지 + 옵트인 질문 → 출력 스키마, harness-scaffold 입력 스키마 + manifest 카테고리 계약(config=managed/스타터=custom)
+- E2E 스캐폴드 템플릿 5종 + 골든 픽스처(`test/e2e-fixtures.sh`)
+- harness-check ⑧ E2E 구조 검사(경고 전용, 자기 게이트 — e2e 옵트인 프로젝트에서만 발동)
+- Phase 4 카탈로그 E2E 능력 줄(순수 투영, `e2e.enabled` 게이트)
+- harness-checklist §4.2에 E2E 구현 경로 명시(§5.17이 생성, 구조만 보장하며 스위트 통과는 앱별 부팅 의존)
+
+### 수정 (Changed) — Session 36 (2026-06-15)
+- Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계)
+- versioning-policy §1 "생성 파일 구조" 행: "19개 파일 (+ 옵트인 시 ESLint·E2E)"로 e2e 옵트인 추가 반영. 플레이스홀더 29개 불변(신규 `{{}}` 미도입)
+- 프로필 스키마 version 1.10.0 → 1.11.0 (두 SKILL.md 동기)
+- README 버전 표기 1.10.0 → 1.11.0, HANDOFF 현재 버전 1.10.0 → 1.11.0 (버전 범프 동시 갱신 계약)
+
+---
+
 ## [1.10.0] — 2026-06-15 (첫 셋업 능력 카탈로그 — 이슈 #11)
 
 > 첫 셋업 직후 "이 하네스로 무엇을→어떻게 할 수 있나"를 액션 지향으로 안내. MINOR (Phase 4 보고 enrichment — Public API 무변경, 신규 생성 파일 0). 마이그레이션 불필요.

@@ -318,6 +318,9 @@
 - **U5 비대칭**: 업그레이드 보고는 카탈로그 미출력(첫 셋업 전용) — §10.2에 1문장 명문화. NET-NEW 능력 1줄 델타는 OUT-OF-SCOPE 후속
 - MINOR, Public API 4계약(프로필/매니페스트/프리셋/생성파일) 무변경 — 휘발성 Phase 4 보고 enrichment(선례 1.5.0/1.9.0). 마이그레이션 불필요. 부수 수정: README 버전 표기 1.8.0(드리프트)→1.10.0
 
+### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
+- **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
 ---
 
 ## 5. 향후 확장 가능 항목

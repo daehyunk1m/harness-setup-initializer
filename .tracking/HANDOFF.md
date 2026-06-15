@@ -134,7 +134,12 @@
   - **의미 정확성 교정**: 이슈 #11의 "Security Reviewer = §5.10 게이트" 거짓 확인(§5.10은 7개 에이전트 항상 생성) → 실제 게이트는 session-routine Phase 4.5 SECURITY 호출 조건(`tdd.securityCategories` 매칭). 카탈로그는 파이프라인 비열거·정본 지시. 부수: README 버전 드리프트 1.8.0→1.10.0 정정
   - **신규 생성 파일 0** — harness-check ①·doc-freshness 타깃·manifest files{}·"19개 파일" 카운트·§10.3 레지스트리 무변경. Public API 4계약 무변경(MINOR). 마이그레이션 불필요
 
-**현재 버전: 1.10.0** (첫 셋업 능력 카탈로그)
+- **Session 36 (06-15)**: 1.11.0 — E2E 스캐폴드 모듈 (이슈 #12 증분 1)
+  - 프론트엔드 옵트인 시 Playwright 기반 E2E 셋업(`playwright.config.ts` + `e2e/` + `test:e2e` + `@playwright/test` devDep) 생성 — harness-scaffold §5.17 + package.json 머지 확장. 템플릿 5종 + 골든 픽스처(`test/e2e-fixtures.sh`)
+  - e2e 프로필 스키마(`e2e: { enabled }`, 두 SKILL.md 동기), manifest 카테고리 계약(config=managed/스타터=custom), harness-check ⑧ 구조 검사(경고 전용·자기 게이트), Phase 4 카탈로그 E2E 줄(순수 투영, `e2e.enabled` 게이트)
+  - Vitest 충돌은 `*.e2e.ts` 네이밍 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계). **신규 플레이스홀더 0개**(29개 불변), 옵트인·생략 기본 → 마이그레이션 불필요. MINOR
+
+**현재 버전: 1.11.0** (E2E 스캐폴드 모듈)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
