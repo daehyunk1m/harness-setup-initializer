@@ -1138,6 +1138,9 @@ Phase U1에서 각 managed 파일에 대해:
 | `scripts/structural-test.ts` | `templates/structural-test-{architectureType}.ts` |
 | `scripts/doc-freshness.ts` | `templates/doc-freshness.ts` |
 | `scripts/harness-check.sh` | `templates/harness-check.sh` |
+| `.githooks/pre-push` | `templates/githooks/pre-push` |
+
+> **노트(플래그)**: 기존 e2e managed 파일(`playwright.config.ts`, `e2e/tsconfig.json`)은 이 매핑에 **부재**한다 (1.11.0 옵트인 모듈 선례 — 자동 감지 제외). pre-push는 보안·정확성 업데이트 전파가 필요해 매핑에 포함한다. 두 e2e 파일의 매핑 정렬은 별도 후속(증분 4 / 본 증분 범위 밖)으로 TODO에 남긴다.
 
 `docs/` 하위 디렉토리 등 매핑에 없는 managed 파일은 이 자동 감지 대상에서 제외하고, 마이그레이션으로만 관리한다. `custom` 아키텍처 유형의 `scripts/structural-test.ts`는 동적 생성되므로(템플릿 매핑 없음) 자동 감지에서 제외된다 — layer-based/fsd/domain-based는 `structural-test-{architectureType}.ts` 매핑으로 자동 감지된다.
 

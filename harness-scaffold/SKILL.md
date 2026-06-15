@@ -1683,11 +1683,15 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 2. [profile] integrations.multiModelConsult: U1 재감지에서 새로 감지되면 연계 추가를 제안한다 (옵트인 — 자동 추가 아님). 동의 시 보조 스킬 섹션에 항목 합산
    - 기본값: 미연계 (생략) — 자동 추가하지 않음
 
+- **pre-push 재감지** (1.14.0+): 기존 `e2e.enabled` 하네스에 `e2e.prePush`가 없고 git 저장소면, pre-push 게이트 옵트인을 **제안**한다 (생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 § 5.18 생성 로직(공존성 분기 포함) 실행 + manifest 등록. 활성화는 Phase U5 보고에서 수동 안내(스킬은 git config 미실행).
+
 > 새 버전을 추가할 때 마이그레이션이 필요한지 판단 기준: ① custom 파일 외과 수정 ② [new]/[remove] 파일 ③ [profile] 기본값 있는 새 필드 ④ [data] 스키마 변경 — 이 중 하나라도 해당하면 등록한다. managed 템플릿 변경·컴패니언 스킬·인프라 수정은 등록하지 않는다.
 >
 > **1.7.1**(이슈 정리·install.sh 인프라)과 **1.8.0**(autoCommit)도 위 기준상 마이그레이션이 없다 — autoCommit은 git-workflow.md(managed)에 `{{AUTO_COMMIT_MODE}}` 추가이므로 § 12.6 자동 감지로 전파되고(기존 하네스는 mode=off 섹션이 덧붙음, 무해), 프로필 필드는 생략=off라 기존 프로필에 추가 불필요.
 >
 > **1.9.0**(보장 정직화+의미검증)도 마이그레이션이 없다 — `{{Q2_ENFORCEMENT}}` 마커와 manifest 필드(`structuralTestEnforcement`/`semanticApprovalAt`)는 managed 템플릿(structural-test의 layer/fsd/domain, harness-check.sh)과 manifest 재렌더에 § 12.6 자동 감지로 전파된다. custom structural-test(자동 감지 제외)에 마커가 없으면 harness-check ④-b는 안전하게 `enforced`로 간주(기존 동작 유지). 골든 픽스처는 스킬 내부 테스트(test/)라 생성 하네스와 무관.
+>
+> **1.14.0**(이슈 #12 증분 2b, pre-push 게이트)도 마이그레이션이 없다 — `.githooks/pre-push`는 신규 managed 파일이지만 `e2e.prePush` 옵트인 시에만 생성되고 생략=off라(1.11.0 e2e 모듈과 동일 선례), 기존 하네스는 산출물 0건이다. harness-check.sh ⑨ 추가분은 § 12.6 자동 감지로 전파된다. 신규 파일 생성은 U1 재감지 옵트인 경로로만 발생한다 (§ 10.2).
 
 ### 10.4 엣지 케이스
 
