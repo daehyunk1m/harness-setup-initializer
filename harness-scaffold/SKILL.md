@@ -220,6 +220,7 @@ fi
 17. docs/HARNESS_FRICTION.md (마찰 로그 — 피드백 수집)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
 19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리
+19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
 20. ESLint 보조 규칙 수정 (eslintAssist 옵트인 시에만 — § 5.15)
 21. .harness-manifest.json (버전 추적 매니페스트 — § 5.13, 항상 마지막 — Stop hook 종료 조건)
 ```
@@ -1114,7 +1115,7 @@ grep -Eq 'HARNESS:Q2_ENFORCEMENT=(enforced|unenforced)' scripts/structural-test.
 node -e "JSON.parse(require('fs').readFileSync('feature_list.json','utf8')); console.log('✅ feature_list.json valid');" 2>&1 || echo "❌ feature_list.json invalid"
 
 # 6.11 템플릿 기반 파일에 미치환 플레이스홀더가 없는지 확인
-grep -r '{{.*}}' agents/ .claude/rules/ init.sh scripts/doc-freshness.ts scripts/harness-check.sh docs/TECH_DEBT.md 2>/dev/null && echo "❌ 미치환 플레이스홀더 발견" || echo "✅ 플레이스홀더 모두 치환됨"
+grep -r '{{.*}}' agents/ .claude/rules/ init.sh scripts/doc-freshness.ts scripts/harness-check.sh docs/TECH_DEBT.md .githooks/pre-push 2>/dev/null && echo "❌ 미치환 플레이스홀더 발견" || echo "✅ 플레이스홀더 모두 치환됨"
 
 # 6.12 .harness-manifest.json 검증
 node -e "
@@ -1149,6 +1150,12 @@ if [ -f playwright.config.ts ]; then
   ls -la playwright.config.ts e2e/tsconfig.json e2e/specs/smoke.e2e.ts 2>&1
   node -e "const p=require('./package.json'); console.log(p.scripts['test:e2e'] ? '✅ test:e2e script' : '❌ test:e2e 누락'); console.log(p.devDependencies && p.devDependencies['@playwright/test'] ? '✅ @playwright/test devDep' : '⚠️ @playwright/test devDep 미기록');"
   grep -q '{{' playwright.config.ts && echo "❌ playwright.config.ts 미치환 플레이스홀더" || echo "✅ playwright.config.ts 치환 완료"
+fi
+
+# 6.17 pre-push 게이트 검증 (e2e.prePush 옵트인 시에만)
+if [ -f .githooks/pre-push ]; then
+  grep -q "harness-setup:e2e-prepush" .githooks/pre-push && echo "✅ pre-push 마커 존재" || echo "❌ pre-push 마커 누락"
+  grep -q '{{' .githooks/pre-push && echo "❌ pre-push 미치환 플레이스홀더" || echo "✅ pre-push 플레이스홀더 치환됨"
 fi
 ```
 
@@ -1270,8 +1277,18 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/, playwright.config.ts) — e2e 옵트인 시에만 표시
+- pre-push 게이트 → `git push` 시 `@critical` 자동 검증 (상세: .githooks/pre-push · references/harness-checklist.md §4.2) — e2e.prePush 옵트인 + 훅 생성 시에만 표시
 > 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
 ```
+
+#### pre-push 게이트 활성화 안내 (e2e.prePush 옵트인 시에만)
+
+`e2e.prePush`로 `.githooks/pre-push`를 생성/주입한 경우, 보고 말미에 다음을 **반드시** 출력한다 (스킬은 git 설정을 변경하지 않았다):
+
+1. **활성화** (그린필드 생성 시): `git config core.hooksPath .githooks` — 기존 hooksPath/Husky에 주입한 경우 이미 활성이므로 이 명령을 안내하지 않고 "기존 훅에 주입됨(이미 활성)"으로 보고한다. 폴백한 경우 권고 스니펫과 수동 안내를 출력한다.
+2. **보안 고지**: "이 훅은 `git push` 시 `validate` → `@critical` E2E를 실행합니다 (임의 코드 실행). 신뢰할 수 있는 저장소에서만 활성화하세요."
+3. **monorepo 한계**: repo-root 기준으로 동작하므로 하위 패키지에 설치된 playwright는 미탐지될 수 있다 (명시적 한계).
+4. **비활성화**: `git config --unset core.hooksPath`.
 
 #### "이제 할 수 있는 일" 카탈로그 렌더링 규칙
 
@@ -1283,6 +1300,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **하네스 정리 · 피드백 분석 줄**: 컴패니언 스킬(install.sh로 `~/.claude/skills/`에 글로벌 설치)이므로 "글로벌 설치 전제"로 제시한다 — 글로벌 미설치 환경에서는 호출되지 않을 수 있다.
 - **검증 게이트 · 자가진단 · 품질·부채 추적 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
 - **브라우저 E2E 줄**: `e2e.enabled === true`이고 § 5.17 산출물(`playwright.config.ts`)이 생성된 경우에만 렌더 — 산출물 생성을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 자체를 생략한다 (미와이어 능력 광고 불가).
+- **pre-push 게이트 줄**: `e2e.prePush === true`이고 § 5.18 산출물(`.githooks/pre-push`)이 생성/주입된 경우에만 렌더 — 산출물 생성 신호를 재사용하는 순수 투영. 미옵트인·폴백 시 줄 자체를 생략한다 (미와이어/미활성 능력 광고 불가).
 
 언어는 보고 전체와 동일하게 § 8 "문서 품질"의 언어 규칙(한국어 기본, 사용자 요청 시 예외)을 따른다 — 한국어를 하드코딩하지 않는다. 각 줄은 정본(session-routine.md / 통합 매핑 / 컴패니언 SKILL.md)을 가리킬 뿐 능력 사실을 복제하지 않는다 — **새 손-관리 능력 목록이 아니다.**
 
