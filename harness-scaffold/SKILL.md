@@ -217,9 +217,10 @@ fi
 15. docs/QUALITY_SCORE.md (품질 점수표 초기값)
 16. docs/TECH_DEBT.md (기술 부채 빈 템플릿)
 17. docs/HARNESS_FRICTION.md (마찰 로그 — 피드백 수집)
-18. package.json scripts 추가 (harness:check 포함)
-19. ESLint 보조 규칙 수정 (eslintAssist 옵트인 시에만 — § 5.15)
-20. .harness-manifest.json (버전 추적 매니페스트 — § 5.13, 항상 마지막 — Stop hook 종료 조건)
+18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
+19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리
+20. ESLint 보조 규칙 수정 (eslintAssist 옵트인 시에만 — § 5.15)
+21. .harness-manifest.json (버전 추적 매니페스트 — § 5.13, 항상 마지막 — Stop hook 종료 조건)
 ```
 
 **skipFiles 처리**: `skipFiles` 배열에 포함된 파일은 생성을 건너뛴다. 해당 파일이 다른 파일의 의존 대상이면 기존 파일이 존재한다고 가정하고 진행한다.
@@ -503,11 +504,13 @@ plan_ref: {계획 참조}
   - `doc:check`: 문서 최신성 검사
   - `harness:check`: 하네스 자가진단 — `bash scripts/harness-check.sh`
   - `test:run` (조건부): 기존 `test` 스크립트가 watch 기본(예: `vitest` 단독)일 때만 추가 — 단발 실행 형태 (예: `vitest run`). 기존 `test` 키는 수정하지 않는다
+  - `test:e2e` (조건부): 프로필에 `e2e.enabled`가 있을 때만 추가 — `playwright test`
 - 기존에 같은 이름의 script가 있으면 스킵한다
 - Node 스크립트로 안전하게 수정한다:
 
 ```bash
 node -e "
+const fs = require('fs');
 const pkg = require('./package.json');
 const toAdd = {
   'lint:arch': '{프로필에서 가져온 lint:arch 명령}',
@@ -516,21 +519,28 @@ const toAdd = {
   'harness:check': 'bash scripts/harness-check.sh'
 };
 // 기존 test가 watch 기본일 때만: toAdd['test:run'] = '{단발 실행 명령, 예: vitest run}';
+// e2e 옵트인 시에만: toAdd['test:e2e'] = 'playwright test';
 let changed = false;
 for (const [key, val] of Object.entries(toAdd)) {
-  if (!pkg.scripts[key]) {
-    pkg.scripts[key] = val;
-    changed = true;
-  }
+  if (!pkg.scripts[key]) { pkg.scripts[key] = val; changed = true; }
 }
+// e2e 옵트인 시: @playwright/test devDependency add-only 머지 (설치는 실행하지 않음 — Phase 4 안내)
+// const PW_VERSION = '{프로필 e2e.playwrightVersion}';
+// pkg.devDependencies = pkg.devDependencies || {};
+// if (!pkg.devDependencies['@playwright/test']) { pkg.devDependencies['@playwright/test'] = '^' + PW_VERSION; changed = true; }
 if (changed) {
-  require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-  console.log('✅ package.json scripts 추가 완료');
+  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+  console.log('✅ package.json 업데이트 완료');
 } else {
-  console.log('ℹ️ 추가할 scripts 없음 (이미 존재)');
+  console.log('ℹ️ 추가할 항목 없음 (이미 존재)');
 }
 "
 ```
+
+**E2E 머지 (e2e 옵트인 시에만)**:
+- `scripts.test:e2e` ← `playwright test` (키 부재 시에만 추가)
+- `devDependencies['@playwright/test']` ← `^{profile.e2e.playwrightVersion}` (키 부재 시에만 추가). **install은 실행하지 않는다** — Phase 4에서 `npm i && npx playwright install` 안내
+- `test:e2e`는 **validate에 포함하지 않는다** — 전체 E2E는 빠른 검증 루프와 분리한다 (브라우저·dev 서버 기동 비용). E2E를 TDD 빠른 루프에 편입하는 것은 증분 2(@critical + pre-push)에서 다룬다
 
 validate 명령 조합 규칙:
 - typecheck 명령이 package.json scripts에 있으면 포함, 없으면 생략
@@ -1001,6 +1011,29 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 - `detectedVersion`은 정보용 표기일 뿐, 버전 비교/차단을 하지 않는다 (드리프트는 실존 검증이 잡는다)
 - 옵트아웃(해당 통합 필드 생략) 시 그 통합명이 어떤 산출물에도 나타나지 않는다. `integrations` 전체가 없으면 "## 보조 스킬" 섹션 자체가 없다
 
+### 5.17 E2E 스캐폴드 모듈 (옵트인)
+
+프로필에 `e2e` 필드가 있고 `enabled: true`일 때만 실행한다. 필드가 없으면 이 단계 전체를 건너뛴다 (산출물 0건).
+
+> **원칙 준수**: 비침습 — 기존 `vitest.config`·`tsconfig`를 수정하지 않는다. 새 파일만 생성하고, package.json은 § 5.5의 add-only 머지만 수행한다.
+
+#### 생성 파일
+
+| 파일 | 카테고리 | 템플릿 | 치환 |
+|------|---------|--------|------|
+| `playwright.config.ts` | managed | `templates/playwright.config.ts` | `{{DEV_SERVER_COMMAND}}` ← devServer.command, `{{DEV_SERVER_PORT}}` ← devServer.port |
+| `e2e/tsconfig.json` | managed | `templates/e2e/tsconfig.json` | 없음 |
+| `e2e/fixtures/test.ts` | custom | `templates/e2e/fixtures/test.ts` | 없음 |
+| `e2e/fixtures/seed.ts` | custom | `templates/e2e/fixtures/seed.ts` | 없음 |
+| `e2e/specs/smoke.e2e.ts` | custom | `templates/e2e/specs/smoke.e2e.ts` | 없음 |
+
+#### 규칙
+
+- `playwright.config.ts`의 `testMatch`는 `**/*.e2e.ts`이고, Vitest 기본 글롭(`**/*.{test,spec}.ts`)은 `.e2e.ts`를 수집하지 않는다 — 따라서 vitest.config 수정이 불필요하다 (이슈 #12의 load-bearing 결정).
+- `e2e/tsconfig.json`은 root tsconfig를 `extends`하고 e2e 디렉토리만 컴파일한다. **root tsconfig는 수정하지 않는다.** root의 include가 e2e를 포함하면 harness-check ⑧이 경고한다 (§ 5.14).
+- custom 파일(fixtures/seed/smoke)은 이미 존재하면 덮어쓰지 않는다 (사용자 소유). managed 파일(config/tsconfig)은 § 12.6 자동 감지로 템플릿 변경을 전파한다.
+- E2E 그린은 앱별 부팅(env/route-block)에 의존하므로 **스위트를 실행하지 않는다** — 구조(파일·스크립트 존재)만 보장한다 (의미 비보장, harness-checklist § 7 일관).
+
 ---
 
 ## 6. Phase 3: 검증
@@ -1075,6 +1108,13 @@ grep -q "^## 보조 스킬" AGENTS.md && echo "✅ 보조 스킬 섹션 존재" 
 # (c) 옵트아웃/미감지 통합은 반대로 — 해당 통합명이 AGENTS.md·.claude/rules/ 어디에도 없어야 한다
 #     (예: superpowers만 옵트인 → "multi-model-consult" 문자열 0건, 그 역도 동일)
 # 항목 수는 통합/스킬 수에 비례하므로 고정 카운트로 검증하지 않는다 (통합 추가 시 깨지지 않도록)
+
+# 6.16 E2E 스캐폴드 검증 (e2e 옵트인 시에만 실행)
+if [ -f playwright.config.ts ]; then
+  ls -la playwright.config.ts e2e/tsconfig.json e2e/specs/smoke.e2e.ts 2>&1
+  node -e "const p=require('./package.json'); console.log(p.scripts['test:e2e'] ? '✅ test:e2e script' : '❌ test:e2e 누락'); console.log(p.devDependencies && p.devDependencies['@playwright/test'] ? '✅ @playwright/test devDep' : '⚠️ @playwright/test devDep 미기록');"
+  grep -q '{{' playwright.config.ts && echo "❌ playwright.config.ts 미치환 플레이스홀더" || echo "✅ playwright.config.ts 치환 완료"
+fi
 ```
 
 ### 검증 결과 판정
