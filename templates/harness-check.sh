@@ -145,15 +145,15 @@ if [ -f .githooks/pre-push ] || [ -n "${HOOKS_PATH:-}" ]; then
   ACTIVE_HOOK="${HOOKS_PATH:+$HOOKS_PATH/pre-push}"
   if [ -n "$ACTIVE_HOOK" ] && [ -f "$ACTIVE_HOOK" ] && grep -q "harness-setup:e2e-prepush" "$ACTIVE_HOOK" 2>/dev/null; then
     echo "✅ pre-push 게이트 활성 — core.hooksPath=$HOOKS_PATH"
+    if [ -x node_modules/.bin/playwright ]; then
+      echo "✅ playwright 실행 가능"
+    else
+      echo "ℹ️ playwright 미설치 — E2E 게이트는 no-op (validate만 실행)"
+    fi
   elif [ -f .githooks/pre-push ] && grep -q "harness-setup:e2e-prepush" .githooks/pre-push 2>/dev/null; then
     echo "⚠️ pre-push 훅(.githooks/pre-push)은 있으나 비활성 — 활성화: git config core.hooksPath .githooks"
   else
     echo "⚠️ pre-push 마커 미발견 — 게이트 미설치 (e2e.prePush 옵트인 필요)"
-  fi
-  if [ -x node_modules/.bin/playwright ]; then
-    echo "✅ playwright 실행 가능"
-  else
-    echo "ℹ️ playwright 미설치 — E2E 게이트는 no-op (validate만 실행)"
   fi
 fi
 
