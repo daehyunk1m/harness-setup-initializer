@@ -119,11 +119,14 @@ if [ -f playwright.config.ts ]; then
   else
     echo "⚠️ e2e/specs 디렉토리 미발견"
   fi
-  # root tsconfig가 e2e를 포함하면 tsc가 e2e를 잘못 컴파일할 수 있음 (tsconfig는 수정하지 않음 — 경고만)
+  # root tsconfig가 e2e를 컴파일에 포함하면 tsc가 e2e를 잘못 컴파일할 수 있음 (tsconfig는 수정하지 않음 — 경고만)
+  # JSONC라 grep 기반 soft check: e2e가 이미 exclude되어 있으면(권장 설정) 경고하지 않는다 (오탐 방지)
   if [ -f tsconfig.json ]; then
-    if ! grep -q '"include"' tsconfig.json 2>/dev/null; then
-      echo "⚠️ tsconfig.json에 include 없음 — e2e/가 root 컴파일에 섞일 수 있습니다. root tsconfig exclude에 \"e2e\" 추가 권장 (하네스는 tsconfig를 수정하지 않음)"
-    elif grep -q '"e2e' tsconfig.json 2>/dev/null; then
+    if grep -A3 '"exclude"' tsconfig.json 2>/dev/null | grep -q 'e2e'; then
+      :  # e2e가 exclude에 있음 — 정상 (경고 없음)
+    elif ! grep -q '"include"' tsconfig.json 2>/dev/null; then
+      echo "⚠️ tsconfig.json에 include/exclude 설정 없음 — e2e/가 root 컴파일에 섞일 수 있습니다. root tsconfig exclude에 \"e2e\" 추가 권장 (하네스는 tsconfig를 수정하지 않음)"
+    elif grep -A3 '"include"' tsconfig.json 2>/dev/null | grep -q 'e2e'; then
       echo "⚠️ tsconfig.json include가 e2e를 포함하는 듯합니다 — exclude에 \"e2e\" 추가 권장"
     fi
   fi

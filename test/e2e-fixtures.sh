@@ -72,6 +72,18 @@ WORK2="$TMP/has-e2e"; mkdir -p "$WORK2/e2e/specs"
 cp "$WORK/hc.sh" "$WORK2/hc.sh"; : > "$WORK2/playwright.config.ts"; : > "$WORK2/e2e/specs/smoke.e2e.ts"
 echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK2/package.json"
 ( cd "$WORK2" && bash hc.sh 2>&1 | grep -q "── ⑧" ) && echo "✅ e2e 설치 시 ⑧ 실행" || { echo "❌ e2e 있는데 ⑧ 미실행"; FAILS=$((FAILS+1)); }
+# (c) e2e가 exclude된 tsconfig (권장 설정) → include 오탐 경고 없어야 함 (회귀 방지)
+WORK3="$TMP/e2e-excluded"; mkdir -p "$WORK3/e2e/specs"
+cp "$WORK/hc.sh" "$WORK3/hc.sh"; : > "$WORK3/playwright.config.ts"; : > "$WORK3/e2e/specs/smoke.e2e.ts"
+echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK3/package.json"
+echo '{"include":["src"],"exclude":["e2e"]}' > "$WORK3/tsconfig.json"
+( cd "$WORK3" && bash hc.sh 2>&1 | grep -q "include가 e2e를 포함" ) && { echo "❌ exclude된 e2e에 오탐 경고"; FAILS=$((FAILS+1)); } || echo "✅ e2e exclude 시 경고 없음 (오탐 회귀 방지)"
+# (d) include가 e2e를 포함하는 tsconfig → 경고 있어야 함
+WORK4="$TMP/e2e-included"; mkdir -p "$WORK4/e2e/specs"
+cp "$WORK/hc.sh" "$WORK4/hc.sh"; : > "$WORK4/playwright.config.ts"; : > "$WORK4/e2e/specs/smoke.e2e.ts"
+echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK4/package.json"
+echo '{"include":["src","e2e"]}' > "$WORK4/tsconfig.json"
+( cd "$WORK4" && bash hc.sh 2>&1 | grep -q "include가 e2e를 포함" ) && echo "✅ include에 e2e 포함 시 경고" || { echo "❌ include e2e 경고 누락"; FAILS=$((FAILS+1)); }
 
 echo ""
 echo "═══ 판정 ═══"
