@@ -5,6 +5,24 @@
 
 ---
 
+## [1.13.0] — 2026-06-16 (E2E VERIFY 러너 정합 + 파일럿 마찰 수정)
+
+> haja 1.9→1.12 실전 업그레이드 파일럿에서 발견된 3건 반영. MINOR (신규 플레이스홀더 `{{E2E_COMMAND}}` — e2e 옵트인, 후방호환). 마이그레이션 불필요(전부 managed/custom 템플릿 편집 → §12.6 자동 전파).
+
+### 추가 (Added) — Session 38 (2026-06-16)
+- 신규 플레이스홀더 `{{E2E_COMMAND}}`(29→30) — VERIFY(E2E)가 유닛 러너가 아닌 E2E 러너(`<pm> run test:e2e`)로 실행하도록 결정화. harness-scaffold §5.11.3 치환 테이블에 행 추가(새 프로필 필드 없이 `e2e.enabled`+`test:e2e` 스크립트에서 도출)
+
+### 수정됨 (Fixed) — Session 38 (2026-06-16)
+- **[F3, high] VERIFY(E2E) 거짓 PASS 차단**: session-routine Phase 4.7이 `{{TEST_COMMAND}}`(유닛 러너, 예 `vitest run`)로 E2E를 실행하도록 되어 있어 `.e2e.ts`가 유닛 글롭에 미수집 → 0개 실행 후 exit 0으로 게이트 무력화. `{{E2E_COMMAND}}`로 교체 + 실패 모드 주석. test-engineer.md 교차참조도 E2E 러너 명시
+- **[F1, medium] E2E 스타터 seed.ts가 validate 차단**: `seed(_payload)` 미사용 파라미터가 argsIgnorePattern 미설정 프로젝트의 `@typescript-eslint/no-unused-vars`에 걸림 → `void payload;`로 바인딩 실참조(eslint 설정 무관 통과). custom 파일이라 신규 스캐폴드에만 반영
+- **[F2, low] harness-check ⑧ tsconfig 오탐**: `files:[]`+`references` 위임 루트(Vite/TS 솔루션 스타일)에서 "include/exclude 없음" 오경고 → references 위임 패턴 short-circuit 추가. 경고 전용이라 판정 무관
+
+### 검증 — Session 38 (2026-06-16)
+- 골든 픽스처 6/6 통과(`test/run-fixtures.sh`), distinct 플레이스홀더 30개, 두 SKILL.md version 1.13.0 동기
+- 발견 출처: haja-web-fe 1.9.0→1.12.0 업그레이드 파일럿(HARNESS_FRICTION 기록) — 실전 검증이 마퀴 기능(VERIFY E2E)의 high-sev 결함을 노출
+
+---
+
 ## [1.12.0] — 2026-06-16 (E2E TDD 배선 — 이슈 #12 증분 2a)
 
 > 증분 1의 E2E 스캐폴드를 TDD 사이클에 배선. MINOR (managed 템플릿 편집 — 신규 파일·git config·플레이스홀더 0). 마이그레이션 불필요(§12.6 자동 감지 전파). 멀티모델 적대적 검증 반영.

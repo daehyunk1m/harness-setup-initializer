@@ -195,7 +195,7 @@ feature.category가 {{SECURITY_CATEGORIES}} 중 하나일 때만 실행.
 - `skipped` / `not_applicable` → VERIFY를 건너뛴다 (명시적 선언이 있어야만 스킵).
 - 판정 유실/모호(재개 세션 등) → **BLOCK**: `e2e/specs`를 feature ID(`@feature:{featureID}`)로 재탐색하거나, 불명확하면 사용자에게 확인을 요청한다. 침묵은 PASS가 아니다.
 
-**실행**: 해당 feature 스펙만 선택 실행한다(전체 스위트 아님) — `{{TEST_COMMAND}}` 계열 E2E 명령에 `--grep @feature:{featureID}`를 적용. (전체 @critical 게이팅은 증분 2b의 pre-push 책임.)
+**실행**: 해당 feature 스펙만 선택 실행한다(전체 스위트 아님) — E2E 러너 `{{E2E_COMMAND}}`에 `--grep @feature:{featureID}`를 적용한다(유닛 러너 `{{TEST_COMMAND}}`가 **아님** — `.e2e.ts`는 유닛 테스트 글롭에 수집되지 않아 유닛 러너로는 0개 실행되어 거짓 PASS가 된다). (전체 @critical 게이팅은 증분 2b의 pre-push 책임.)
 
 **분기**:
 - PASS → 기능 완료 처리.

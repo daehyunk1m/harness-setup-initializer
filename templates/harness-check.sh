@@ -122,7 +122,9 @@ if [ -f playwright.config.ts ]; then
   # root tsconfig가 e2e를 컴파일에 포함하면 tsc가 e2e를 잘못 컴파일할 수 있음 (tsconfig는 수정하지 않음 — 경고만)
   # JSONC라 grep 기반 soft check: e2e가 이미 exclude되어 있으면(권장 설정) 경고하지 않는다 (오탐 방지)
   if [ -f tsconfig.json ]; then
-    if grep -A3 '"exclude"' tsconfig.json 2>/dev/null | grep -q 'e2e'; then
+    if grep -q '"references"' tsconfig.json 2>/dev/null && grep -Eq '"files"[[:space:]]*:[[:space:]]*\[[[:space:]]*\]' tsconfig.json 2>/dev/null; then
+      :  # 레퍼런스 위임 루트(files:[]+references) — 자체로 0개 파일 컴파일, e2e는 참조 config + e2e/tsconfig.json로 격리됨 (경고 없음, 오탐 방지)
+    elif grep -A3 '"exclude"' tsconfig.json 2>/dev/null | grep -q 'e2e'; then
       :  # e2e가 exclude에 있음 — 정상 (경고 없음)
     elif ! grep -q '"include"' tsconfig.json 2>/dev/null; then
       echo "⚠️ tsconfig.json에 include/exclude 설정 없음 — e2e/가 root 컴파일에 섞일 수 있습니다. root tsconfig exclude에 \"e2e\" 추가 권장 (하네스는 tsconfig를 수정하지 않음)"

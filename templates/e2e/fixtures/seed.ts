@@ -8,6 +8,6 @@
 //     window.localStorage.setItem(payload.key, JSON.stringify(payload.value));
 //   }
 // 주의: 직렬화 형태(DTO 배열 + version 필드 등)와 키 이름은 앱의 persist 설정과 정확히 일치해야 한다.
-export function seed(_payload: unknown): void {
-  // (앱별) 위 예시를 참고해 시드 로직을 구현하세요. 시드가 불필요하면 사용하지 않아도 됩니다.
+export function seed(payload: unknown): void {
+  void payload; // (앱별) 위 예시를 참고해 시드 로직을 구현하세요. 시드가 불필요하면 사용하지 않아도 됩니다.
 }

@@ -749,10 +749,10 @@
 - **파일**: `templates/rules/coding-standards.md`(@critical), `templates/agents/architect.md`(E2E 슬롯), `templates/agents/test-engineer.md`(E2E 작성+판정 Output), `templates/agents/debugger.md`(브라우저 재현), `templates/rules/session-routine.md`(VERIFY Phase 4.7+TDD STATE+마찰), `references/harness-checklist.md` §4.2, 버전/트래킹
 - **해결**: E2E를 TDD 사이클에 배선 — 결정 (a) Test Engineer 확장(신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7(해당 feature 스펙만, FAIL→GREEN 시도 누적), debugger 재현(플레이키니스 환각 금지). 멀티모델 적대적 검증으로 게이트 결정화(명시적 E2E 판정+TDD STATE+`@feature:` grep, 침묵=BLOCK). 전부 managed 편집 → §12.6 자동 전파, 신규 파일·git config·플레이스홀더 0(29 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md
 
-### TODO-95b: E2E 모듈 증분 2b — pre-push 인프라 (후속, 목표 1.13.0)
+### TODO-95b: E2E 모듈 증분 2b — pre-push 인프라 (후속, 목표 1.14.0)
 - **상태**: [ ] 미착수
 - **내용**: 무의존 pre-push 훅(`.githooks/pre-push` + core.hooksPath, 결정 b) — @critical 스펙 게이팅. e2e 전용 eslint override(eslintAssist 시 별도 마커). 설계 정본 §8 참조
-- **착수 전 해소할 9개 난제(적대적 자문)**: ① 기존 Husky/hooksPath 공존성("충돌 시 경고"와 "강제" 양립불가 → 적응형 마커 주입) ② PM 비종속(`node_modules/.bin/playwright` 직접) ③ monorepo repo-root 계산(하위 패키지는 명시적 한계) ④ @critical 탐지(`--list --grep`, 소스 grep 오탐 회피, 0-exit 픽스처 검증) ⑤ 실제 설치 판정(package.json 존재 ≠ 실행 가능) ⑥ 별도 eslint 마커(`harness-setup:e2e-eslint`) ⑦ 멱등성(core.hooksPath는 manifest 밖 외부 상태) ⑧ 보안 고지(push 시 임의 코드 실행) ⑨ 신규 managed 파일 마이그레이션 M-1.12.0-to-1.13.0(e2e.enabled 시만, 기존 훅 4-상태). 신규 파일 발생 → MINOR(1.13.0)
+- **착수 전 해소할 9개 난제(적대적 자문)**: ① 기존 Husky/hooksPath 공존성("충돌 시 경고"와 "강제" 양립불가 → 적응형 마커 주입) ② PM 비종속(`node_modules/.bin/playwright` 직접) ③ monorepo repo-root 계산(하위 패키지는 명시적 한계) ④ @critical 탐지(`--list --grep`, 소스 grep 오탐 회피, 0-exit 픽스처 검증) ⑤ 실제 설치 판정(package.json 존재 ≠ 실행 가능) ⑥ 별도 eslint 마커(`harness-setup:e2e-eslint`) ⑦ 멱등성(core.hooksPath는 manifest 밖 외부 상태) ⑧ 보안 고지(push 시 임의 코드 실행) ⑨ 신규 managed 파일 마이그레이션 M-1.13.0-to-1.14.0(e2e.enabled 시만, 기존 훅 4-상태). 신규 파일 발생 → MINOR(1.14.0 — 1.13.0은 파일럿 마찰 수정에 소비됨)
 
 ### TODO-96: E2E 모듈 증분 3 — MCP 연계 (후속)
 - **상태**: [ ] 미착수
@@ -761,3 +761,8 @@
 ### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 (후속)
 - **상태**: [ ] 미착수
 - **내용**: 프리셋에 e2e 기본값 반영(react-vite 등), 사용자 문서(E2E 작성 가이드). U1 재감지(업그레이드 시 e2e 옵트인 제안) 패턴도 검토. 설계 §11 증분 4 범위
+
+### TODO-98: haja 1.9→1.12 업그레이드 파일럿 마찰 3건 (1.13.0)
+- **상태**: [x] 완료 (Session 38, 2026-06-16)
+- **내용**: 실전 업그레이드 파일럿이 노출한 3건 수정. **F3(high)**: VERIFY(E2E) Phase 4.7이 유닛 러너(`{{TEST_COMMAND}}`)로 실행 → `.e2e.ts` 미수집 거짓 PASS → 신규 `{{E2E_COMMAND}}`(29→30) 도입(session-routine + §5.11.3 치환표 + test-engineer 락스텝). **F1(medium)**: seed.ts `_payload`→`void payload`. **F2(low)**: harness-check ⑧ references 위임루트 short-circuit. MINOR, 골든 픽스처 6/6
+- **후속 후보(미착수)**: §6.11 검증에 "session-routine Phase 4.7이 e2e.enabled 시 test:e2e/playwright를 참조하는지" 명시 어서션 추가(현재는 잔여 `{{...}}` grep으로 간접 보장). harness-check ⑧ tsconfig 휴리스틱의 monorepo/solution-style 추가 형태 검토

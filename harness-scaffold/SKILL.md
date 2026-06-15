@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.12.0",
+  "version": "1.13.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -747,6 +747,7 @@ session-routine.md:
 |-------------|------|--------|
 | `{{VALIDATE_COMMAND}}` | 프로필 scripts.validate | `npm run validate` |
 | `{{TEST_COMMAND}}` | 프로필 scripts.test | `npm run test` |
+| `{{E2E_COMMAND}}` | 패키지매니저 run + `test:e2e` 스크립트 (e2e.enabled 시 § 5.5가 생성, scripts.test/validate와 동일한 패키지매니저 prefix — 예: `yarn test:e2e`) — VALIDATE/TEST_COMMAND처럼 **항상 치환**한다(e2e 미옵트인이어도 Phase 4.7이 런타임 게이트라 무해, 미치환 잔존은 6.11에서 에러). 유닛 러너(TEST_COMMAND)와 구분: VERIFY(E2E)는 반드시 E2E 러너로 실행해야 `.e2e.ts`를 수집한다 | `npm run test:e2e` |
 | `{{SECURITY_CATEGORIES}}` | 프로필 tdd.securityCategories | `auth, security, api, payment` |
 | `{{MAX_IMPLEMENTER_ATTEMPTS}}` | 프로필 tdd.maxImplementerAttempts | `3` |
 | `{{MAX_DEBUGGER_ATTEMPTS}}` | 프로필 tdd.maxDebuggerAttempts | `2` |
