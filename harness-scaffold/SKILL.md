@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.14.0",
+  "version": "1.15.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",

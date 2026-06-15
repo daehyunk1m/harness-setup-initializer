@@ -5,6 +5,19 @@
 
 ---
 
+## [1.15.0] — 2026-06-16 (Playwright MCP 진단 배선 — 이슈 #12 증분 3)
+
+### 추가 (Added)
+- templates/agents/debugger.md: 브라우저 MCP 탐색 진단 블록(`{{MCP_DEBUG_PROTOCOL}}`, 플레이스홀더 30→31) — 스펙 없는 UI 증상을 라이브 브라우저로 진단. known `.e2e.ts` 실패는 §0 러너가 정본.
+- SKILL.md·harness-scaffold/SKILL.md: `e2e.mcp` 분리 옵트인 스키마(`enabled`/`version`, `e2e.enabled`와 독립) + §5.19 배선 + Phase 4 카탈로그/보고 + U1 재감지. 공유 `.mcp.json` 비커밋 — 개발자 로컬 `claude mcp add` 등록.
+- test/mcp-fixtures.sh: MCP 배선 골든 픽스처.
+- references/harness-checklist.md·versioning-policy.md: MCP 진단 경로·1.15.0 정책 반영.
+
+### 비고
+- 신규 산출물 파일 0(픽스처 제외)·옵트인·생략 기본 → 마이그레이션 불필요. MINOR. 멀티모델 자문(codex·gemini) 반영 — 비커밋 B안(공유 .mcp.json 미생성).
+
+---
+
 ## [1.14.0] — 2026-06-16
 
 ### 추가 (Added)

@@ -756,7 +756,8 @@
 - **착수 전 해소할 9개 난제(적대적 자문)**: ① 기존 Husky/hooksPath 공존성("충돌 시 경고"와 "강제" 양립불가 → 적응형 마커 주입) ② PM 비종속(`node_modules/.bin/playwright` 직접) ③ monorepo repo-root 계산(하위 패키지는 명시적 한계) ④ @critical 탐지(`--list --grep`, 소스 grep 오탐 회피, 0-exit 픽스처 검증) ⑤ 실제 설치 판정(package.json 존재 ≠ 실행 가능) ⑥ 별도 eslint 마커(`harness-setup:e2e-eslint`) ⑦ 멱등성(core.hooksPath는 manifest 밖 외부 상태) ⑧ 보안 고지(push 시 임의 코드 실행) ⑨ 신규 managed 파일 마이그레이션 M-1.13.0-to-1.14.0(e2e.enabled 시만, 기존 훅 4-상태). 신규 파일 발생 → MINOR(1.14.0 — 1.13.0은 파일럿 마찰 수정에 소비됨)
 
 ### TODO-96: E2E 모듈 증분 3 — MCP 연계 (후속)
-- **상태**: [ ] 미착수
+- **상태**: [x] 완료 (2026-06-16, 1.15.0)
+- **해소**: 배치 e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 충돌)·비커밋 B안(멀티모델 자문 — nagware·머지 회피)·분리 옵트인 `e2e.mcp`·`{{MCP_DEBUG_PROTOCOL}}`(30→31)·debugger 지침+로컬 `claude mcp add` 등록. 설계 정본 `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md`, 플랜 `docs/superpowers/plans/2026-06-16-e2e-mcp-incr3.md`.
 - **내용**: Playwright MCP 등 브라우저 자동화 MCP 연계 (integrations.<name> 메커니즘). 설계 §11 증분 3 범위
 
 ### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 (후속)
