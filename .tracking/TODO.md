@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 TODO
 
-> 마지막 업데이트: 2026-04-08
+> 마지막 업데이트: 2026-06-15
 > 분석 기반: SKILL.md + harness-scaffold/SKILL.md (2-스킬 분리), presets/ 2개, references/ 3개, templates/ 17개
 
 ---
@@ -731,3 +731,27 @@
 - **의미 정확성 교정**: 이슈의 "Security Reviewer = §5.10 게이트" 거짓 확인 → 실제 게이트는 session-routine Phase 4.5 호출 조건(`tdd.securityCategories` 매칭). 카탈로그는 파이프라인 비열거. 부수: README 버전 드리프트(1.8.0→1.10.0) 정정
 - **무변경 확인**: harness-check ①·doc-freshness 타깃·manifest files{}·"19개 파일" 카운트·§10.3 레지스트리 — 신규 생성 파일 0이므로 일절 무변경
 - **OUT-OF-SCOPE (후속)**: 업그레이드 NET-NEW 능력 1줄 델타 (U5에 "새로 사용 가능: /consult") — capability-diff 스코프 크리프 회피 위해 제외
+
+---
+
+## Session 36 (2026-06-15): E2E 스캐폴드 모듈 (1.11.0) — 이슈 #12
+
+> 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업 생성. MINOR (옵트인 추가 모듈, 신규 플레이스홀더 0개, 기본 생략). 마이그레이션 불필요. 설계 정본: `docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md`
+
+### TODO-94: E2E 스캐폴드 모듈 — 증분 1 (옵트인 setup 경로)
+- **상태**: [x] 완료 (2026-06-15, 1.11.0)
+- **파일**: `templates/playwright.config.ts`·`templates/e2e/*`(tsconfig·fixtures·smoke), `test/e2e-fixtures.sh`, `harness-scaffold/SKILL.md` §4(입력 스키마+manifest 카테고리)·§5.5(package.json 머지)·§5.17(E2E 생성 단계)·§7(Phase 4 카탈로그 E2E 줄), `SKILL.md`(프론트엔드 감지+옵트인 질문→e2e 출력 스키마), `templates/harness-check.sh` ⑧, `references/harness-checklist.md` §4.2, `references/versioning-policy.md` §1, `references/project-context.md` §4, `.tracking/*`
+- **해결**: 프론트엔드 감지 시 E2E 옵트인 질문 → `e2e: { enabled }` 프로필 → harness-scaffold §5.17이 `playwright.config.ts` + `e2e/` + `test:e2e` 스크립트 + `@playwright/test` devDep(add-only 머지) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계). config=managed/스타터=custom. harness-check ⑧ 구조 검사(경고 전용·자기 게이트). Phase 4 카탈로그 E2E 줄(순수 투영, `e2e.enabled` 게이트). 신규 플레이스홀더 0개(29개 불변)
+- **GAP 처리(설계 §6 대비 범위 축소)**: eslint e2e override는 증분 1에서 하지 않음(핵심 펜스는 Vitest 네이밍+tsconfig 경고). U1 재감지(업그레이드 시 기존 프론트 하네스에 e2e 옵트인 제안)는 증분 1 범위 밖 — 기존 하네스는 옵트인 생략 기본이라 무영향
+
+### TODO-95: E2E 모듈 증분 2 — TDD 배선 + pre-push (후속)
+- **상태**: [ ] 미착수
+- **내용**: e2e 스펙을 TDD 파이프라인/session-routine 검증 레벨에 배선, pre-push 훅에서 E2E 게이팅. e2e 전용 eslint override(eslintAssist 켜진 경우 마커 추가 — 설계 §6)도 이 증분에서 처리. 설계 §11 증분 2 범위
+
+### TODO-96: E2E 모듈 증분 3 — MCP 연계 (후속)
+- **상태**: [ ] 미착수
+- **내용**: Playwright MCP 등 브라우저 자동화 MCP 연계 (integrations.<name> 메커니즘). 설계 §11 증분 3 범위
+
+### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 (후속)
+- **상태**: [ ] 미착수
+- **내용**: 프리셋에 e2e 기본값 반영(react-vite 등), 사용자 문서(E2E 작성 가이드). U1 재감지(업그레이드 시 e2e 옵트인 제안) 패턴도 검토. 설계 §11 증분 4 범위

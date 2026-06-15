@@ -198,7 +198,7 @@
 | P4 기능 리스트 | ✅ 완료 | passes 판정 기준 구체화 |
 | P5 Initializer Agent | ✅ 스킵 | 스킬 자체가 초기화 역할 — 별도 프롬프트 불필요 |
 | P6 Coding Agent 루틴 | ✅ 완료 | TDD subagent 파이프라인 (7 agents) + .claude/rules/ 분리 |
-| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가 |
+| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가. 1.11.0: E2E L4 스캐폴드(옵트인) — Playwright 구조 생성, 스위트 통과는 앱별 부팅 의존 |
 | P8 아키텍처 자동 검사 | ✅ 완료 | 버전 체크, 동점 해소, 누락 레이어 경고 |
 | P9 품질/부채 관리 | ✅ 완료 | docFreshnessDays 파라미터화. 1.1.0: 자동 검사 승격 대기 큐 + 승격 루프 (체크리스트 §3.3) |
 | P10 엔트로피 관리 | ✅ 컴패니언 커버 | doc-freshness.ts 감지 + 운영 사이클 문서화 + harness:check 자가진단 + **harness-cleanup 스킬(1.4.0)이 주간/격주/월간 루틴 실행** (--add-dir opt-in) |
