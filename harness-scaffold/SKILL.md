@@ -1038,6 +1038,35 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 
 ---
 
+### 5.18 pre-push 게이트 (옵트인 — e2e.prePush)
+
+프로필에 `e2e.prePush: true`일 때만 실행한다. 없으면 이 단계 전체를 건너뛴다 (산출물 0건). `e2e.enabled`가 전제다.
+
+> **원칙 준수**: 스캐폴드는 **`git config`를 실행하지 않는다.** `.githooks/pre-push` 파일만 생성/주입하고, 활성화는 Phase 4 안내로 사용자가 직접 수행한다 ("승인 없이 git 실행 금지" 절대 규칙).
+
+#### 생성 파일
+
+| 파일 | 카테고리 | 템플릿 | 치환 |
+|------|---------|--------|------|
+| `.githooks/pre-push` | managed | `templates/githooks/pre-push` | `{{VALIDATE_COMMAND}}` ← 프로필 scripts.validate |
+
+#### 공존성 분기 (기존 git hook 환경 감지 — 텍스트 파싱만, 비실행 원칙)
+
+생성 전에 기존 환경을 감지하여 분기한다 (`git config --get core.hooksPath`, `.husky/pre-push`·`.git/hooks/pre-push` 존재 여부 — 파일 실행/평가 금지):
+
+| 환경 | 동작 |
+|------|------|
+| **그린필드** (hooksPath 미설정 + `.husky/pre-push` 없음 + `.git/hooks/pre-push` 없음) | `.githooks/pre-push`를 템플릿으로 신규 생성(`chmod +x`). Phase 4가 `git config core.hooksPath .githooks` 안내 |
+| **기존 hooksPath/Husky** (`core.hooksPath` 설정됨 또는 `.husky/pre-push` 존재) | 그 경로의 `pre-push`에 **마커 블록(`harness-setup:e2e-prepush:start`~`end`)만 주입**(파일 끝에 append, 없으면 shebang+블록으로 생성). git config 변경 불필요 — 이미 활성 |
+| **`.git/hooks/pre-push` 존재** (기본 경로에 사용자 훅) | core.hooksPath로 전환하면 기본 훅이 무력화되므로 **자동 전환·생성하지 않는다** → 폴백 |
+| **비표준/파싱 불가/판단 불가** | **폴백**: 수정하지 않고 Phase 4에 권고 스니펫(마커 블록 + 활성화 명령)을 출력한다. 비활성 보고. 에러 아님 |
+
+- **멱등**: 마커 `harness-setup:e2e-prepush:start`가 대상 파일에 이미 있으면 스킵.
+- 주입 시 **shebang은 복제하지 않는다** — 마커 블록(start~end)만 기존 훅 뒤에 붙인다(호스트 훅의 shebang/로직 보존). 신규 생성 시에만 템플릿 전체(shebang 포함)를 쓴다.
+- 훅 본문은 `set -e`가 아니라 명시적 `|| exit 1`을 쓴다 — 주입 시 호스트 훅 동작을 바꾸지 않기 위해 (템플릿이 이미 그렇게 작성됨).
+
+---
+
 ## 6. Phase 3: 검증
 
 생성이 완료되면 자동으로 검증한다. 검증 항목은 `references/harness-checklist.md`(하네스 구성 체크리스트)의 판정 기준에 대응한다.
