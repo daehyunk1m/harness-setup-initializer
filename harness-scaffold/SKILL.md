@@ -1152,10 +1152,16 @@ if [ -f playwright.config.ts ]; then
   grep -q '{{' playwright.config.ts && echo "❌ playwright.config.ts 미치환 플레이스홀더" || echo "✅ playwright.config.ts 치환 완료"
 fi
 
-# 6.17 pre-push 게이트 검증 (e2e.prePush 옵트인 시에만)
-if [ -f .githooks/pre-push ]; then
-  grep -q "harness-setup:e2e-prepush" .githooks/pre-push && echo "✅ pre-push 마커 존재" || echo "❌ pre-push 마커 누락"
-  grep -q '{{' .githooks/pre-push && echo "❌ pre-push 미치환 플레이스홀더" || echo "✅ pre-push 플레이스홀더 치환됨"
+# 6.17 pre-push 게이트 검증 (e2e.prePush 옵트인 시에만 — 그린필드/주입 타깃 모두)
+PREPUSH_TARGET=""
+for cand in .githooks/pre-push .husky/pre-push "$(git config --get core.hooksPath 2>/dev/null)/pre-push"; do
+  if [ -f "$cand" ] && grep -q "harness-setup:e2e-prepush" "$cand" 2>/dev/null; then PREPUSH_TARGET="$cand"; break; fi
+done
+if [ -n "$PREPUSH_TARGET" ]; then
+  echo "✅ pre-push 마커 존재 ($PREPUSH_TARGET)"
+  grep -q '{{' "$PREPUSH_TARGET" && echo "❌ pre-push 미치환 플레이스홀더" || echo "✅ pre-push 플레이스홀더 치환됨"
+elif [ -f .githooks/pre-push ]; then
+  echo "❌ pre-push 마커 누락"
 fi
 ```
 
@@ -1277,13 +1283,13 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/, playwright.config.ts) — e2e 옵트인 시에만 표시
-- pre-push 게이트 → `git push` 시 `@critical` 자동 검증 (상세: .githooks/pre-push · references/harness-checklist.md §4.2) — e2e.prePush 옵트인 + 훅 생성 시에만 표시
+- pre-push 게이트 → 활성화 후 `git push` 시 `@critical` 자동 검증 (활성화 방법: 아래 'pre-push 게이트 활성화 안내'; 상세: .githooks/pre-push · references/harness-checklist.md §4.2) — e2e.prePush 옵트인 + 훅 생성 시에만 표시
 > 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
 ```
 
 #### pre-push 게이트 활성화 안내 (e2e.prePush 옵트인 시에만)
 
-`e2e.prePush`로 `.githooks/pre-push`를 생성/주입한 경우, 보고 말미에 다음을 **반드시** 출력한다 (스킬은 git 설정을 변경하지 않았다):
+`e2e.prePush` 옵트인 시 보고 말미에 다음을 **반드시** 출력한다 (생성·주입·폴백 분기 모두 해당 — 스킬은 git 설정을 변경하지 않았다). 해당 분기에 맞는 항목만 출력한다:
 
 1. **활성화** (그린필드 생성 시): `git config core.hooksPath .githooks` — 기존 hooksPath/Husky에 주입한 경우 이미 활성이므로 이 명령을 안내하지 않고 "기존 훅에 주입됨(이미 활성)"으로 보고한다. 폴백한 경우 권고 스니펫과 수동 안내를 출력한다.
 2. **보안 고지**: "이 훅은 `git push` 시 `validate` → `@critical` E2E를 실행합니다 (임의 코드 실행). 신뢰할 수 있는 저장소에서만 활성화하세요."
