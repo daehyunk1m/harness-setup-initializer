@@ -122,6 +122,7 @@
 | structural-test 골든 픽스처 (1.9.0) | 스킬 레벨 `test/fixtures/` + `test/run-fixtures.sh` (생성 프로젝트 footprint 0). 6/6 통과 실측 | codex 메타테스트 + gemini negative testing 권고. "템플릿 자체의 정확성/회귀"를 검증 (프로젝트별 규칙 오설정은 의미 게이트가 보완). 프로젝트별 selftest 대신 스킬 레벨 택해 타겟 청결 유지 (사용자 선택) |
 | 의미론적 승인 게이트 (1.9.0) | scaffold Phase 4 "아키텍처 정확성 확인" — 생성 제약 재요약+사용자 확인(비차단), manifest `semanticApprovalAt` | 구조 검증은 의미 정확성을 보장 못 함(자문 공통). Step 5 승인은 프로필 대상이고 문서는 그 이후 생성되므로 의미 게이트가 부재했음 (gemini 권고) |
 | 프로필 스키마 검증 보류 (1.9.0) | gemini의 ".harness-profile.json 경량 JSON Schema 결정화" 제안 보류 | 1.6.2에서 "JSON Schema 분리=과한 코드화"로 이미 비수용. 산문 사양+LLM 실행 철학 유지. 두 스킬 간 계약 드리프트가 실제 마찰로 누적되면 재검토 (사용자 선택) |
+| 첫 셋업 능력 카탈로그 (1.10.0) | scaffold Phase 4 보고에 "이제 할 수 있는 일" 블록(≤12줄, 신규 파일 0) — 와이어된 능력만 조건부 렌더하는 **순수 투영**, U5(업그레이드)는 미출력 | 첫 셋업 직후 "무엇을→어떻게"가 불명확(이슈 #11). 새 손-관리 목록은 최대 드리프트 위험 → 산출물 게이트 신호(`integrations`/생존 `linkedSkills`/`tdd.securityCategories`) 재사용해 미와이어 능력 광고 차단. Security Reviewer는 §5.10 게이트가 아니라 session-routine Phase 4.5 호출 조건이 실제 게이트(이슈 표기 교정) — 카탈로그는 파이프라인을 열거하지 않고 정본을 가리킴 |
 
 ---
 
@@ -308,6 +309,14 @@
 - **item 5 보류**: 프로필 JSON Schema 검증은 1.6.2 "과한 코드화" 비수용 유지 — 계약 드리프트 마찰 누적 시 재검토
 - MINOR, 마이그레이션 불필요 (managed 자동 감지 + 선택 필드/마커 기본값 흡수). 도그푸딩: multi-model-consult 4번째 실사용 (자문 대상이 스킬 구조 자체)
 - **실전 검증** (1.7.0→1.9.0 업그레이드 E2E): 마이그레이션 0, managed 자동 감지로 1.7.1·1.8.0·1.9.0 일괄 전파, 해시 재현성 일치, "표준 하네스 가동"+"Q2 강제". 무마이그레이션 설계 실물 입증. 관찰: 업그레이드 경로는 의미 게이트 미발동(`semanticApprovalAt=null`) — 규칙 불변이라 의도된 동작 (TODO-92 검토 항목)
+
+### 1.10.0 (첫 셋업 능력 카탈로그 — 이슈 #11)
+- **배경**: 첫 셋업 직후 사용자가 "이 하네스로 무엇을→어떻게 할 수 있나"를 빠르게 알기 어려움. Phase 4 보고에 능력 안내가 산점(다음 단계·TDD 워크플로·운용 스킬)되어 액션 지향 통합 뷰가 없었음
+- **전달**: scaffold Phase 4 보고 fenced 블록에 `### 이제 할 수 있는 일`(≤12줄) 신설 + 영속 포인터 1줄. 기존 "운용 스킬 (선택)" 블록을 흡수(cleanup/feedback 2줄로). **신규 생성 파일 0** — harness-check ①·doc-freshness 타깃·manifest files{}·"19개 파일" 카운트·마이그레이션 레지스트리 전부 무변경
+- **순수 투영(projection)**: 새 게이트 로직·플레이스홀더 없음. 산출물 생성을 결정한 프로필 신호(`integrations.multiModelConsult`+§5.16 실존 검증 / 생존 `linkedSkills` / 컴패니언 글로벌 설치 전제)를 재사용해 조건부 렌더 → 미와이어 능력 광고 불가
+- **의미 정확성 교정**: 이슈가 "Security Reviewer는 §5.10 게이트와 동일"이라 했으나 §5.10은 7개 에이전트를 항상 생성 — 실제 게이트는 session-routine Phase 4.5 SECURITY 호출 조건(`tdd.securityCategories` 매칭). 카탈로그는 파이프라인을 열거하지 않고 session-routine.md를 가리켜 미호출 가능 단계 비광고
+- **U5 비대칭**: 업그레이드 보고는 카탈로그 미출력(첫 셋업 전용) — §10.2에 1문장 명문화. NET-NEW 능력 1줄 델타는 OUT-OF-SCOPE 후속
+- MINOR, Public API 4계약(프로필/매니페스트/프리셋/생성파일) 무변경 — 휘발성 Phase 4 보고 enrichment(선례 1.5.0/1.9.0). 마이그레이션 불필요. 부수 수정: README 버전 표기 1.8.0(드리프트)→1.10.0
 
 ---
 

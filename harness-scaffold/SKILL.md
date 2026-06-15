@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.9.0",
+  "version": "1.10.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -1179,13 +1179,29 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 **세션 시작**: claude-progress.txt → git status → git log → feature_list.json → validate (회귀 체크) → TDD 사이클
 **세션 종료**: validate → feature_list.json 업데이트 → progress 기록 → git-workflow.md 규칙에 따라 커밋 제안
 
-### 운용 스킬 (선택)
-하네스 운용 컴패니언 스킬은 `install.sh`로 `~/.claude/skills/`에 글로벌 설치되어 자연어로 바로 호출할 수 있습니다 (별도 --add-dir 불필요):
-- **엔트로피 정리**: "하네스 정리"라고 요청 (harness-cleanup)
-  - 운영 사이클(주간/격주/월간)의 실행 주체 — 문서 부식 감지, QUALITY_SCORE 재측정, TECH_DEBT·승격 큐 검토, 문서-실구조 일치, passes 재검증
-- **피드백 분석**: "하네스 피드백 분석해줘"라고 요청 (harness-feedback)
-  - docs/HARNESS_FRICTION.md에 누적된 마찰 이벤트를 분석하여 harness-setup 리포에 개선 Issue를 생성합니다
+### 이제 할 수 있는 일
+- TDD 사이클 → feature_list.json 첫 기능 선택 (또는 `/plan`이 Architect 대체) (상세: 위 '다음 단계' 5·6 · .claude/rules/session-routine.md)
+- 검증 게이트 → `npm run validate` · `lint:arch` · `doc:check` (상세: AGENTS.md "## 명령어")
+- 자가진단 → `npm run harness:check` (상세: references/harness-checklist.md §8)
+- 품질·부채 추적 → docs/QUALITY_SCORE.md · docs/TECH_DEBT.md 갱신 (상세: docs/TECH_DEBT.md 승격 대기 큐)
+- 하네스 정리 → "하네스 정리" / "월간 점검" (상세: CLAUDE.md 운영 사이클 — 컴패니언, 글로벌 설치 전제)
+- 피드백 분석 → "하네스 피드백 분석해줘" (상세: CLAUDE.md 하네스 이슈 보고 — 컴패니언, 글로벌 설치 전제)
+- 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
+- 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
+> 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
 ```
+
+#### "이제 할 수 있는 일" 카탈로그 렌더링 규칙
+
+이 카탈로그는 **첫 셋업 보고 전용이며**(업그레이드 U5는 § 10.2 참조), 새 사실을 만들지 않는 **순수 투영(projection)**이다 — 산출물 생성을 결정한 바로 그 프로필 신호를 그대로 재사용해 각 줄을 조건부 렌더링한다. 새 게이트 로직·플레이스홀더를 도입하지 않는다:
+
+- **멀티모델 자문 줄**: `integrations.multiModelConsult.enabled === true`이고 § 5.16 실존 검증(글로벌 심링크 + codex/gemini CLI ≥ 1)을 통과한 경우에만 렌더. 둘 중 하나라도 실패하면 줄 자체를 생략한다.
+- **보조 스킬 줄**: § 5.16 실존 검증을 통과한 생존 `linkedSkills`가 1개 이상일 때만 렌더 (AGENTS.md "## 보조 스킬" 섹션과 **동일 생존 집합**). 생존 스킬 0개면 생략한다.
+- **TDD 사이클 줄**: 항상 렌더하되 파이프라인 단계를 열거하지 않고 session-routine.md를 가리킨다. Security Reviewer는 7개 에이전트의 하나로 **항상 생성**되지만 `tdd.securityCategories`에 매칭되는 feature가 있을 때만 호출되므로(session-routine Phase 4.5 SECURITY 호출 조건 — 빈 배열이면 매칭 feature가 없어 실호출되지 않음), 미호출 가능한 단계를 상시 능력으로 광고하지 않는다.
+- **하네스 정리 · 피드백 분석 줄**: 컴패니언 스킬(install.sh로 `~/.claude/skills/`에 글로벌 설치)이므로 "글로벌 설치 전제"로 제시한다 — 글로벌 미설치 환경에서는 호출되지 않을 수 있다.
+- **검증 게이트 · 자가진단 · 품질·부채 추적 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
+
+언어는 보고 전체와 동일하게 § 8 "문서 품질"의 언어 규칙(한국어 기본, 사용자 요청 시 예외)을 따른다 — 한국어를 하드코딩하지 않는다. 각 줄은 정본(session-routine.md / 통합 매핑 / 컴패니언 SKILL.md)을 가리킬 뿐 능력 사실을 복제하지 않는다 — **새 손-관리 능력 목록이 아니다.**
 
 ### 아키텍처 정확성 확인 (의미 게이트)
 
@@ -1349,6 +1365,8 @@ Phase U5: 보고
 2. `npm run validate`를 실행하여 검증하세요
 3. `.harness-manifest.json`을 커밋하세요
 ```
+
+> **U5 보고는 § 7의 "이제 할 수 있는 일" 능력 카탈로그를 출력하지 않는다** — 카탈로그는 첫 셋업(매니페스트 부재) 전용이고, U5는 버전 델타 + 변경 요약 표만 표시한다. (업그레이드가 순수 신규 능력을 와이어한 경우의 "새로 사용 가능" 1줄 델타는 별도 후속 항목 — 이슈 #11 OUT-OF-SCOPE.)
 
 ### 10.3 마이그레이션 레지스트리
 

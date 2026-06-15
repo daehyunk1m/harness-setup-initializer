@@ -104,6 +104,7 @@ cd ~/Desktop/side-project/haja-web-fe && claude
 # 2. 템플릿의 {{...}} 패턴이 harness-scaffold/SKILL.md 치환 규칙에 모두 정의되어 있는가
 # 3. harness-scaffold/SKILL.md의 생성 파일 목록과 실제 templates/ 구조가 일치하는가
 # 4. 프리셋의 필드가 SKILL.md 프리셋 스키마와 일치하는가
+# 5. (Phase 4 보고) "이제 할 수 있는 일" 카탈로그의 각 줄은 산출물(agent/통합/스크립트)을 게이트하는 프로필 신호를 동일하게 가진다 — 미와이어 능력 광고 불가 (harness-scaffold §7 렌더링 규칙)
 
 # 골든 픽스처 (structural-test 템플릿 회귀 — 템플릿 또는 harness-scaffold §5.4 수정 시 릴리스 전 실행)
 bash test/run-fixtures.sh   # 3 아키텍처 × (src-pass 통과 / src-fail 차단) 검증

@@ -717,3 +717,17 @@
 - **① E2E (완료, 2026-06-14)**: 1.7.0→1.9.0 업그레이드 — 마이그레이션 0(managed 자동 감지로 1.7.1·1.8.0·1.9.0 일괄 전파), 영향 managed 4개 재생성+해시 재현성 일치, harness:check "표준 하네스 가동"+"Q2 강제"(enforced 프로젝트), auto 모드 자동 커밋(190fbef). **한계**: enforced+업그레이드 경로라 Q2 미강제 강등 경로·setup Phase 4 의미 게이트는 미발동 — 시뮬레이션 검증만 유지
 - **② README (완료, 2026-06-14)**: README.md:25 "표준 하네스 가동" 판정 옆에 "구조 설치·실행 가능성 확인, 의미 정확성은 별도 검토" 캐비엇 반영
 - **관찰 (신규, 저우선)**: 업그레이드 경로(U1~U5)는 setup Phase 4 의미 게이트를 거치지 않음 → `semanticApprovalAt`가 업그레이드만으로는 null 유지. 규칙 불변이라 의도된 동작이나, 업그레이드 채택자는 게이트 미경험 → U5 보고에 경량 의미 확인을 넣을지 검토
+
+---
+
+## Session 35 (2026-06-15): 첫 셋업 능력 카탈로그 (1.10.0) — 이슈 #11
+
+> 첫 셋업 직후 "무엇을→어떻게" 액션 안내. Phase 4 보고 enrichment, 신규 파일 0, Public API 무변경. MINOR.
+
+### TODO-93: 첫 셋업 능력 안내 (Phase 4 보고 "이제 할 수 있는 일" 블록)
+- **상태**: [x] 완료 (2026-06-15, 1.10.0)
+- **파일**: `harness-scaffold/SKILL.md` §7(카탈로그+렌더링 규칙 산문)·§10.2(U5 비대칭), `SKILL.md`/`harness-scaffold/SKILL.md` 프로필 version, `README.md`, `CLAUDE.md` 정합성 검사 ⑤, `references/project-context.md`, `.tracking/CHANGELOG.md`
+- **해결**: §7 fenced 블록에 `### 이제 할 수 있는 일` 카탈로그(≤12줄, 8능력+영속 포인터). 기존 "운용 스킬 (선택)" 흡수. 펜스 직후 순수 투영 렌더링 규칙(산출물 게이트 신호 재사용, 새 로직·플레이스홀더 0). U5는 카탈로그 미출력
+- **의미 정확성 교정**: 이슈의 "Security Reviewer = §5.10 게이트" 거짓 확인 → 실제 게이트는 session-routine Phase 4.5 호출 조건(`tdd.securityCategories` 매칭). 카탈로그는 파이프라인 비열거. 부수: README 버전 드리프트(1.8.0→1.10.0) 정정
+- **무변경 확인**: harness-check ①·doc-freshness 타깃·manifest files{}·"19개 파일" 카운트·§10.3 레지스트리 — 신규 생성 파일 0이므로 일절 무변경
+- **OUT-OF-SCOPE (후속)**: 업그레이드 NET-NEW 능력 1줄 델타 (U5에 "새로 사용 가능: /consult") — capability-diff 스코프 크리프 회피 위해 제외
