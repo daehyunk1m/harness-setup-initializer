@@ -928,10 +928,10 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 | `{{DOC_CHECK_COMMAND}}` | 고정 규칙 (§ 5.5에서 추가한 스크립트 호출) | `npm run doc:check` |
 | `{{PATH_ALIAS_LIST}}` | 프로필 pathAlias — 문자열이면 단일(`"@/"`), 배열이면 공백 구분(`"@/" "~/"`)으로 렌더 (bash for-in용) | `"@/"` |
 
-- 검사 7항목과 exit 규칙:
+- 검사 8항목과 exit 규칙:
   - ① 필수 파일 존재, ② AGENTS.md 100줄 이내, ③ feature_list.json 유효 JSON — **하네스 구조** 항목. 실패 시 exit 1
   - ④ lint:arch 실행, ⑤ validate 실행 — **프로젝트 품질** 항목. 실패 시 exit 1 (exit code 전파)
-  - ⑥ doc:check 실행, ⑦ tsconfig paths에 pathAlias 존재 — **경고 전용**. exit code에 영향 없음 (tsconfig는 JSONC라 grep 기반 soft check)
+  - ⑥ doc:check 실행, ⑦ tsconfig paths에 pathAlias 존재, ⑧ E2E 스캐폴드 구조(playwright.config.ts 존재 시) — **경고 전용**. exit code에 영향 없음
 - 전체 통과 시 "✅ 표준 하네스 가동"을 출력한다 (harness-checklist.md § 7의 단계 판정)
 - **skipFiles 주의**: 사용자가 skipFiles로 생성을 건너뛴 필수 파일은 ① 검사에서 실패로 잡힌다. Phase 3 (6.13)과 Phase 4 보고에서 해당 실패가 skipFiles에 의한 의도적 부재임을 구분하여 안내한다
 
@@ -1192,7 +1192,7 @@ fi
 - ✅ .claude/rules/ 파일 (3개): 정상
 - ✅ 플레이스홀더 치환: 완료
 - ✅ .harness-manifest.json: 정상
-- ✅ harness:check: 통과 (7항목)
+- ✅ harness:check: 통과 (8항목 — ⑧ E2E 스캐폴드는 playwright.config.ts 존재 시에만 검사)
 - ✅ 보조 스킬 연계: {N}종 렌더링 (드롭 {M}종 — 실존 검증 실패 시 스킬명과 함께 표시. integrations 옵트인 시에만 이 행 표시)
 
 ### 하네스 단계 판정

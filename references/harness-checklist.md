@@ -223,4 +223,4 @@ npx tsx scripts/doc-freshness.ts
 6개 명령이 모두 통과하면 **표준 하네스 가동 중**으로 판정한다.
 
 > 생성된 하네스에서는 위 6개 명령이 `npm run harness:check` 하나로 통합되어 있다
-> (`scripts/harness-check.sh` — tsconfig paths 검사 포함 7항목).
+> (`scripts/harness-check.sh` — tsconfig paths 검사 + E2E 스캐폴드 구조(⑧) 포함 8항목).

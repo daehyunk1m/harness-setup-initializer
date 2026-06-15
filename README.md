@@ -150,7 +150,7 @@ stateDiagram-v2
 | **스크립트** | `init.sh` | 의존성 설치 + 개발 서버 실행 + 준비 확인 |
 | | `scripts/structural-test.ts` | 아키텍처 의존성 규칙 자동 검증 (위반 시 exit 1) |
 | | `scripts/doc-freshness.ts` | 문서 최신성 검사 |
-| | `scripts/harness-check.sh` | 하네스 자가진단 7항목 (`npm run harness:check`) |
+| | `scripts/harness-check.sh` | 하네스 자가진단 8항목 (⑧ E2E 스캐폴드는 playwright.config.ts 존재 시에만 검사, `npm run harness:check`) |
 | **품질** | `docs/QUALITY_SCORE.md` | 6개 카테고리 품질 점수표 |
 | | `docs/TECH_DEBT.md` | 기술 부채 추적 (4단계 심각도) + 자동 검사 승격 대기 큐 |
 | | `docs/HARNESS_FRICTION.md` | 마찰 로그 (피드백 수집) |

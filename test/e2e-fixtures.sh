@@ -60,6 +60,19 @@ node -e '
 '
 if [ $? -ne 0 ]; then FAILS=$((FAILS + 1)); fi
 
+# ── 4. harness-check.sh ⑧ E2E 구조 검사 (자기 게이트: playwright.config.ts 존재 시에만 동작) ──
+HC="$TEMPLATES/harness-check.sh"
+# (a) playwright.config.ts 없는 디렉토리 → ⑧ 출력 없음(스킵)
+WORK="$TMP/no-e2e"; mkdir -p "$WORK"
+sed -e "s#{{LINT_ARCH_COMMAND}}#true#g" -e "s#{{VALIDATE_COMMAND}}#true#g" \
+    -e "s#{{DOC_CHECK_COMMAND}}#true#g" -e 's#{{PATH_ALIAS_LIST}}#"@/"#g' "$HC" > "$WORK/hc.sh"
+( cd "$WORK" && bash hc.sh 2>&1 | grep -q "── ⑧" ) && { echo "❌ e2e 없는데 ⑧ 실행됨"; FAILS=$((FAILS+1)); } || echo "✅ e2e 미설치 시 ⑧ 스킵"
+# (b) playwright.config.ts 있는 디렉토리 → ⑧ 출력 존재
+WORK2="$TMP/has-e2e"; mkdir -p "$WORK2/e2e/specs"
+cp "$WORK/hc.sh" "$WORK2/hc.sh"; : > "$WORK2/playwright.config.ts"; : > "$WORK2/e2e/specs/smoke.e2e.ts"
+echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK2/package.json"
+( cd "$WORK2" && bash hc.sh 2>&1 | grep -q "── ⑧" ) && echo "✅ e2e 설치 시 ⑧ 실행" || { echo "❌ e2e 있는데 ⑧ 미실행"; FAILS=$((FAILS+1)); }
+
 echo ""
 echo "═══ 판정 ═══"
 if [ "$FAILS" -eq 0 ]; then

@@ -6,7 +6,7 @@
 # 항목 구분:
 #   하네스 구조 (①②③) — 실패 시 하네스 자체가 깨진 상태
 #   프로젝트 품질 (④⑤) — 실패 시 하네스는 정상이나 코드 검증이 깨진 상태
-#   경고 전용 (⑥⑦)   — exit code에 영향 없음
+#   경고 전용 (⑥⑦⑧) — exit code에 영향 없음
 
 STRUCT_FAIL=0
 QUALITY_FAIL=0
@@ -103,6 +103,30 @@ if [ -f tsconfig.json ]; then
   done
 else
   echo "ℹ️ tsconfig.json 없음 — paths 검사 건너뜀"
+fi
+
+# ⑧ E2E 스캐폴드 구조 (경고만 — playwright.config.ts 존재 시에만 검사)
+if [ -f playwright.config.ts ]; then
+  echo ""
+  echo "── ⑧ E2E 스캐폴드 ──"
+  if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts['test:e2e'] ? 0 : 1)" 2>/dev/null; then
+    echo "✅ test:e2e 스크립트 존재"
+  else
+    echo "⚠️ test:e2e 스크립트 미발견 — package.json 확인 권장"
+  fi
+  if [ -d e2e/specs ]; then
+    echo "✅ e2e/specs 디렉토리 존재"
+  else
+    echo "⚠️ e2e/specs 디렉토리 미발견"
+  fi
+  # root tsconfig가 e2e를 포함하면 tsc가 e2e를 잘못 컴파일할 수 있음 (tsconfig는 수정하지 않음 — 경고만)
+  if [ -f tsconfig.json ]; then
+    if ! grep -q '"include"' tsconfig.json 2>/dev/null; then
+      echo "⚠️ tsconfig.json에 include 없음 — e2e/가 root 컴파일에 섞일 수 있습니다. root tsconfig exclude에 \"e2e\" 추가 권장 (하네스는 tsconfig를 수정하지 않음)"
+    elif grep -q '"e2e' tsconfig.json 2>/dev/null; then
+      echo "⚠️ tsconfig.json include가 e2e를 포함하는 듯합니다 — exclude에 \"e2e\" 추가 권장"
+    fi
+  fi
 fi
 
 # 종합 판정
