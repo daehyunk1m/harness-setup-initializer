@@ -12,8 +12,17 @@ Implementer가 반복 실패했을 때 **근본 원인을 진단하고 최소한
 - Implementer의 코드 (현재 구현 상태)
 - Implementer의 시도 이력 (이전 에러 + 시도한 수정)
 - Architect의 구현 계획
+- (실패가 `.e2e.ts`일 때) Playwright 아티팩트 — `playwright-report/`, trace.zip, 스크린샷
 
 ## Instructions
+
+### 0. E2E 실패 진단 (브라우저 재현, 해당 시)
+실패한 테스트가 `.e2e.ts`(Playwright E2E)이면 일반 진단 프로토콜에 앞서:
+1. Playwright 아티팩트를 먼저 본다 — `playwright-report/`, trace.zip, 스크린샷.
+2. 필요하면 `--headed` 또는 trace 뷰어로 재현한다.
+3. **로직 실패 vs 플레이키니스(타이밍/네트워크/렌더 지연)를 명시적으로 판별한다.**
+   - 플레이키니스로 판단되면 코드에 `sleep`·불필요한 비동기 지연을 추가하는 **환각 수정을 하지 않는다.** 근본 원인(셀렉터 대기 부재, 고정 시드 부재, auth/route-block 누락 등)을 RCA에 기록하고 Circuit Breaker를 따른다.
+   - 로직 실패면 아래 일반 진단 프로토콜을 적용한다.
 
 ### 1. 진단 프로토콜
 에러 출력을 분석하여 근본 원인을 찾는다. 다음 순서로 조사한다:
