@@ -123,7 +123,7 @@
 | 의미론적 승인 게이트 (1.9.0) | scaffold Phase 4 "아키텍처 정확성 확인" — 생성 제약 재요약+사용자 확인(비차단), manifest `semanticApprovalAt` | 구조 검증은 의미 정확성을 보장 못 함(자문 공통). Step 5 승인은 프로필 대상이고 문서는 그 이후 생성되므로 의미 게이트가 부재했음 (gemini 권고) |
 | 프로필 스키마 검증 보류 (1.9.0) | gemini의 ".harness-profile.json 경량 JSON Schema 결정화" 제안 보류 | 1.6.2에서 "JSON Schema 분리=과한 코드화"로 이미 비수용. 산문 사양+LLM 실행 철학 유지. 두 스킬 간 계약 드리프트가 실제 마찰로 누적되면 재검토 (사용자 선택) |
 | 첫 셋업 능력 카탈로그 (1.10.0) | scaffold Phase 4 보고에 "이제 할 수 있는 일" 블록(≤12줄, 신규 파일 0) — 와이어된 능력만 조건부 렌더하는 **순수 투영**, U5(업그레이드)는 미출력 | 첫 셋업 직후 "무엇을→어떻게"가 불명확(이슈 #11). 새 손-관리 목록은 최대 드리프트 위험 → 산출물 게이트 신호(`integrations`/생존 `linkedSkills`/`tdd.securityCategories`) 재사용해 미와이어 능력 광고 차단. Security Reviewer는 §5.10 게이트가 아니라 session-routine Phase 4.5 호출 조건이 실제 게이트(이슈 표기 교정) — 카탈로그는 파이프라인을 열거하지 않고 정본을 가리킴 |
-| E2E TDD 배선 (1.12.0, 증분 2a) | E2E를 TDD에 배선: test-engineer가 작성(결정 a — 신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7이 해당 feature 스펙만 실행, debugger 재현. 게이트는 명시적 E2E 판정(침묵=BLOCK)+TDD STATE+`@feature:` grep 키로 결정화(LLM 기억 비의존). pre-push는 증분 2b로 분리 | 멀티모델 적대적 검증(codex/gemini): 암묵적 "RED가 E2E 썼나" 게이트는 재개 세션·컨텍스트 밀림에 취약. VERIFY 전체 스위트는 플레이키니스 환각 루프 → feature 스펙만+시도 한도. 인프라(pre-push)와 워크플로(배선)는 실패 도메인이 달라 분할. 전부 managed 편집 → §12.6 자동 전파, 플레이스홀더 0(28 불변) |
+| E2E TDD 배선 (1.12.0, 증분 2a) | E2E를 TDD에 배선: test-engineer가 작성(결정 a — 신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7이 해당 feature 스펙만 실행, debugger 재현. 게이트는 명시적 E2E 판정(침묵=BLOCK)+TDD STATE+`@feature:` grep 키로 결정화(LLM 기억 비의존). pre-push는 증분 2b로 분리 | 멀티모델 적대적 검증(codex/gemini): 암묵적 "RED가 E2E 썼나" 게이트는 재개 세션·컨텍스트 밀림에 취약. VERIFY 전체 스위트는 플레이키니스 환각 루프 → feature 스펙만+시도 한도. 인프라(pre-push)와 워크플로(배선)는 실패 도메인이 달라 분할. 전부 managed 편집 → §12.6 자동 전파, 플레이스홀더 0(29 불변) |
 
 ---
 
@@ -323,7 +323,7 @@
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
 
 ### 1.12.0 (E2E TDD 배선 — 이슈 #12 증분 2a)
-- **1.12.0** (2026-06-16) — E2E를 TDD 사이클에 배선 (이슈 #12 증분 2a). test-engineer 확장(결정 a)이 `e2e/specs/{ID}-*.e2e.ts`를 `@feature:{ID}` 태그로 작성, session-routine VERIFY(E2E) Phase 4.7이 해당 feature 스펙만 실행(FAIL→GREEN 시도 누적), debugger 브라우저 재현(플레이키니스 환각 금지), coding-standards `@critical` 정의. 게이트는 명시적 E2E 판정(침묵=BLOCK)+TDD STATE 보존+grep 키로 결정화. pre-push 강제는 증분 2b로 분리. 멀티모델 적대적 검증(codex/gemini) 반영, 도그푸딩 6회차. 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, 신규 파일·git config·플레이스홀더 0(28 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md, 계획: docs/superpowers/plans/2026-06-16-e2e-tdd-wiring-2a.md
+- **1.12.0** (2026-06-16) — E2E를 TDD 사이클에 배선 (이슈 #12 증분 2a). test-engineer 확장(결정 a)이 `e2e/specs/{ID}-*.e2e.ts`를 `@feature:{ID}` 태그로 작성, session-routine VERIFY(E2E) Phase 4.7이 해당 feature 스펙만 실행(FAIL→GREEN 시도 누적), debugger 브라우저 재현(플레이키니스 환각 금지), coding-standards `@critical` 정의. 게이트는 명시적 E2E 판정(침묵=BLOCK)+TDD STATE 보존+grep 키로 결정화. pre-push 강제는 증분 2b로 분리. 멀티모델 적대적 검증(codex/gemini) 반영, 도그푸딩 6회차. 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, 신규 파일·git config·플레이스홀더 0(29 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md, 계획: docs/superpowers/plans/2026-06-16-e2e-tdd-wiring-2a.md
 
 ---
 

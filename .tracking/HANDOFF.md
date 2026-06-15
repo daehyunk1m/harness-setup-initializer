@@ -143,7 +143,7 @@
   - 증분 1의 E2E 스캐폴드를 TDD 사이클에 배선: coding-standards `@critical` 정의, architect E2E 슬롯 완성, test-engineer E2E 작성 심화 + **E2E 판정 Output(created/skipped/not_applicable, 침묵=BLOCK)**, debugger 브라우저 재현(플레이키니스 환각 금지), session-routine VERIFY(E2E) Phase 4.7(해당 feature 스펙만 실행, FAIL→GREEN 시도 누적) + TDD STATE 보존 + `e2e-fail` 마찰
   - 결정: (a) E2E 작성 주체 = **Test Engineer 확장**(신규 에이전트 아님, 7개 불변), (b) pre-push = **무의존 git hook**(증분 2b로 분리)
   - **멀티모델 적대적 검증**(codex 결함/gemini 운영): 게이트를 LLM 기억 → 명시적 판정+TDD STATE+`@feature:` grep 키로 결정화, VERIFY 범위 축소(feature 스펙만), 증분 2 → 2a/2b 분할. 도그푸딩 6회차
-  - 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, **신규 파일·git config·플레이스홀더 0(28 불변)**, 마이그레이션 불필요. 골든 픽스처 회귀 통과
+  - 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, **신규 파일·git config·플레이스홀더 0(29 불변)**, 마이그레이션 불필요. 골든 픽스처 회귀 통과
 
 **현재 버전: 1.12.0** (E2E TDD 배선 — 이슈 #12 증분 2a)
 

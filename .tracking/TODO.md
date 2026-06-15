@@ -747,7 +747,7 @@
 ### TODO-95a: E2E 모듈 증분 2a — TDD 배선
 - **상태**: [x] 완료 (2026-06-16, 1.12.0)
 - **파일**: `templates/rules/coding-standards.md`(@critical), `templates/agents/architect.md`(E2E 슬롯), `templates/agents/test-engineer.md`(E2E 작성+판정 Output), `templates/agents/debugger.md`(브라우저 재현), `templates/rules/session-routine.md`(VERIFY Phase 4.7+TDD STATE+마찰), `references/harness-checklist.md` §4.2, 버전/트래킹
-- **해결**: E2E를 TDD 사이클에 배선 — 결정 (a) Test Engineer 확장(신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7(해당 feature 스펙만, FAIL→GREEN 시도 누적), debugger 재현(플레이키니스 환각 금지). 멀티모델 적대적 검증으로 게이트 결정화(명시적 E2E 판정+TDD STATE+`@feature:` grep, 침묵=BLOCK). 전부 managed 편집 → §12.6 자동 전파, 신규 파일·git config·플레이스홀더 0(28 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md
+- **해결**: E2E를 TDD 사이클에 배선 — 결정 (a) Test Engineer 확장(신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7(해당 feature 스펙만, FAIL→GREEN 시도 누적), debugger 재현(플레이키니스 환각 금지). 멀티모델 적대적 검증으로 게이트 결정화(명시적 E2E 판정+TDD STATE+`@feature:` grep, 침묵=BLOCK). 전부 managed 편집 → §12.6 자동 전파, 신규 파일·git config·플레이스홀더 0(29 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md
 
 ### TODO-95b: E2E 모듈 증분 2b — pre-push 인프라 (후속, 목표 1.13.0)
 - **상태**: [ ] 미착수

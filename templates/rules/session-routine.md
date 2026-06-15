@@ -188,7 +188,7 @@ feature.category가 {{SECURITY_CATEGORIES}} 중 하나일 때만 실행.
 
 ### Phase 4.7: VERIFY(E2E) (조건부)
 
-REVIEW·SECURITY·(조건부 REFACTOR)가 모두 끝난 뒤, **기능 완료 직전**에 실행한다.
+**번호는 4.7이지만, 실행 시점은 REVIEW·SECURITY·(조건부) REFACTOR가 모두 끝난 직후 · 기능 완료 직전이다** — 모든 성공 경로(REVIEW PASS / SECURITY PASS / REFACTOR PASS)가 수렴하는 마지막 게이트다. `기능 완료 처리`의 전제로도 재확인되므로 어느 경로로 와도 누락되지 않는다.
 
 **게이트** (`profile.e2e.enabled`가 참일 때만 평가):
 - Test Engineer E2E 판정이 `created` → 실행한다.
