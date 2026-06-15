@@ -145,7 +145,8 @@ fi
     "enabled": true,
     "framework": "playwright",
     "playwrightVersion": "1.48.0",
-    "prePush": true
+    "prePush": true,
+    "mcp": { "enabled": true, "version": "0.0.76" }
   },
   "integrations": {
     "superpowers": {
@@ -179,7 +180,7 @@ fi
 - `scripts.test`는 **비대화형(단발 실행) 명령**이다 — watch 기본 러너(예: `vitest` 단독)는 분석 단계에서 `npm run test:run` 형태로 기록되며, § 5.5가 `test:run` 키를 package.json에 추가한다. `{{TEST_COMMAND}}`와 `{{VALIDATE_COMMAND}}`의 안전성이 이 규칙에 의존한다.
 - `sharedDirs`는 **domain-based 전용** 선택 필드다 — structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]`.
 - `integrations`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드, `integrations.<name>` 구조). 생략 시 외부 연계 산출물을 생성하지 않는다 (§ 5.16). 통합 메커니즘 규약: `references/integrations/_protocol.md`. 각 통합의 연계 내용은 `references/integrations/<name>-mapping.md`가 정본. superpowers의 `linkedSkills`는 매핑 정본의 연계/선택 목록에 있는 것만 렌더링된다.
-- `e2e`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 E2E 스캐폴드 산출물을 생성하지 않는다 (§ 5.17). 프론트엔드 프로젝트에서만 제안된다. `playwrightVersion`은 핀 버전이며 § 5.5가 package.json devDependencies에 직접 사용한다 (`scripts.lint:arch`와 동일하게 프로필에서 읽음 — 새 플레이스홀더 아님). `prePush`는 선택 하위 필드(생략=false)로 pre-push 게이트 생성 여부를 결정한다 (§ 5.18). `e2e.enabled` 없이 `prePush`만 있을 수 없다.
+- `e2e`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 E2E 스캐폴드 산출물을 생성하지 않는다 (§ 5.17). 프론트엔드 프로젝트에서만 제안된다. `playwrightVersion`은 핀 버전이며 § 5.5가 package.json devDependencies에 직접 사용한다 (`scripts.lint:arch`와 동일하게 프로필에서 읽음 — 새 플레이스홀더 아님). `prePush`는 선택 하위 필드(생략=false)로 pre-push 게이트 생성 여부를 결정한다 (§ 5.18). `e2e.enabled` 없이 `prePush`만 있을 수 없다. `mcp`는 선택 객체(`enabled`/`version`)로 브라우저 MCP 탐색 진단 배선 여부를 결정한다 — `e2e.enabled`와 **독립**(스펙 없이 mcp만 가능). 신규 파일 없이 debugger.md `{{MCP_DEBUG_PROTOCOL}}` 치환만 발생(§ 5.19). `version`은 `@playwright/mcp` exact 핀.
 - `autoCommit`은 사용자가 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 `mode: "off"`로 간주하여 git-workflow.md의 `{{AUTO_COMMIT_MODE}}`를 `off`로 치환한다 (제안만 — 기존 동작).
 - `extras`의 각 항목은 문답에서 확인된 경우에만 존재한다. 없는 키는 해당 섹션 생략을 의미한다.
 - `eslintAssist`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드 — 프리셋 비대상, 감지+문답 전용). 생략 시 ESLint 설정을 수정하지 않는다 (§ 5.15). `configFormat`은 설정 파일 형식: `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*).
@@ -685,6 +686,7 @@ echo "=== 초기화 완료 (PID: $DEV_PID) ==="
 | `{{SECURITY_CATEGORIES}}` | 프로필 tdd.securityCategories | `auth, security, api, payment` | security-reviewer |
 | `{{MAX_IMPLEMENTER_ATTEMPTS}}` | 프로필 tdd.maxImplementerAttempts | `3` | session-routine (참조) |
 | `{{MAX_DEBUGGER_ATTEMPTS}}` | 프로필 tdd.maxDebuggerAttempts | `2` | session-routine (참조) |
+| `{{MCP_DEBUG_PROTOCOL}}` | `e2e.mcp.enabled`면 § 5.19 블록으로 치환(`version` 인라인), 아니면 빈 문자열. debugger.md 전용 | (§ 5.19 블록 또는 빈칸) | debugger |
 
 치환 후 `{{...}}` 패턴이 남아 있으면 검증 단계에서 에러로 보고한다.
 
@@ -1071,6 +1073,39 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 - 훅 본문은 `set -e`가 아니라 명시적 `|| exit 1`을 쓴다 — 주입 시 호스트 훅 동작을 바꾸지 않기 위해 (템플릿이 이미 그렇게 작성됨).
 - **주입 경로는 자동 감지 제외**: §12.6.1 매핑 키는 `.githooks/pre-push`(그린필드)이므로, 기존 hooksPath/Husky에 주입한 훅(타깃 경로가 다름)은 §12.6 자동 감지 대상이 아니다 — 템플릿 보안·정확성 업데이트가 주입 훅에는 자동 전파되지 않는다(호스트 훅 비침습 보장의 대가). 그린필드 `.githooks/pre-push`만 자동 전파된다.
 
+### 5.19 MCP 진단 배선 (옵트인)
+
+프로필에 `e2e.mcp.enabled: true`일 때만 실행한다. 신규 파일을 생성하지 않는다 — debugger.md(managed)의 `{{MCP_DEBUG_PROTOCOL}}`를 아래 블록으로 치환하고, `version`을 인라인한다. `e2e.mcp`가 없으면 빈 문자열로 치환한다(`e2e.enabled`와 무관).
+
+치환 블록(`@playwright/mcp@{버전}`은 `e2e.mcp.version` 인라인):
+
+````markdown
+### 0.5 브라우저 MCP 탐색 진단 (스펙 없는 UI 증상, 해당 시)
+
+재현 스펙이 아직 없는 UI 증상(사용자 버그 리포트 등)은 **라이브 브라우저로 탐색·진단**한다. 이미 실패하는 `.e2e.ts`가 있으면 § 0(러너 재현)이 정본이며 이 절을 쓰지 않는다.
+
+**로컬 등록 (개발자 1회)** — MCP 도구는 세션 시작 시 등록돼야 사용 가능하다. 공유 `.mcp.json`을 만들지 않으므로, 진단이 필요한 개발자가 자기 로컬에 1회 등록한다:
+
+```sh
+claude mcp add playwright-harness -- npx -y @playwright/mcp@0.0.76 --headless --isolated
+```
+
+등록 후 세션을 재시작하면 `playwright-harness` MCP 도구가 활성화된다. 기본 `local` 스코프라 커밋되지 않는다(팀 공유 `--scope project`는 권장하지 않음 — 개인 진단 도구).
+
+**MCP vs 러너 (정본 구분)**
+- **known `.e2e.ts` 실패** → § 0 적용. 러너/아티팩트(trace·report·screenshot)가 **정본**. MCP 탐색을 시작하지 않는다.
+- **스펙 없는 UI 증상** → MCP 허용. 목적은 **관찰 + 최소 재현 수집**.
+- 모호하면 러너/스펙 우선, MCP는 마지막 수단.
+
+**보안 기본값** — `--headless --isolated`(영속 프로필 금지 → 쿠키/세션 노출 차단). **localhost/devServer origin만** 기본, 외부 URL은 사용자 명시 승인. exact 핀만(`@latest` 금지). (참고: `--allowed-origins`는 도구 자체 설명상 보안 경계가 아니므로 localhost 제한은 지침으로 강제한다.)
+
+**사용 후 의무** — MCP로 찾은 재현을 `.e2e.ts`로 코드화(E2E 모듈 옵트인 시) 또는 명시적 재현 단계로 기록한다. **최종 완료 판단은 항상 § 3의 검증 명령(validate/E2E) 통과** — MCP 관찰만으로 "수정 완료" 단정 금지.
+
+**관찰 로그 필수** — URL · 시작 상태 · 클릭/입력 순서 · actual vs expected · console/network 근거. 본 것만 기록, 추정은 추정 표시(§ 0 플레이키니스 환각 금지 연장).
+````
+
+> Task 1에서 확인: `--headless`·`--isolated`는 `@playwright/mcp@0.0.76`에 실재한다. 버전이 바뀌면 등록 명령의 핀과 플래그를 그 버전 `--help`로 재검증한다.
+
 ---
 
 ## 6. Phase 3: 검증
@@ -1284,6 +1319,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/, playwright.config.ts) — e2e 옵트인 시에만 표시
+- 브라우저 MCP 진단 → debugger가 스펙 없는 UI 증상을 라이브 브라우저로 탐색 (상세: agents/debugger.md § 0.5) — e2e.mcp 옵트인 시에만 표시
 - pre-push 게이트 → 활성화 후 `git push` 시 `@critical` 자동 검증 (활성화 방법: 아래 'pre-push 게이트 활성화 안내'; 상세: .githooks/pre-push · references/harness-checklist.md §4.2) — e2e.prePush 옵트인 + 훅 생성 시에만 표시
 > 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
 ```
@@ -1297,6 +1333,12 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 3. **monorepo 한계**: repo-root 기준으로 동작하므로 하위 패키지에 설치된 playwright는 미탐지될 수 있다 (명시적 한계).
 4. **비활성화**: `git config --unset core.hooksPath`.
 
+#### 브라우저 MCP 진단 안내 (e2e.mcp 옵트인 시에만)
+
+`e2e.mcp` 옵트인 시 보고 말미에 다음을 출력한다 (스킬은 `.mcp.json`을 만들지 않으므로 개발자가 로컬 1회 등록해야 한다):
+
+- (e2e.mcp 옵트인 시) 브라우저 MCP 진단: 로컬 1회 등록 `claude mcp add playwright-harness -- npx -y @playwright/mcp@{version} --headless --isolated` (기본 local 스코프=커밋 안 됨). ⚠️ MCP 서버는 세션에서 코드를 실행한다 — 신뢰할 수 있는 환경에서만. 상세: agents/debugger.md § 0.5
+
 #### "이제 할 수 있는 일" 카탈로그 렌더링 규칙
 
 이 카탈로그는 **첫 셋업 보고 전용이며**(업그레이드 U5는 § 10.2 참조), 새 사실을 만들지 않는 **순수 투영(projection)**이다 — 산출물 생성을 결정한 바로 그 프로필 신호를 그대로 재사용해 각 줄을 조건부 렌더링한다. 새 게이트 로직·플레이스홀더를 도입하지 않는다:
@@ -1307,6 +1349,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **하네스 정리 · 피드백 분석 줄**: 컴패니언 스킬(install.sh로 `~/.claude/skills/`에 글로벌 설치)이므로 "글로벌 설치 전제"로 제시한다 — 글로벌 미설치 환경에서는 호출되지 않을 수 있다.
 - **검증 게이트 · 자가진단 · 품질·부채 추적 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
 - **브라우저 E2E 줄**: `e2e.enabled === true`이고 § 5.17 산출물(`playwright.config.ts`)이 생성된 경우에만 렌더 — 산출물 생성을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 자체를 생략한다 (미와이어 능력 광고 불가).
+- **브라우저 MCP 줄**: `e2e.mcp.enabled === true`일 때만 렌더 — debugger.md MCP 블록 치환을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 생략(미와이어 능력 광고 불가).
 - **pre-push 게이트 줄**: `e2e.prePush === true`이고 § 5.18 산출물(`.githooks/pre-push`)이 생성/주입된 경우에만 렌더 — 산출물 생성 신호를 재사용하는 순수 투영. 미옵트인·폴백 시 줄 자체를 생략한다 (미와이어/미활성 능력 광고 불가).
 
 언어는 보고 전체와 동일하게 § 8 "문서 품질"의 언어 규칙(한국어 기본, 사용자 요청 시 예외)을 따른다 — 한국어를 하드코딩하지 않는다. 각 줄은 정본(session-routine.md / 통합 매핑 / 컴패니언 SKILL.md)을 가리킬 뿐 능력 사실을 복제하지 않는다 — **새 손-관리 능력 목록이 아니다.**
@@ -1692,8 +1735,11 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 > **1.9.0**(보장 정직화+의미검증)도 마이그레이션이 없다 — `{{Q2_ENFORCEMENT}}` 마커와 manifest 필드(`structuralTestEnforcement`/`semanticApprovalAt`)는 managed 템플릿(structural-test의 layer/fsd/domain, harness-check.sh)과 manifest 재렌더에 § 12.6 자동 감지로 전파된다. custom structural-test(자동 감지 제외)에 마커가 없으면 harness-check ④-b는 안전하게 `enforced`로 간주(기존 동작 유지). 골든 픽스처는 스킬 내부 테스트(test/)라 생성 하네스와 무관.
 >
 > **1.14.0**(이슈 #12 증분 2b, pre-push 게이트)도 마이그레이션이 없다 — `.githooks/pre-push`는 신규 managed 파일이지만 `e2e.prePush` 옵트인 시에만 생성되고 생략=off라(1.11.0 e2e 모듈과 동일 선례), 기존 하네스는 산출물 0건이다. harness-check.sh ⑨ 추가분은 § 12.6 자동 감지로 전파된다. 신규 파일 생성은 U1 재감지 옵트인 경로로만 발생한다 (Phase U1 재감지).
+>
+> **1.15.0**(이슈 #12 증분 3, MCP 진단 배선)도 마이그레이션이 없다 — `e2e.mcp`는 옵트인·생략 기본이라(1.11.0/1.14.0 선례) 기존 프로필에 추가 불필요하고, 신규 파일을 만들지 않는다(debugger.md의 `{{MCP_DEBUG_PROTOCOL}}` 치환만). debugger.md(managed) 템플릿 변경은 § 12.6 자동 감지로 전파되며(미옵트인 시 빈 문자열 치환), 산출물 0건이라 별도 M-엔트리가 없다. 재치환은 U1 재감지 옵트인 경로로만 발생한다 (Phase U1 재감지).
 
 - **pre-push 재감지** (1.14.0+ U1): 기존 `e2e.enabled` 하네스에 `e2e.prePush`가 없고 git 저장소면, 업그레이드 U1 재감지에서 pre-push 게이트 옵트인을 **제안**한다 (생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 § 5.18 생성 로직(공존성 분기 포함) 실행 + manifest 등록. 활성화는 Phase U5 보고에서 수동 안내(스킬은 git config 미실행).
+- **MCP 재감지** (1.15.0+ U1): 기존 프론트엔드 하네스에 `e2e.mcp`가 없으면 업그레이드 U1에서 브라우저 MCP 진단 옵트인을 **제안**한다(생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 debugger.md `{{MCP_DEBUG_PROTOCOL}}`를 § 5.19 블록으로 재치환(managed 재렌더링).
 
 ### 10.4 엣지 케이스
 
