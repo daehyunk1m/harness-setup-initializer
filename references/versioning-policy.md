@@ -220,6 +220,7 @@ MAJOR 범프 시 추가:
 | Session 17 | CLAUDE.md/coding-standards.md 금지 규칙 | MINOR | 새 기능 (에이전트 행동 제약 추가) |
 | Session 17 | 모델 선택 가이드 | — | Public API 아님 (참조 문서) |
 | 1.14.0 릴리스 | 옵트인 managed 파일 추가 (pre-push 훅 템플릿, `e2e.prePush`) | MINOR | 새 파일이지만 생략 기본(옵트인)이라 기존 하네스 호환 — 마이그레이션 불필요 |
+| 1.15.0 릴리스 | Playwright MCP 진단 배선(이슈 #12 증분 3). 플레이스홀더 30→31(`{{MCP_DEBUG_PROTOCOL}}`), 프로필 `e2e.mcp` 서브필드. 신규 파일 0·옵트인·마이그레이션 불필요. | MINOR | 새 옵트인 기능(MCP 진단 경로) — 기존 하네스 호환 |
 
 → Session 14-17을 하나의 릴리스로 묶으면: **MINOR** (가장 높은 수준)
 → 만약 1.0.0에서 시작했다면: **1.1.0**
