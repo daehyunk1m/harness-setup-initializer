@@ -13,12 +13,11 @@ HC="$ROOT/templates/harness-check.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 FAILS=0
-N=0
 
 # 워크 디렉토리 = git repo + 렌더된 훅 + mock playwright
 # $1=validate_cmd  $2=mock_critical(0/1)  $3=mock_e2e_exit
 make_work() {
-  N=$((N + 1)); W="$TMP/w$N"
+  W="$(mktemp -d "$TMP/w.XXXXXX")"
   mkdir -p "$W/node_modules/.bin"
   ( cd "$W" && git init -q )
   sed -e "s#{{VALIDATE_COMMAND}}#$1#g" "$HOOK_TMPL" > "$W/pre-push"
@@ -69,18 +68,21 @@ grep -q "harness-setup:e2e-prepush:start" "$HOOK_TMPL" && grep -q "harness-setup
 render_hc() { sed -e "s#{{LINT_ARCH_COMMAND}}#true#g" -e "s#{{VALIDATE_COMMAND}}#true#g" \
   -e "s#{{DOC_CHECK_COMMAND}}#true#g" -e 's#{{PATH_ALIAS_LIST}}#"@/"#g' "$HC"; }
 
+echo ""
+echo "── harness-check ⑨ pre-push 게이트 ──"
+
 # 8. .githooks/pre-push 있고 core.hooksPath 미설정 → ⑨ "비활성" 경고
-N=$((N+1)); W="$TMP/w$N"; mkdir -p "$W/.githooks"; ( cd "$W" && git init -q )
+W="$(mktemp -d "$TMP/w.XXXXXX")"; mkdir -p "$W/.githooks"; ( cd "$W" && git init -q )
 render_hc > "$W/hc.sh"; cp "$HOOK_TMPL" "$W/.githooks/pre-push"
 ( cd "$W" && bash hc.sh 2>&1 | grep -q "비활성" ) && echo "✅ ⑨ 비활성 보고" || { echo "❌ ⑨ 비활성 미보고"; FAILS=$((FAILS+1)); }
 
 # 9. core.hooksPath=.githooks → ⑨ "활성"
-N=$((N+1)); W="$TMP/w$N"; mkdir -p "$W/.githooks"; ( cd "$W" && git init -q && git config core.hooksPath .githooks )
+W="$(mktemp -d "$TMP/w.XXXXXX")"; mkdir -p "$W/.githooks"; ( cd "$W" && git init -q && git config core.hooksPath .githooks )
 render_hc > "$W/hc.sh"; cp "$HOOK_TMPL" "$W/.githooks/pre-push"
 ( cd "$W" && bash hc.sh 2>&1 | grep -q "pre-push 게이트 활성" ) && echo "✅ ⑨ 활성 보고" || { echo "❌ ⑨ 활성 미보고"; FAILS=$((FAILS+1)); }
 
 # 10. 훅도 hooksPath도 없음 → ⑨ 섹션 자체 생략
-N=$((N+1)); W="$TMP/w$N"; ( cd "$W" 2>/dev/null || { mkdir -p "$W"; cd "$W"; }; git init -q )
+W="$(mktemp -d "$TMP/w.XXXXXX")"; ( cd "$W" && git init -q )
 render_hc > "$W/hc.sh"
 ( cd "$W" && bash hc.sh 2>&1 | grep -q "── ⑨" ) && { echo "❌ pre-push 없는데 ⑨ 실행됨"; FAILS=$((FAILS+1)); } || echo "✅ pre-push 미설치 시 ⑨ 스킵"
 
