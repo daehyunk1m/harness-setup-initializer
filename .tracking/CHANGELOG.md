@@ -5,6 +5,20 @@
 
 ---
 
+## [1.14.0] — 2026-06-16
+
+### 추가 (Added)
+- E2E pre-push 게이트 (이슈 #12 증분 2b): 옵트인 `e2e.prePush` → `.githooks/pre-push`(managed) 생성. `validate` → `@critical` E2E fail-fast 게이팅. 무의존 git hook(POSIX sh), PM 비종속(`node_modules/.bin/playwright`), `--list --grep @critical` 실제 매처.
+- harness-check ⑨ pre-push 게이트 활성/비활성 보고 (경고 전용 — 판정 분리).
+- 골든 픽스처 `test/prepush-fixtures.sh` (게이팅 분기 + ⑨ 회귀, mock playwright).
+
+### 변경 (Changed)
+- 활성화는 수동(`git config core.hooksPath` — 스킬 비실행, Phase 4 안내). 공존성 4-환경 분기 + 적응형 마커 주입.
+- eslint e2e override는 드롭(YAGNI — e2e/는 srcRoot 밖). §12.6.1 매핑에 pre-push 추가.
+- MINOR. 신규 플레이스홀더 0개(30 불변). 마이그레이션 불필요(옵트인·생략 기본).
+
+---
+
 ## [1.13.1] — 2026-06-16 (E2E 판정 의미 명확화 — 파일럿 마찰)
 
 > haja TaskItem 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정을 도출 + `not_applicable`을 즉흥 분류한 데서 발견. PATCH (test-engineer.md 산문 명확화 — 신규 플레이스홀더·필드·파일 0). 마이그레이션 불필요.

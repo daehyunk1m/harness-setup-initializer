@@ -750,7 +750,8 @@
 - **해결**: E2E를 TDD 사이클에 배선 — 결정 (a) Test Engineer 확장(신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7(해당 feature 스펙만, FAIL→GREEN 시도 누적), debugger 재현(플레이키니스 환각 금지). 멀티모델 적대적 검증으로 게이트 결정화(명시적 E2E 판정+TDD STATE+`@feature:` grep, 침묵=BLOCK). 전부 managed 편집 → §12.6 자동 전파, 신규 파일·git config·플레이스홀더 0(29 불변), 마이그레이션 불필요. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-tdd-wiring-design.md
 
 ### TODO-95b: E2E 모듈 증분 2b — pre-push 인프라 (후속, 목표 1.14.0)
-- **상태**: [ ] 미착수
+- **상태**: [x] 완료 (2026-06-16, 1.14.0)
+- **해소**: 9개 난제 중 8개 정본 §8 방향대로 해소, 난제 ⑥(eslint override) 드롭(YAGNI — e2e/는 srcRoot 밖, 승격 조건 보존). 활성화 수동(D1). 골든 픽스처 통과. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md. 구현 계획: docs/superpowers/plans/2026-06-16-e2e-prepush-2b.md. **후속 플래그**: e2e managed 파일(playwright.config.ts/e2e tsconfig)의 §12.6.1 매핑 정렬은 증분 4로 이월
 - **내용**: 무의존 pre-push 훅(`.githooks/pre-push` + core.hooksPath, 결정 b) — @critical 스펙 게이팅. e2e 전용 eslint override(eslintAssist 시 별도 마커). 설계 정본 §8 참조
 - **착수 전 해소할 9개 난제(적대적 자문)**: ① 기존 Husky/hooksPath 공존성("충돌 시 경고"와 "강제" 양립불가 → 적응형 마커 주입) ② PM 비종속(`node_modules/.bin/playwright` 직접) ③ monorepo repo-root 계산(하위 패키지는 명시적 한계) ④ @critical 탐지(`--list --grep`, 소스 grep 오탐 회피, 0-exit 픽스처 검증) ⑤ 실제 설치 판정(package.json 존재 ≠ 실행 가능) ⑥ 별도 eslint 마커(`harness-setup:e2e-eslint`) ⑦ 멱등성(core.hooksPath는 manifest 밖 외부 상태) ⑧ 보안 고지(push 시 임의 코드 실행) ⑨ 신규 managed 파일 마이그레이션 M-1.13.0-to-1.14.0(e2e.enabled 시만, 기존 훅 4-상태). 신규 파일 발생 → MINOR(1.14.0 — 1.13.0은 파일럿 마찰 수정에 소비됨)
 

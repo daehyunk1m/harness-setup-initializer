@@ -125,6 +125,7 @@
 | 첫 셋업 능력 카탈로그 (1.10.0) | scaffold Phase 4 보고에 "이제 할 수 있는 일" 블록(≤12줄, 신규 파일 0) — 와이어된 능력만 조건부 렌더하는 **순수 투영**, U5(업그레이드)는 미출력 | 첫 셋업 직후 "무엇을→어떻게"가 불명확(이슈 #11). 새 손-관리 목록은 최대 드리프트 위험 → 산출물 게이트 신호(`integrations`/생존 `linkedSkills`/`tdd.securityCategories`) 재사용해 미와이어 능력 광고 차단. Security Reviewer는 §5.10 게이트가 아니라 session-routine Phase 4.5 호출 조건이 실제 게이트(이슈 표기 교정) — 카탈로그는 파이프라인을 열거하지 않고 정본을 가리킴 |
 | E2E TDD 배선 (1.12.0, 증분 2a) | E2E를 TDD에 배선: test-engineer가 작성(결정 a — 신규 에이전트 아님, 7개 불변), VERIFY(E2E) Phase 4.7이 해당 feature 스펙만 실행, debugger 재현. 게이트는 명시적 E2E 판정(침묵=BLOCK)+TDD STATE+`@feature:` grep 키로 결정화(LLM 기억 비의존). pre-push는 증분 2b로 분리 | 멀티모델 적대적 검증(codex/gemini): 암묵적 "RED가 E2E 썼나" 게이트는 재개 세션·컨텍스트 밀림에 취약. VERIFY 전체 스위트는 플레이키니스 환각 루프 → feature 스펙만+시도 한도. 인프라(pre-push)와 워크플로(배선)는 실패 도메인이 달라 분할. 전부 managed 편집 → §12.6 자동 전파, 플레이스홀더 0(29 불변) |
 | E2E VERIFY 러너 정합 (1.13.0) | VERIFY(E2E) 실행 명령을 `{{TEST_COMMAND}}`(유닛 러너)→신규 `{{E2E_COMMAND}}`(E2E 러너, `<pm> run test:e2e`)로 교체. 새 프로필 필드 없이 `e2e.enabled`+`test:e2e` 스크립트에서 도출(29→30) | haja 1.9→1.12 파일럿 적대적 검증: 유닛 러너로는 `.e2e.ts`가 글롭에 미수집 → 0개 실행 후 exit 0(거짓 PASS)로 게이트 무력화. "계열" 헷지는 하드 치환 토큰 앞에서 무의미(§6.11이 이미 치환). 동반 수정: seed.ts `void payload`(F1, no-unused-vars), harness-check ⑧ references 위임루트 short-circuit(F2). harness:check가 런타임 Phase 4.7을 안 거쳐 못 잡음 → 실전 기능 주행이 검증에 필수임을 입증 |
+| **이슈 #12 증분 2b (1.14.0)**: pre-push 게이트. 활성화 수동(D1 — git config 비실행, "승인 없이 git 실행 금지" 정합), 게이팅 `validate`→`@critical`(D2), 옵트인 `e2e.prePush`(D3), eslint override 드롭(D4 — e2e/는 srcRoot 밖이라 assist 규칙 미도달, 승격 조건만 보존), 신규 플레이스홀더 0(D5). 공존성 4-환경 분기(그린필드/기존 hooksPath·Husky/기본 hooks/폴백) + 적응형 마커 주입. harness-check ⑨ 경고 전용(판정 분리). 설계 정본: docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md | — | —
 
 ---
 
@@ -322,6 +323,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.14.0 (E2E pre-push 게이트 — 이슈 #12 증분 2b)
+- **1.14.0** (2026-06-16) — E2E pre-push 게이트 (이슈 #12 증분 2b): 옵트인 `e2e.prePush` → `.githooks/pre-push`(managed) 생성. `validate` → `@critical` E2E fail-fast 게이팅. 무의존 git hook(POSIX sh), PM 비종속(`node_modules/.bin/playwright`), `--list --grep @critical` 실제 매처. 수동 활성화(D1 — git config 비실행, "승인 없이 git 실행 금지" 정합). 공존성 4-환경 분기(그린필드/기존 hooksPath·Husky/기본 hooks/폴백) + 적응형 마커 주입. eslint override 드롭(D4 — e2e/는 srcRoot 밖, 승격 조건 보존). harness-check ⑨ 경고 전용(판정 분리). 골든 픽스처 `test/prepush-fixtures.sh`. MINOR, 신규 플레이스홀더 0, 마이그레이션 불필요(옵트인·생략 기본).
 
 ### 1.13.1 (E2E 판정 의미 명확화 — haja TaskItem 도그푸딩)
 - **1.13.1** (2026-06-16) — haja TaskItem 레이아웃 수정 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정을 도출하고 `not_applicable`을 즉흥 분류 → test-engineer.md §3.5에 3개 status 기준 명시: `not_applicable`은 UI/사용자 표면이 전혀 없을 때만(UI 표면 있는데 미작성=`skipped`), 판정은 `@critical`과 무관(@critical은 2b pre-push 전용). PATCH(산문 명확화, 플레이스홀더·필드 0). **보류(TODO-99)**: E2E 트리거가 "UI 상호작용" 중심이라 시각/레이아웃 회귀(jsdom 유닛 검증 불가)의 사각 존재 — 스코프 확장은 의견 개입이라 데이터포인트 더 수집 후 결정.
