@@ -118,6 +118,7 @@
 - [ ] (e2e 옵트인 시) `playwright.config.ts` + `e2e/` 스캐폴드 존재 — harness-setup E2E 모듈(§ 5.17)이 생성. 구조만 보장하며 스위트 통과(의미)는 앱별 부팅에 의존
 - [ ] feature_list의 steps가 E2E 테스트와 1:1로 매핑 가능한가
 - [ ] (e2e 옵트인 시) E2E가 TDD 사이클에 배선됨 — RED(Test Engineer)가 `@feature:{ID}` 태그로 작성, VERIFY(E2E)(session-routine Phase 4.7)가 해당 feature 스펙 실행, Debugger가 브라우저 재현. L4의 구현 경로(harness-setup 증분 2a)
+- (1.14.0, 증분 2b) `@critical` 태그 E2E의 **cross-feature 회귀**는 옵트인 pre-push 게이트(`.githooks/pre-push`)가 push 시점에 강제한다 (`validate` → `@critical`). per-feature VERIFY(Phase 4.7)와 분리된 마지막 방어선이며, 활성화는 수동(`git config core.hooksPath`)이다. CI 부재 환경에서 "안 보이는 테스트" 방치를 막는 강제 경로.
 
 ### 4.3 환경 재현성
 
