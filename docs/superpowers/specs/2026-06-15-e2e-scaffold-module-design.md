@@ -90,9 +90,10 @@ E2E를 **1급 옵트인 스캐폴드 모듈**로 추가한다.
 
 **카테고리 근거**: managed = 템플릿 개선을 4-상태 자동 감지로 전파(설정은 하네스가 진화). custom = 사용자가 채우고 소유(테스트/시드는 프로젝트별) → 업그레이드 시 미덮어쓰기.
 
-### 5.1 신규 플레이스홀더
-- `{{PLAYWRIGHT_VERSION}}` **1개만** 추가. (`specDir`/`browser`는 템플릿 고정 기본값, webServer는 기존 `{{DEV_SERVER_COMMAND}}`/`{{DEV_SERVER_PORT}}` 재사용)
-- harness-scaffold §4 치환 규칙 테이블 + (해당 시) presets 스키마 가이드에 반영.
+### 5.1 신규 플레이스홀더 — **0개**
+- `playwright.config.ts`는 webServer에서 기존 `{{DEV_SERVER_COMMAND}}`/`{{DEV_SERVER_PORT}}`만 재사용한다 (버전 불필요).
+- 핀 버전은 `§5.5` package.json 머지 스크립트에서 `profile.e2e.playwrightVersion`을 **직접 읽는다** — `scripts.lint:arch`가 프로필에서 오는 것과 동일 패턴이므로 새 `{{}}` 템플릿 플레이스홀더가 아니다.
+- 결과: 플레이스홀더 총 개수(29개) 불변 → versioning-policy §1 카운트 영향 없음.
 
 ### 5.2 생성 순서
 기존 20단계 중 **package.json scripts(18) 이후, .harness-manifest.json(20) 이전**에 신규 단계 삽입 (e2e.enabled일 때만 실행). 의존성: webServer가 devServer 정보를 쓰므로 devServer 확정 이후, manifest가 파일 목록을 쓰므로 그 이전.
@@ -111,7 +112,7 @@ E2E를 **1급 옵트인 스캐폴드 모듈**로 추가한다.
 |------|----------|------------|
 | **Vitest 글롭 충돌** | e2e 스펙을 `*.e2e.ts`로 명명 → Vitest 기본 글롭(`**/*.{test,spec}.ts`)이 미매칭, playwright.config가 `testMatch:'**/*.e2e.ts'`로 명시 매칭 | vitest.config **미수정** |
 | **tsconfig 분리** | `e2e/tsconfig.json`(자체) 생성 + root tsconfig **절대 비수정**. root가 broad include면 harness-check가 **감지·경고만** | tsconfig **미수정** |
-| **eslint 타깃** | `eslintAssist.enabled`인 경우 기존 마커 메커니즘으로 e2e 오버라이드 블록 추가, 아니면 Phase 4 안내로 위임 | 옵트인 마커 머지만 |
+| **eslint 타깃** | **증분 1에서는 e2e 전용 eslint 수정을 하지 않는다** — load-bearing 펜스는 Vitest(네이밍)·tsconfig(경고)이고 eslint override는 부가. e2e-aware eslint 타깃은 증분 2(TDD 배선)로 이관 | 수정 없음 |
 
 > Vitest 충돌은 이슈가 "가장 load-bearing"이라 짚었고, 이슈 설계는 `.spec.ts` + `exclude` 머지였다. 본 설계는 **네이밍 컨벤션으로 회피**하여 vitest.config 수정을 아예 제거한다 — 하네스의 비침습·멱등 불변식에 더 부합.
 
@@ -160,7 +161,8 @@ E2E를 **1급 옵트인 스캐폴드 모듈**로 추가한다.
 
 ## 9. 업그레이드 / 마이그레이션
 
-- **강제 마이그레이션 없음** (옵트인 모듈). U1 재감지가 기존 **프론트엔드** 하네스에 e2e 옵트인을 제안한다 — superpowers/multi-model-consult의 "업그레이드 시 옵트인" 패턴과 동일.
+- **강제 마이그레이션 없음** (옵트인 모듈). 기존 하네스는 `e2e` 필드 생략이 기본이라 **무영향**(깨지지 않음) — 1.8.0 autoCommit과 동일한 옵트인·생략 기본 패턴.
+- **증분 1 범위**: setup 경로(신규 프로젝트 스캐폴드)를 완성한다. **U1 재감지로 기존 프론트엔드 하네스에 e2e 옵트인을 제안하는 것은 후속 작업**으로 분리한다(superpowers/multi-model-consult의 "업그레이드 시 옵트인" 패턴을 따르되, 증분 1에서는 setup-first). 이로써 증분 1이 독립적으로 동작하는 소프트웨어를 산출한다.
 - 이미 `e2e` 보유 하네스: managed 파일(`playwright.config.ts`·`e2e/tsconfig.json`)의 템플릿 변경을 §12.6 4-상태 자동 감지로 전파. custom 파일은 미덮어쓰기.
 - manifest 스키마: 새 카테고리 파일 정의 추가(파일 목록 확장). Public API 무변경(옵트인·하위호환) → MINOR.
 
