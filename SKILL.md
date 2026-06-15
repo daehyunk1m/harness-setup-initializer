@@ -354,6 +354,8 @@ done
 **E2E 계층 (Playwright) 관련** (Step 1.4에서 프론트엔드 신호가 감지된 경우에만, 우선순위 5 — 옵트인):
 - "브라우저 E2E 계층(Playwright)을 셋업할까요? jsdom 단위 테스트가 못 잡는 상호작용 회귀(편집모드 재오픈, 드래그 오발동, StrictMode 이중 effect 등)를 실제 브라우저로 자동화합니다. `playwright.config.ts`와 `e2e/` 디렉토리·스모크 스펙을 생성하고, package.json에 `test:e2e` 스크립트와 `@playwright/test` 의존성을 추가합니다 (**설치 명령은 안내만 — 자동 실행하지 않음**). `e2e/`는 src 밖이라 레이어 린터·Vitest와 충돌하지 않습니다."
 - 동의하면 프로필에 `e2e` 필드(enabled, framework: "playwright", playwrightVersion)를 기록한다. playwrightVersion은 현재 stable 버전으로 채운다. 거부하거나 답이 없으면 필드를 생략한다 (E2E 모듈 미생성)
+- **E2E 옵트인이 확정되고** `git rev-parse --is-inside-work-tree`가 참이면(git 저장소), 이어서 묻는다: "push 전에 `@critical` E2E 스펙을 자동 검증하는 pre-push 게이트를 추가할까요? `validate` 통과 후 `@critical` 태그 스펙만 실행합니다. **`.githooks/pre-push` 파일만 생성하며, 활성화 명령(`git config core.hooksPath`)은 셋업 후 직접 실행하셔야 합니다 — 스킬은 git 설정을 변경하지 않습니다.** git hook은 push 시 임의 코드를 실행하므로 신뢰할 수 있는 저장소에서만 권장합니다."
+- 동의하면 `e2e.prePush: true`를 기록한다. E2E 미옵트인이거나 git 저장소가 아니거나 거부/무응답이면 `prePush`를 생략한다 (pre-push 산출물 미생성).
 
 **superpowers 연계 관련** (Step 1.6에서 superpowers가 감지된 경우에만, 우선순위 5 — 옵트인):
 - "superpowers 플러그인이 감지되었습니다 (v{버전}). AGENTS.md에 연계 가이드를 삽입할까요? 연계 대상(보완 영역만): brainstorming(설계 결정), systematic-debugging(일반 버그 추적), writing-plans(계획 문서 작성). 제외: TDD·코드 리뷰·검증·git 워크플로는 본 하네스 자체 워크플로를 사용합니다."
@@ -610,7 +612,8 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
   "e2e": {
     "enabled": true,
     "framework": "playwright",
-    "playwrightVersion": "1.48.0"
+    "playwrightVersion": "1.48.0",
+    "prePush": true
   },
   "integrations": {
     "superpowers": {
