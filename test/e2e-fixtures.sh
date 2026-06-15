@@ -84,6 +84,18 @@ cp "$WORK/hc.sh" "$WORK4/hc.sh"; : > "$WORK4/playwright.config.ts"; : > "$WORK4/
 echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK4/package.json"
 echo '{"include":["src","e2e"]}' > "$WORK4/tsconfig.json"
 ( cd "$WORK4" && bash hc.sh 2>&1 | grep -q "include가 e2e를 포함" ) && echo "✅ include에 e2e 포함 시 경고" || { echo "❌ include e2e 경고 누락"; FAILS=$((FAILS+1)); }
+# (e) 루트 광범위 글롭 include → 경고 있어야 함 (스펙 §8.1 "전체 디렉토리 컴파일")
+WORK5="$TMP/glob-broad"; mkdir -p "$WORK5/e2e/specs"
+cp "$WORK/hc.sh" "$WORK5/hc.sh"; : > "$WORK5/playwright.config.ts"; : > "$WORK5/e2e/specs/smoke.e2e.ts"
+echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK5/package.json"
+echo '{"include":["**/*.ts"]}' > "$WORK5/tsconfig.json"
+( cd "$WORK5" && bash hc.sh 2>&1 | grep -q "광범위 글롭" ) && echo "✅ 루트 광범위 글롭 시 경고" || { echo "❌ 광범위 글롭 경고 누락"; FAILS=$((FAILS+1)); }
+# (f) src 한정 글롭 include → 경고 없어야 함 (오탐 회귀 방지)
+WORK6="$TMP/glob-scoped"; mkdir -p "$WORK6/e2e/specs"
+cp "$WORK/hc.sh" "$WORK6/hc.sh"; : > "$WORK6/playwright.config.ts"; : > "$WORK6/e2e/specs/smoke.e2e.ts"
+echo '{"scripts":{"test:e2e":"playwright test"}}' > "$WORK6/package.json"
+echo '{"include":["src/**/*.ts"]}' > "$WORK6/tsconfig.json"
+( cd "$WORK6" && bash hc.sh 2>&1 | grep -Eq "광범위 글롭|e2e를 포함" ) && { echo "❌ src 한정 글롭에 오탐 경고"; FAILS=$((FAILS+1)); } || echo "✅ src 한정 글롭 시 경고 없음 (오탐 회귀 방지)"
 
 echo ""
 echo "═══ 판정 ═══"

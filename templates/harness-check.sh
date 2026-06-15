@@ -128,6 +128,9 @@ if [ -f playwright.config.ts ]; then
       echo "⚠️ tsconfig.json에 include/exclude 설정 없음 — e2e/가 root 컴파일에 섞일 수 있습니다. root tsconfig exclude에 \"e2e\" 추가 권장 (하네스는 tsconfig를 수정하지 않음)"
     elif grep -A3 '"include"' tsconfig.json 2>/dev/null | grep -q 'e2e'; then
       echo "⚠️ tsconfig.json include가 e2e를 포함하는 듯합니다 — exclude에 \"e2e\" 추가 권장"
+    elif grep -A3 '"include"' tsconfig.json 2>/dev/null | grep -Eq '"\*\*|"\*"|"\."'; then
+      # 루트 기준 광범위 글롭(["**/*"], ["."], ["*"])은 e2e/까지 컴파일 — 단 "src/**"처럼 경로 접두가 있으면 미해당
+      echo "⚠️ tsconfig.json include가 광범위 글롭(\"**\"·\".\" 등)이라 e2e/가 컴파일에 섞일 수 있습니다 — exclude에 \"e2e\" 추가 권장"
     fi
   fi
 fi
