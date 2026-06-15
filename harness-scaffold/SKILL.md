@@ -1069,6 +1069,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 - **멱등**: 마커 `harness-setup:e2e-prepush:start`가 대상 파일에 이미 있으면 스킵.
 - 주입 시 **shebang은 복제하지 않는다** — 마커 블록(start~end)만 기존 훅 뒤에 붙인다(호스트 훅의 shebang/로직 보존). 신규 생성 시에만 템플릿 전체(shebang 포함)를 쓴다.
 - 훅 본문은 `set -e`가 아니라 명시적 `|| exit 1`을 쓴다 — 주입 시 호스트 훅 동작을 바꾸지 않기 위해 (템플릿이 이미 그렇게 작성됨).
+- **주입 경로는 자동 감지 제외**: §12.6.1 매핑 키는 `.githooks/pre-push`(그린필드)이므로, 기존 hooksPath/Husky에 주입한 훅(타깃 경로가 다름)은 §12.6 자동 감지 대상이 아니다 — 템플릿 보안·정확성 업데이트가 주입 훅에는 자동 전파되지 않는다(호스트 훅 비침습 보장의 대가). 그린필드 `.githooks/pre-push`만 자동 전파된다.
 
 ---
 
@@ -1403,6 +1404,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 28 | `e2e/fixtures/test.ts` | custom | per-test fixture, 사용자가 시드 훅 추가 (e2e 옵트인 시에만) |
 | 29 | `e2e/fixtures/seed.ts` | custom | 앱별 시드 로직, 사용자 소유 (e2e 옵트인 시에만) |
 | 30 | `e2e/specs/smoke.e2e.ts` | custom | 스타터 스모크, 사용자가 회귀 스펙 축적 (e2e 옵트인 시에만) |
+| 31 | `.githooks/pre-push` | managed | 옵트인(e2e.prePush) 시에만. 그린필드=`.githooks/pre-push`, 기존 hooksPath/Husky 주입 시 호스트 훅 경로 |
 
 #### managed 파일의 사용자 수정 대응
 
