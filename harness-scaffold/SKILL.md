@@ -1042,7 +1042,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 
 프로필에 `e2e.prePush: true`일 때만 실행한다. 없으면 이 단계 전체를 건너뛴다 (산출물 0건). `e2e.enabled`가 전제다.
 
-> **원칙 준수**: 스캐폴드는 **`git config`를 실행하지 않는다.** `.githooks/pre-push` 파일만 생성/주입하고, 활성화는 Phase 4 안내로 사용자가 직접 수행한다 ("승인 없이 git 실행 금지" 절대 규칙).
+> **원칙 준수**: 스캐폴드는 **`git config`를 설정(write)하지 않는다** — `git config --get`으로 환경을 읽어 감지하는 것만 허용한다(읽기 전용·비실행). `.githooks/pre-push` 파일만 생성/주입하고, 활성화(`core.hooksPath` 설정)는 Phase 4 안내로 사용자가 직접 수행한다 ("승인 없이 git 실행 금지" 절대 규칙).
 
 #### 생성 파일
 
@@ -1050,16 +1050,20 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 |------|---------|--------|------|
 | `.githooks/pre-push` | managed | `templates/githooks/pre-push` | `{{VALIDATE_COMMAND}}` ← 프로필 scripts.validate |
 
+> 위 경로(`.githooks/pre-push`)는 **그린필드 분기의 타깃**이다. 기존 hooksPath/Husky 분기에서는 마커 블록을 기존 훅 경로(`{core.hooksPath}/pre-push` 또는 `.husky/pre-push`)에 주입하므로 타깃 경로가 달라진다 — manifest 등록·Phase 4 보고에는 실제 타깃 경로를 사용한다 (아래 공존성 분기 참조).
+
 #### 공존성 분기 (기존 git hook 환경 감지 — 텍스트 파싱만, 비실행 원칙)
 
-생성 전에 기존 환경을 감지하여 분기한다 (`git config --get core.hooksPath`, `.husky/pre-push`·`.git/hooks/pre-push` 존재 여부 — 파일 실행/평가 금지):
+생성 전에 기존 환경을 감지한다 (`git config --get core.hooksPath` 읽기, `.husky/` 디렉토리·`.git/hooks/pre-push` 존재 여부 — 파일 실행/평가 금지). **아래 표를 위에서 아래로 순서대로 평가하며, 첫 번째로 일치하는 환경에서 멈춘다 (우선순위 고정).**
 
-| 환경 | 동작 |
-|------|------|
-| **그린필드** (hooksPath 미설정 + `.husky/pre-push` 없음 + `.git/hooks/pre-push` 없음) | `.githooks/pre-push`를 템플릿으로 신규 생성(`chmod +x`). Phase 4가 `git config core.hooksPath .githooks` 안내 |
-| **기존 hooksPath/Husky** (`core.hooksPath` 설정됨 또는 `.husky/pre-push` 존재) | 그 경로의 `pre-push`에 **마커 블록(`harness-setup:e2e-prepush:start`~`end`)만 주입**(파일 끝에 append, 없으면 shebang+블록으로 생성). git config 변경 불필요 — 이미 활성 |
-| **`.git/hooks/pre-push` 존재** (기본 경로에 사용자 훅) | core.hooksPath로 전환하면 기본 훅이 무력화되므로 **자동 전환·생성하지 않는다** → 폴백 |
-| **비표준/파싱 불가/판단 불가** | **폴백**: 수정하지 않고 Phase 4에 권고 스니펫(마커 블록 + 활성화 명령)을 출력한다. 비활성 보고. 에러 아님 |
+| # | 환경 (조건) | 동작 |
+|---|------------|------|
+| 1 | **기존 hooksPath/Husky**: `core.hooksPath` 설정됨 **또는** `.husky/` 디렉토리 존재 | 대상 훅의 `pre-push`에 **마커 블록(`harness-setup:e2e-prepush:start`~`end`)만 주입**(파일 끝 append; 파일 없으면 shebang+블록으로 생성). git config 변경 불필요 — 이미 활성. **타깃 결정**: `core.hooksPath` 값이 있으면 그 경로 우선, 없으면 `.husky/`. 타깃 디렉토리가 없으면 생성한다 |
+| 2 | **기본 경로 사용자 훅**: hooksPath 미설정 **그리고** `.git/hooks/pre-push` 존재 | core.hooksPath로 전환하면 기본 훅이 무력화되므로 **자동 전환·생성하지 않는다** → 폴백 |
+| 3 | **그린필드**: 위 1·2 어디에도 해당 없음 | `.githooks/pre-push`를 템플릿으로 신규 생성(`chmod +x`). Phase 4가 `git config core.hooksPath .githooks` 안내 |
+| 폴백 | **비표준/파싱 불가/판단 불가**: 어느 분기든 안전한 주입 지점을 확신 못 함 | **수정하지 않고** Phase 4에 권고 스니펫(마커 블록 + 활성화 명령)을 출력한다. 비활성 보고. 에러 아님 |
+
+#### 규칙
 
 - **멱등**: 마커 `harness-setup:e2e-prepush:start`가 대상 파일에 이미 있으면 스킵.
 - 주입 시 **shebang은 복제하지 않는다** — 마커 블록(start~end)만 기존 훅 뒤에 붙인다(호스트 훅의 shebang/로직 보존). 신규 생성 시에만 템플릿 전체(shebang 포함)를 쓴다.
