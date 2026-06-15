@@ -177,7 +177,7 @@ ls -la .eslintrc* eslint.config.* .prettierrc* tsconfig.json tailwind.config.* v
 - tsconfig.json의 paths 설정 유무와 alias 형태
 - 테스트 프레임워크 종류
 - ESLint 설정 파일 존재와 형식 — flat config(`eslint.config.*`) vs legacy(`.eslintrc.*`). 감지되면 § 4.2의 ESLint 보조 규칙 질문(옵트인)을 트리거한다
-- 프론트엔드 신호(테스트 프레임워크가 playwright이거나, stack에 UI 프레임워크 — react/react-dom/vue/svelte/solid-js/@angular/core — 감지)가 있으면 § 4.2의 E2E 계층 질문(옵트인)을 트리거한다. 백엔드 전용(express 등)은 트리거하지 않는다
+- 프론트엔드 신호(테스트 프레임워크가 playwright이거나, stack에 UI 프레임워크 — react/react-dom/vue/svelte/solid-js/@angular/core — 감지)가 있으면 § 4.2의 E2E 계층 질문(옵트인)을 트리거한다. 백엔드 전용(express 등)은 트리거하지 않는다. 같은 프론트엔드 신호는 § 4.2의 브라우저 MCP 진단 질문(옵트인)도 트리거한다 — E2E 스펙 옵트인과 **독립**.
 
 #### 1.5 기존 하네스 흔적 확인
 ```bash
@@ -356,6 +356,10 @@ done
 - 동의하면 프로필에 `e2e` 필드(enabled, framework: "playwright", playwrightVersion)를 기록한다. playwrightVersion은 현재 stable 버전으로 채운다. 거부하거나 답이 없으면 필드를 생략한다 (E2E 모듈 미생성)
 - **E2E 옵트인이 확정되고** `git rev-parse --is-inside-work-tree`가 참이면(git 저장소), 이어서 묻는다: "push 전에 `@critical` E2E 스펙을 자동 검증하는 pre-push 게이트를 추가할까요? `validate` 통과 후 `@critical` 태그 스펙만 실행합니다. **`.githooks/pre-push` 파일만 생성하며, 활성화 명령(`git config core.hooksPath`)은 셋업 후 직접 실행하셔야 합니다 — 스킬은 git 설정을 변경하지 않습니다.** git hook은 push 시 임의 코드를 실행하므로 신뢰할 수 있는 저장소에서만 권장합니다."
 - 동의하면 `e2e.prePush: true`를 기록한다. E2E 미옵트인이거나 git 저장소가 아니거나 거부/무응답이면 `prePush`를 생략한다 (pre-push 산출물 미생성)
+
+**브라우저 MCP 진단 (Playwright MCP) 관련** (Step 1.4에서 프론트엔드 신호가 감지된 경우에만, 우선순위 5 — 옵트인, E2E 스펙 옵트인과 독립):
+- "에이전트가 재현 스펙이 없는 UI 증상을 **라이브 브라우저로 탐색·진단**하도록 브라우저 MCP(공식 `@playwright/mcp`)를 셋업할까요? 공유 설정 파일은 만들지 않고, debugger 에이전트 지침 + 개발자가 자기 로컬에 1회 등록하는 명령(`claude mcp add ... npx @playwright/mcp`)만 안내합니다. headless·격리·localhost 기본. E2E 스펙 작성과 무관하게 옵트인할 수 있습니다."
+- 동의하면 프로필에 `e2e.mcp` 객체(`enabled: true`, `version`)를 기록한다. `version`은 묻지 않고 현재 stable(`@playwright/mcp`)로 채운다(`playwrightVersion` 기본값 패턴과 동일). 거부/무응답이면 `mcp`를 생략한다. **`e2e.enabled` 없이 `e2e.mcp`만 기록 가능** — 이 경우 `e2e` 블록은 `mcp`만 가진다.
 
 **superpowers 연계 관련** (Step 1.6에서 superpowers가 감지된 경우에만, 우선순위 5 — 옵트인):
 - "superpowers 플러그인이 감지되었습니다 (v{버전}). AGENTS.md에 연계 가이드를 삽입할까요? 연계 대상(보완 영역만): brainstorming(설계 결정), systematic-debugging(일반 버그 추적), writing-plans(계획 문서 작성). 제외: TDD·코드 리뷰·검증·git 워크플로는 본 하네스 자체 워크플로를 사용합니다."
@@ -613,7 +617,8 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
     "enabled": true,
     "framework": "playwright",
     "playwrightVersion": "1.48.0",
-    "prePush": true
+    "prePush": true,
+    "mcp": { "enabled": true, "version": "0.0.76" }
   },
   "integrations": {
     "superpowers": {
@@ -658,7 +663,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 | `scripts.test` | Step 1.2 감지 | **비대화형(단발 실행) 명령이어야 한다** — watch 기본 러너(예: `vitest` 단독)면 `npm run test:run`으로 기록하고 scaffold가 `test:run` 키를 추가한다 (§ 4.4) |
 | `sharedDirs` (선택) | Step 2 스캔 + 문답 | **domain-based 전용** — 도메인 간 공유 모듈 디렉토리 목록. structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]` |
 | `eslintAssist` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 ESLint 수정 없음. `configFormat`은 `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*). 프리셋 비대상 (감지+문답 전용) |
-| `e2e` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 E2E 모듈 미생성. **프론트엔드 프로젝트에서만 제안** (testFramework.e2e가 playwright이거나 UI 프레임워크 감지). `playwrightVersion`은 핀 버전 — harness-scaffold § 5.5가 devDependencies에 직접 사용. 프리셋 비대상 (감지+문답 전용) prePush(선택 하위 필드, 생략=false)는 git 저장소 + 별도 옵트인 시에만 기록 — pre-push 게이트 생성 결정(harness-scaffold § 5.18). |
+| `e2e` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 E2E 모듈 미생성. **프론트엔드 프로젝트에서만 제안** (testFramework.e2e가 playwright이거나 UI 프레임워크 감지). `playwrightVersion`은 핀 버전 — harness-scaffold § 5.5가 devDependencies에 직접 사용. 프리셋 비대상 (감지+문답 전용) prePush(선택 하위 필드, 생략=false)는 git 저장소 + 별도 옵트인 시에만 기록 — pre-push 게이트 생성 결정(harness-scaffold § 5.18). `mcp`(선택 객체 `enabled`/`version`)는 브라우저 MCP 진단 배선 — `e2e.enabled`와 독립(스펙 없이 단독 가능), 신규 파일 없이 debugger.md `{{MCP_DEBUG_PROTOCOL}}` 치환만(harness-scaffold § 5.19). |
 | `integrations` (선택) | Step 1.6 감지 + Step 4 옵트인 | 생략 시 외부 연계 없음. `integrations.<name>` 구조 — 공통 필드 `enabled`/`source`(plugin·skill-dir·companion·cli)/`detectedVersion`(정보용)/`installPath`(실존 검증용) + 통합별 필드(superpowers의 `linkedSkills` 등). 현재 지원: `superpowers`(외부 플러그인), `multiModelConsult`(컴패니언+CLI). 규약: `references/integrations/_protocol.md`. 프리셋 비대상 |
 | `extras` | Step 4 문답에서 확인된 경우만 | 해당 키가 없으면 섹션 생략 |
 | `existingFiles` | Step 1.5 스캔 | 이미 존재하는 하네스 파일 목록 |
