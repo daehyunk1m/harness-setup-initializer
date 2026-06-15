@@ -219,14 +219,7 @@ MAJOR 범프 시 추가:
 | Session 17 | Plan 모드 TDD 브릿지 | MINOR | 새 기능 (session-routine.md에 섹션 추가) |
 | Session 17 | CLAUDE.md/coding-standards.md 금지 규칙 | MINOR | 새 기능 (에이전트 행동 제약 추가) |
 | Session 17 | 모델 선택 가이드 | — | Public API 아님 (참조 문서) |
+| 1.14.0 릴리스 | 옵트인 managed 파일 추가 (pre-push 훅 템플릿, `e2e.prePush`) | MINOR | 새 파일이지만 생략 기본(옵트인)이라 기존 하네스 호환 — 마이그레이션 불필요 |
 
 → Session 14-17을 하나의 릴리스로 묶으면: **MINOR** (가장 높은 수준)
 → 만약 1.0.0에서 시작했다면: **1.1.0**
-
----
-
-## 8. 버전 히스토리 (semver 도입 이후)
-
-| 버전 | 수준 | 주요 변경 |
-|------|------|----------|
-| **1.14.0** | MINOR | 이슈 #12 증분 2b — pre-push 게이트. 신규 managed 파일 `templates/githooks/pre-push`(옵트인 `e2e.prePush`). 신규 플레이스홀더 0개(`{{VALIDATE_COMMAND}}` 재사용 — 30 불변). 마이그레이션 불필요(옵트인·생략 기본, 1.11.0 선례). |
