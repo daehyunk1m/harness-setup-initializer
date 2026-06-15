@@ -141,6 +141,11 @@ fi
     "layerRules": true,
     "maxLines": 300
   },
+  "e2e": {
+    "enabled": true,
+    "framework": "playwright",
+    "playwrightVersion": "1.48.0"
+  },
   "integrations": {
     "superpowers": {
       "enabled": true,
@@ -173,6 +178,7 @@ fi
 - `scripts.test`는 **비대화형(단발 실행) 명령**이다 — watch 기본 러너(예: `vitest` 단독)는 분석 단계에서 `npm run test:run` 형태로 기록되며, § 5.5가 `test:run` 키를 package.json에 추가한다. `{{TEST_COMMAND}}`와 `{{VALIDATE_COMMAND}}`의 안전성이 이 규칙에 의존한다.
 - `sharedDirs`는 **domain-based 전용** 선택 필드다 — structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]`.
 - `integrations`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드, `integrations.<name>` 구조). 생략 시 외부 연계 산출물을 생성하지 않는다 (§ 5.16). 통합 메커니즘 규약: `references/integrations/_protocol.md`. 각 통합의 연계 내용은 `references/integrations/<name>-mapping.md`가 정본. superpowers의 `linkedSkills`는 매핑 정본의 연계/선택 목록에 있는 것만 렌더링된다.
+- `e2e`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 E2E 스캐폴드 산출물을 생성하지 않는다 (§ 5.17). 프론트엔드 프로젝트에서만 제안된다. `playwrightVersion`은 핀 버전이며 § 5.5가 package.json devDependencies에 직접 사용한다 (`scripts.lint:arch`와 동일하게 프로필에서 읽음 — 새 플레이스홀더 아님).
 - `autoCommit`은 사용자가 옵트인한 경우에만 존재한다 (선택 필드). 생략 시 `mode: "off"`로 간주하여 git-workflow.md의 `{{AUTO_COMMIT_MODE}}`를 `off`로 치환한다 (제안만 — 기존 동작).
 - `extras`의 각 항목은 문답에서 확인된 경우에만 존재한다. 없는 키는 해당 섹션 생략을 의미한다.
 - `eslintAssist`는 사용자가 문답에서 옵트인한 경우에만 존재한다 (선택 필드 — 프리셋 비대상, 감지+문답 전용). 생략 시 ESLint 설정을 수정하지 않는다 (§ 5.15). `configFormat`은 설정 파일 형식: `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*).
@@ -882,7 +888,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 
 #### 생성 규칙
 
-1. **profile 저장**: `.harness-profile.json`의 프로필 데이터 중 다음 필드를 `profile`에 저장한다 — 모든 플레이스홀더 재치환과 업그레이드 외과 수정의 원천이다: `architectureType`, `srcRoot`, `pathAlias`, `layers`, `naming`, `devServer`, `scripts`, `tdd`, `git`, `autoCommit`, `docFreshnessDays`, `eslintAssist`(있는 경우만), `sharedDirs`(있는 경우만), `integrations`(있는 경우만).
+1. **profile 저장**: `.harness-profile.json`의 프로필 데이터 중 다음 필드를 `profile`에 저장한다 — 모든 플레이스홀더 재치환과 업그레이드 외과 수정의 원천이다: `architectureType`, `srcRoot`, `pathAlias`, `layers`, `naming`, `devServer`, `scripts`, `tdd`, `git`, `autoCommit`, `docFreshnessDays`, `eslintAssist`(있는 경우만), `sharedDirs`(있는 경우만), `e2e`(있는 경우만), `integrations`(있는 경우만).
 2. **해시 계산**: 각 생성 파일의 내용을 SHA-256으로 해싱하여 `files.{path}.templateHash`에 기록한다.
    ```bash
    node -e "const c=require('crypto'),f=require('fs'); console.log('sha256:'+c.createHash('sha256').update(f.readFileSync(process.argv[1],'utf8')).digest('hex'))" {file}
@@ -1291,6 +1297,11 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 23 | `package.json` (scripts) | custom | 스킬은 특정 키만 추가, 사용자가 수정했을 수 있음 |
 | 24 | `scripts/harness-check.sh` | managed | 템플릿 기반 자가진단 스크립트 |
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
+| 26 | `playwright.config.ts` | managed | 템플릿 기반 E2E 설정 (e2e 옵트인 시에만) |
+| 27 | `e2e/tsconfig.json` | managed | 템플릿 기반 e2e 컴파일 경계 (e2e 옵트인 시에만) |
+| 28 | `e2e/fixtures/test.ts` | custom | per-test fixture, 사용자가 시드 훅 추가 (e2e 옵트인 시에만) |
+| 29 | `e2e/fixtures/seed.ts` | custom | 앱별 시드 로직, 사용자 소유 (e2e 옵트인 시에만) |
+| 30 | `e2e/specs/smoke.e2e.ts` | custom | 스타터 스모크, 사용자가 회귀 스펙 축적 (e2e 옵트인 시에만) |
 
 #### managed 파일의 사용자 수정 대응
 
