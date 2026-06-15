@@ -33,6 +33,15 @@
 - feature_list.json의 steps는 **L4 E2E 테스트와 1:1 매핑** 가능해야 한다 (한 step = 검증 가능한 한 동작)
 - 명령 값은 AGENTS.md의 "명령어" 섹션이 source of truth이다
 
+## E2E @critical 태그
+
+`@critical`은 E2E 스펙에 부여하는 태그로, **절대 깨지면 안 되는 핵심 사용자 흐름**(로그인, 결제, 데이터 손실 위험 동작 등)을 표시한다.
+
+- Playwright 테스트 제목/어노테이션에 `@critical`을 넣고 `--grep @critical`로 필터한다.
+- **pre-push 게이트 대상**이다 (강제 훅은 후속 증분 2b — 현재는 정의·작성 규율만 도입).
+- **남용 금지**: pre-push 속도·신뢰를 보존하기 위해 진짜 핵심 흐름에만 부여한다. 모든 테스트에 붙이면 게이트가 무의미해진다.
+- Reviewer가 `@critical` 과다 부여를 발견하면 자동 검사 승격 대기 큐(docs/TECH_DEBT.md)에 기록한다.
+
 ## 금지 사항
 
 - feature_list.json의 기능 설명을 수정/삭제하지 않는다
