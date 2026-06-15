@@ -177,6 +177,7 @@ ls -la .eslintrc* eslint.config.* .prettierrc* tsconfig.json tailwind.config.* v
 - tsconfig.json의 paths 설정 유무와 alias 형태
 - 테스트 프레임워크 종류
 - ESLint 설정 파일 존재와 형식 — flat config(`eslint.config.*`) vs legacy(`.eslintrc.*`). 감지되면 § 4.2의 ESLint 보조 규칙 질문(옵트인)을 트리거한다
+- 프론트엔드 신호(테스트 프레임워크가 playwright이거나, stack에 UI 프레임워크 — react/react-dom/vue/svelte/solid-js/@angular/core — 감지)가 있으면 § 4.2의 E2E 계층 질문(옵트인)을 트리거한다. 백엔드 전용(express 등)은 트리거하지 않는다
 
 #### 1.5 기존 하네스 흔적 확인
 ```bash
@@ -349,6 +350,10 @@ done
 **ESLint 보조 규칙 관련** (Step 1.4에서 ESLint 설정 파일이 감지된 경우에만, 우선순위 5 — 옵트인):
 - "ESLint에 보조 규칙을 추가할까요? 레이어 위반을 이중 차단하는 `no-restricted-imports`와 파일당 300줄 제한(`max-lines`)을 넣습니다. **기존 ESLint 설정 파일을 수정하게 됩니다.** (structural-test가 이미 주 검사를 담당하므로 선택 사항입니다)"
 - 동의하면 프로필에 `eslintAssist` 필드를 기록하고, 거부하거나 답이 없으면 필드를 생략한다 (ESLint 수정 없음)
+
+**E2E 계층 (Playwright) 관련** (Step 1.4에서 프론트엔드 신호가 감지된 경우에만, 우선순위 5 — 옵트인):
+- "브라우저 E2E 계층(Playwright)을 셋업할까요? jsdom 단위 테스트가 못 잡는 상호작용 회귀(편집모드 재오픈, 드래그 오발동, StrictMode 이중 effect 등)를 실제 브라우저로 자동화합니다. `playwright.config.ts`와 `e2e/` 디렉토리·스모크 스펙을 생성하고, package.json에 `test:e2e` 스크립트와 `@playwright/test` 의존성을 추가합니다 (**설치 명령은 안내만 — 자동 실행하지 않음**). `e2e/`는 src 밖이라 레이어 린터·Vitest와 충돌하지 않습니다."
+- 동의하면 프로필에 `e2e` 필드(enabled, framework: "playwright", playwrightVersion)를 기록한다. playwrightVersion은 현재 stable 버전으로 채운다. 거부하거나 답이 없으면 필드를 생략한다 (E2E 모듈 미생성)
 
 **superpowers 연계 관련** (Step 1.6에서 superpowers가 감지된 경우에만, 우선순위 5 — 옵트인):
 - "superpowers 플러그인이 감지되었습니다 (v{버전}). AGENTS.md에 연계 가이드를 삽입할까요? 연계 대상(보완 영역만): brainstorming(설계 결정), systematic-debugging(일반 버그 추적), writing-plans(계획 문서 작성). 제외: TDD·코드 리뷰·검증·git 워크플로는 본 하네스 자체 워크플로를 사용합니다."
@@ -602,6 +607,11 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
     "layerRules": true,
     "maxLines": 300
   },
+  "e2e": {
+    "enabled": true,
+    "framework": "playwright",
+    "playwrightVersion": "1.48.0"
+  },
   "integrations": {
     "superpowers": {
       "enabled": true,
@@ -645,6 +655,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 | `scripts.test` | Step 1.2 감지 | **비대화형(단발 실행) 명령이어야 한다** — watch 기본 러너(예: `vitest` 단독)면 `npm run test:run`으로 기록하고 scaffold가 `test:run` 키를 추가한다 (§ 4.4) |
 | `sharedDirs` (선택) | Step 2 스캔 + 문답 | **domain-based 전용** — 도메인 간 공유 모듈 디렉토리 목록. structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]` |
 | `eslintAssist` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 ESLint 수정 없음. `configFormat`은 `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*). 프리셋 비대상 (감지+문답 전용) |
+| `e2e` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 E2E 모듈 미생성. **프론트엔드 프로젝트에서만 제안** (testFramework.e2e가 playwright이거나 UI 프레임워크 감지). `playwrightVersion`은 핀 버전 — harness-scaffold § 5.5가 devDependencies에 직접 사용. 프리셋 비대상 (감지+문답 전용) |
 | `integrations` (선택) | Step 1.6 감지 + Step 4 옵트인 | 생략 시 외부 연계 없음. `integrations.<name>` 구조 — 공통 필드 `enabled`/`source`(plugin·skill-dir·companion·cli)/`detectedVersion`(정보용)/`installPath`(실존 검증용) + 통합별 필드(superpowers의 `linkedSkills` 등). 현재 지원: `superpowers`(외부 플러그인), `multiModelConsult`(컴패니언+CLI). 규약: `references/integrations/_protocol.md`. 프리셋 비대상 |
 | `extras` | Step 4 문답에서 확인된 경우만 | 해당 키가 없으면 섹션 생략 |
 | `existingFiles` | Step 1.5 스캔 | 이미 존재하는 하네스 파일 목록 |
@@ -784,7 +795,7 @@ presets/
 
 ### 파일 보호
 - 기존 소스 코드 (.ts, .tsx, .js, .jsx, .css 등)를 수정하지 않는다
-- 기존 설정 파일을 덮어쓰지 않는다 — 이 스킬은 어떤 파일도 수정하지 않는다. 옵트인된 수정은 `/harness-scaffold`가 수행한다 (package.json scripts: harness-scaffold/SKILL.md § 5.5, ESLint 보조 규칙: 옵트인 질문은 이 파일 § 4.2, 실행은 harness-scaffold/SKILL.md § 5.15)
+- 기존 설정 파일을 덮어쓰지 않는다 — 이 스킬은 어떤 파일도 수정하지 않는다. 옵트인된 수정은 `/harness-scaffold`가 수행한다 (package.json scripts·E2E devDependency: harness-scaffold/SKILL.md § 5.5, E2E 스캐폴드: § 5.17, ESLint 보조 규칙: 옵트인 질문은 이 파일 § 4.2, 실행은 harness-scaffold/SKILL.md § 5.15)
 - 이미 존재하는 하네스 파일을 덮어쓰지 않는다 (사용자 확인 없이)
 - node_modules, .git, 프레임워크 캐시 디렉토리(.next, dist 등)에 접근하지 않는다
 
