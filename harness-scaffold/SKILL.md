@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.11.0",
+  "version": "1.12.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -540,7 +540,7 @@ if (changed) {
 **E2E 머지 (e2e 옵트인 시에만)**:
 - `scripts.test:e2e` ← `playwright test` (키 부재 시에만 추가)
 - `devDependencies['@playwright/test']` ← `^{profile.e2e.playwrightVersion}` (키 부재 시에만 추가). **install은 실행하지 않는다** — Phase 4에서 `npm i && npx playwright install` 안내
-- `test:e2e`는 **validate에 포함하지 않는다** — 전체 E2E는 빠른 검증 루프와 분리한다 (브라우저·dev 서버 기동 비용). E2E를 TDD 빠른 루프에 편입하는 것은 증분 2(@critical + pre-push)에서 다룬다
+- `test:e2e`는 **validate에 포함하지 않는다** — 전체 E2E는 빠른 검증 루프와 분리한다 (브라우저·dev 서버 기동 비용). E2E는 별도 VERIFY(E2E) 단계(증분 2a — session-routine Phase 4.7, validate 비편입)에서 TDD 사이클에 배선되고, @critical 기반 pre-push 강제는 증분 2b에서 다룬다
 
 validate 명령 조합 규칙:
 - typecheck 명령이 package.json scripts에 있으면 포함, 없으면 생략

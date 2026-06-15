@@ -5,6 +5,26 @@
 
 ---
 
+## [1.12.0] — 2026-06-16 (E2E TDD 배선 — 이슈 #12 증분 2a)
+
+> 증분 1의 E2E 스캐폴드를 TDD 사이클에 배선. MINOR (managed 템플릿 편집 — 신규 파일·git config·플레이스홀더 0). 마이그레이션 불필요(§12.6 자동 감지 전파). 멀티모델 적대적 검증 반영.
+
+### 추가 (Added) — Session 37 (2026-06-16)
+- coding-standards.md: `@critical` 태그 정의 + 남용 거버넌스(reviewer 승격 큐)
+- architect.md: E2E 슬롯 완성 — step→시나리오 매핑 + @critical 후보 표시
+- test-engineer.md: E2E 작성 심화(`e2e/specs/{ID}-*.e2e.ts` + `@feature:{ID}` 태그 + fixtures/test.ts) + **E2E 판정 Output(created/skipped/not_applicable, 침묵=BLOCK)**
+- debugger.md: E2E 브라우저 재현 모드(trace/--headed) + 플레이키니스 환각 수정 금지
+- session-routine.md: VERIFY(E2E) Phase 4.7(해당 feature 스펙만 실행, FAIL→GREEN 시도 누적) + Agent Dispatch 행 + TDD STATE `e2e_status`/`e2e_spec_paths` 보존 + `e2e-fail` 마찰 이벤트
+- harness-checklist §4.2: E2E TDD 배선 구현 경로 명시
+
+### 수정 (Changed) — Session 37 (2026-06-16)
+- 결정: (a) E2E 작성 주체 = Test Engineer 확장(신규 에이전트 아님), (b) pre-push = 무의존 git hook(증분 2b로 분리)
+- 적대적 검증(codex/gemini): 게이트 신호를 LLM 기억 → 명시적 판정+TDD STATE+grep 키로 결정화, VERIFY 범위 축소(feature 스펙만), 증분 2 → 2a/2b 분할
+- harness-scaffold §5.5: E2E/validate 분리 설명의 "증분 2" 포워드 참조를 2a/2b로 정확화
+- 프로필 스키마 version 1.11.0 → 1.12.0(두 SKILL.md 동기), README 버전 표기 갱신
+
+---
+
 ## [1.11.0] — 2026-06-15 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 
 > 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업을 생성. MINOR (옵트인 추가 모듈 — 신규 플레이스홀더 0개, 기본 생략). 마이그레이션 불필요.
