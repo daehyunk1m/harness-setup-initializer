@@ -1,0 +1,23 @@
+#!/bin/sh
+# harness-setup:e2e-prepush:start — harness가 관리하는 블록. 직접 수정 시 업그레이드에서 보존되지 않을 수 있다.
+# pre-push 게이트: validate → @critical E2E (이슈 #12 증분 2b).
+# ⚠️ 보안: 이 훅은 push 시 임의 코드를 실행한다. 신뢰할 수 있는 저장소에서만 활성화하라.
+# monorepo: repo-root 기준 동작. 하위 패키지의 playwright는 미탐지될 수 있다(명시적 한계).
+ROOT=$(git rev-parse --show-toplevel) || exit 1
+cd "$ROOT" || exit 1
+
+# ① validate (빠른 정적+유닛, fail-fast) — 스캐폴드 시점 패키지매니저로 치환됨
+{{VALIDATE_COMMAND}} || exit 1
+
+# ② @critical E2E — 실제 설치된 playwright + 매칭 스펙이 있을 때만 (PM 비종속)
+PW="$ROOT/node_modules/.bin/playwright"
+if [ -x "$PW" ]; then
+  if "$PW" test --list --grep @critical 2>/dev/null | grep -q '\.e2e\.ts'; then
+    "$PW" test --grep @critical || exit 1
+  else
+    echo "ℹ️ @critical E2E 스펙 없음 — pre-push E2E 게이트 건너뜀"
+  fi
+else
+  echo "ℹ️ playwright 미설치 — pre-push E2E 게이트 건너뜀 (의존성 설치 후 활성)"
+fi
+# harness-setup:e2e-prepush:end
