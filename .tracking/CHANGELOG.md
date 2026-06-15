@@ -5,6 +5,18 @@
 
 ---
 
+## [1.13.1] — 2026-06-16 (E2E 판정 의미 명확화 — 파일럿 마찰)
+
+> haja TaskItem 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정을 도출 + `not_applicable`을 즉흥 분류한 데서 발견. PATCH (test-engineer.md 산문 명확화 — 신규 플레이스홀더·필드·파일 0). 마이그레이션 불필요.
+
+### 수정 (Changed) — Session 38 (2026-06-16)
+- test-engineer.md §3.5: E2E 판정 3개 status(`created`/`skipped`/`not_applicable`) 기준을 명시 — **`not_applicable`은 UI/사용자 표면이 전혀 없는 변경(순수 로직·유틸·타입)에만, UI 표면이 있는데 미작성이면 `skipped`**. 판정은 `@critical` 여부로 결정하지 않음을 명기(@critical은 증분 2b pre-push 전용 태그, verdict와 무관)
+
+### 알려진 한계 / 후속 — Session 38 (2026-06-16)
+- TODO-99: E2E 트리거가 "UI 상호작용" 중심이라 **시각/레이아웃 회귀**(jsdom 유닛이 검증 불가)의 사각이 있음 — E2E 스코프 확장 여부는 의견 개입 결정이라 데이터포인트 더 수집 후 판단(보류)
+
+---
+
 ## [1.13.0] — 2026-06-16 (E2E VERIFY 러너 정합 + 파일럿 마찰 수정)
 
 > haja 1.9→1.12 실전 업그레이드 파일럿에서 발견된 3건 반영. MINOR (신규 플레이스홀더 `{{E2E_COMMAND}}` — e2e 옵트인, 후방호환). 마이그레이션 불필요(전부 managed/custom 템플릿 편집 → §12.6 자동 전파).

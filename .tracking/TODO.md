@@ -766,3 +766,12 @@
 - **상태**: [x] 완료 (Session 38, 2026-06-16)
 - **내용**: 실전 업그레이드 파일럿이 노출한 3건 수정. **F3(high)**: VERIFY(E2E) Phase 4.7이 유닛 러너(`{{TEST_COMMAND}}`)로 실행 → `.e2e.ts` 미수집 거짓 PASS → 신규 `{{E2E_COMMAND}}`(29→30) 도입(session-routine + §5.11.3 치환표 + test-engineer 락스텝). **F1(medium)**: seed.ts `_payload`→`void payload`. **F2(low)**: harness-check ⑧ references 위임루트 short-circuit. MINOR, 골든 픽스처 6/6
 - **후속 후보(미착수)**: §6.11 검증에 "session-routine Phase 4.7이 e2e.enabled 시 test:e2e/playwright를 참조하는지" 명시 어서션 추가(현재는 잔여 `{{...}}` grep으로 간접 보장). harness-check ⑧ tsconfig 휴리스틱의 monorepo/solution-style 추가 형태 검토
+
+### TODO-98b: E2E 판정(verdict) 의미 명확화 (1.13.1)
+- **상태**: [x] 완료 (Session 38, 2026-06-16)
+- **내용**: haja TaskItem 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정 도출 + `not_applicable` 즉흥 분류 → test-engineer.md §3.5에 created/skipped/not_applicable 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + 판정은 @critical과 무관(2b pre-push 전용) 명기. PATCH
+
+### TODO-99: E2E 트리거 시각/레이아웃 회귀 사각 (보류 — 의견 개입 결정)
+- **상태**: [ ] 보류 (데이터포인트 더 수집 후 결정)
+- **배경**: test-engineer.md:20의 E2E 작성 트리거가 "feature가 **UI 상호작용**일 때"로 상호작용 중심. 텍스트 줄바꿈·정렬 같은 **시각/레이아웃 회귀**는 상호작용이 아니라 트리거 밖으로 빠지나, 정작 이런 회귀는 (a) E2E/브라우저만 검증 가능하고 (b) jsdom 유닛 테스트는 레이아웃 엔진이 없어 클래스 존재만 확인할 뿐 실제 오버플로/정렬을 검증 못 함 → 회귀 가드 공백
+- **검토안**: E2E 트리거를 "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장 + jsdom 한계 명시. 단 하네스 E2E 강도에 대한 의견 개입이고 현재 1개 데이터포인트 → 같은 패턴 반복 시(핵심원칙 #5: 반복=승격) 착수. haja seed를 localBullets 포맷에 연결한 "긴 제목 넘침 없음" 정식 E2E 스펙이 첫 후보

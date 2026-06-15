@@ -323,6 +323,9 @@
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
 
+### 1.13.1 (E2E 판정 의미 명확화 — haja TaskItem 도그푸딩)
+- **1.13.1** (2026-06-16) — haja TaskItem 레이아웃 수정 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정을 도출하고 `not_applicable`을 즉흥 분류 → test-engineer.md §3.5에 3개 status 기준 명시: `not_applicable`은 UI/사용자 표면이 전혀 없을 때만(UI 표면 있는데 미작성=`skipped`), 판정은 `@critical`과 무관(@critical은 2b pre-push 전용). PATCH(산문 명확화, 플레이스홀더·필드 0). **보류(TODO-99)**: E2E 트리거가 "UI 상호작용" 중심이라 시각/레이아웃 회귀(jsdom 유닛 검증 불가)의 사각 존재 — 스코프 확장은 의견 개입이라 데이터포인트 더 수집 후 결정.
+
 ### 1.13.0 (E2E VERIFY 러너 정합 + 파일럿 마찰 — haja 업그레이드 검증)
 - **1.13.0** (2026-06-16) — haja 1.9→1.12 실전 업그레이드 파일럿에서 발견한 3건 반영. **F3(high)**: VERIFY(E2E) Phase 4.7이 유닛 러너(`{{TEST_COMMAND}}`, 예 `vitest run`)로 E2E를 실행해 `.e2e.ts` 0개 수집 후 거짓 PASS로 게이트 무력화 → 신규 `{{E2E_COMMAND}}`(29→30, `e2e.enabled`+`test:e2e`에서 도출, 새 프로필 필드 없음)로 교체 + test-engineer 교차참조 정합. **F1(medium)**: seed.ts `_payload` 미사용이 `no-unused-vars` 위반(argsIgnorePattern 미설정 프로젝트) → `void payload`. **F2(low)**: harness-check ⑧이 `files:[]`+`references` 위임 루트를 오경고 → short-circuit. MINOR(신규 플레이스홀더, 후방호환), 마이그레이션 불필요. 골든 픽스처 6/6. 교훈: harness:check(정적)는 런타임 Phase 4.7을 안 거쳐 F3를 못 잡음 — 실전 기능 주행이 검증에 필수.
 

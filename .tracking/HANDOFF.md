@@ -150,8 +150,9 @@
   - **F1(medium)**: seed.ts `_payload` 미사용 → `void payload`(no-unused-vars 설정 무관 통과). **F2(low)**: harness-check ⑧ `files:[]`+`references` 위임 루트 오경고 → short-circuit
   - 교훈: harness:check(정적)는 런타임 Phase 4.7 미경유로 F3 미검출 — 실전 기능 주행이 검증에 필수. MINOR, 마이그레이션 불필요, 골든 픽스처 6/6
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
+  - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.13.0** (E2E VERIFY 러너 정합 + 파일럿 마찰 — haja 업그레이드 검증)
+**현재 버전: 1.13.1** (E2E 판정 의미 명확화 — haja TaskItem 도그푸딩)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
