@@ -1234,6 +1234,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 피드백 분석 → "하네스 피드백 분석해줘" (상세: CLAUDE.md 하네스 이슈 보고 — 컴패니언, 글로벌 설치 전제)
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
+- 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/, playwright.config.ts) — e2e 옵트인 시에만 표시
 > 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
 ```
 
@@ -1246,6 +1247,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **TDD 사이클 줄**: 항상 렌더하되 파이프라인 단계를 열거하지 않고 session-routine.md를 가리킨다. Security Reviewer는 7개 에이전트의 하나로 **항상 생성**되지만 `tdd.securityCategories`에 매칭되는 feature가 있을 때만 호출되므로(session-routine Phase 4.5 SECURITY 호출 조건 — 빈 배열이면 매칭 feature가 없어 실호출되지 않음), 미호출 가능한 단계를 상시 능력으로 광고하지 않는다.
 - **하네스 정리 · 피드백 분석 줄**: 컴패니언 스킬(install.sh로 `~/.claude/skills/`에 글로벌 설치)이므로 "글로벌 설치 전제"로 제시한다 — 글로벌 미설치 환경에서는 호출되지 않을 수 있다.
 - **검증 게이트 · 자가진단 · 품질·부채 추적 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
+- **브라우저 E2E 줄**: `e2e.enabled === true`이고 § 5.17 산출물(`playwright.config.ts`)이 생성된 경우에만 렌더 — 산출물 생성을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 자체를 생략한다 (미와이어 능력 광고 불가).
 
 언어는 보고 전체와 동일하게 § 8 "문서 품질"의 언어 규칙(한국어 기본, 사용자 요청 시 예외)을 따른다 — 한국어를 하드코딩하지 않는다. 각 줄은 정본(session-routine.md / 통합 매핑 / 컴패니언 SKILL.md)을 가리킬 뿐 능력 사실을 복제하지 않는다 — **새 손-관리 능력 목록이 아니다.**
 
