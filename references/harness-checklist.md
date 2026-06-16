@@ -30,10 +30,11 @@
 - [ ] `ARCHITECTURE.md` — 구조 원칙 문서
 - [ ] `claude-progress.txt` — 세션 간 진행 기록
 - [ ] `feature_list.json` — 기능 목록 + passes 상태
+- [ ] `.harness-friction.jsonl` — 마찰 자동 기록 싱크 (append-only JSONL, manifest category `data`)
 - [ ] `init.sh` — 환경 초기화 스크립트
 - [ ] `docs/` — 하위 문서 디렉토리 (exec-plans, QUALITY_SCORE, TECH_DEBT)
 
-**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json init.sh docs/`
+**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl init.sh docs/`
 
 ### 1.2 AGENTS.md 품질 규칙
 
