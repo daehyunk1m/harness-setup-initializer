@@ -22,7 +22,12 @@
 
 D2가 README를 managed로 택한 이유는 "§12.6 자동 감지 재렌더 → 업그레이드 시 최신 유지"다. 그런데 §12.6 자동 감지는 `manifest.files[]`의 managed 항목을 **§12.6.1 파일-템플릿 매핑 테이블에서 소스 템플릿을 찾아** 재렌더한다(SKILL.md:1128-1150, 1454). 매핑에 없는 managed 파일(`docs/` 하위 등)은 자동 감지에서 **제외**되어 마이그레이션으로만 관리된다(SKILL.md:1150).
 
-따라서 `e2e/README.md`를 §12.6.1에 등록하지 않으면 "managed인데 unmapped" 상태가 되어 **D2의 최신-유지 약속이 깨진다**(가이드 갱신이 기존 e2e 하네스로 전파 안 됨). → **§12.6.1에 `e2e/README.md | templates/e2e/README.md` 1행 추가**(item A의 e2e config 2행과 동일 맥락의 3번째 e2e managed 파일).
+따라서 `e2e/README.md`를 §12.6.1에 등록하지 않으면 "managed인데 unmapped" 상태가 되어 README가 manifest에 있는 하네스(신규 셋업)에서도 **§12.6 자동 감지(갱신 전파)를 못 받는다**. → **§12.6.1에 `e2e/README.md | templates/e2e/README.md` 1행 추가**(item A의 e2e config 2행과 동일 맥락의 3번째 e2e managed 파일).
+
+**전파 경계 (정직)**: §12.6 자동 감지는 `manifest.files[]`에 **이미 기록된** managed 파일의 `templateHash`를 재렌더 해시와 비교한다(SKILL.md:1454) — 즉 **업데이트 전용, 신규 파일 생성 불가**(신규 파일은 `[new]` 마이그레이션 영역, harness-scaffold/SKILL.md:1575 "초기 셋업과 동일하게 생성"). 따라서:
+- **신규 셋업 하네스**: 셋업 시 README가 생성·manifest 기록 → 이후 업그레이드에서 §12.6이 최신 유지. ✅ D2 freshness 약속 성립.
+- **기존(1.11.0~1.16.0) e2e 옵트인 하네스**: manifest에 README 없음 → §12.6이 **소급 생성하지 않음**. `[new]` 마이그레이션을 추가하면 비-e2e 하네스 오주입/프로필-게이트 복잡성이 생겨 비침습·옵트인 원칙과 충돌하므로 **추가하지 않는다**(무마이그레이션 트레이드오프 — 동일 내용이 그들이 이미 가진 test-engineer.md·coding-standards.md에 있음). harness-scaffold §10.3 1.17.0 노트에 파일별로 명시.
+- 반면 **playwright.config.ts·e2e/tsconfig.json**은 기존 e2e 하네스 manifest에 이미 있으므로, §12.6.1 편입으로 다음 업그레이드부터 자동 감지를 **새로 받는다**(업데이트 경로 — 정상).
 
 - **결정론 안전**: README는 플레이스홀더 0인 순수 정적 템플릿 → 재렌더 항상 byte-identical → expectedHash 안정(e2e/tsconfig.json과 동급).
 - **사용자 커스터마이즈 시**: 4-상태 매트릭스가 "템플릿 변경 × 사용자 수정 → 사용자 선택"으로 안전 처리(managed 파일 표준 동작). README를 managed로 택한 D2의 트레이드오프를 그대로 수용.
