@@ -1,6 +1,6 @@
 # harness-setup
 
-> 현재 버전: **1.12.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
+> 현재 버전: **1.20.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
 
 Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 자동으로 셋업하는 Claude Code 스킬.
 
@@ -21,8 +21,11 @@ Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 
 - `agents/*.md`로 TDD subagent 파이프라인을 구동
 - feature_list.json으로 진행 상태를 추적
 - structural-test.ts로 아키텍처 위반을 자동 감지 (exit 1)
+- (프론트엔드 옵트인) Playwright `*.e2e.ts`로 UI·시각/레이아웃 회귀를 실제 브라우저에서 검증
 - init.sh로 개발 환경을 한 번에 초기화
-- `npm run harness:check`로 하네스 상태를 자가진단 ("표준 하네스 가동" 판정 — 구조 설치·실행 가능성을 확인하며, 문서·규칙의 의미 정확성은 별도 검토 권장)
+- `npm run harness:check`로 하네스 상태를 자가진단 ("표준 하네스 가동" 판정 — 구조 설치·실행 가능성을 확인하며, 문서·규칙의 의미 정확성은 별도 검토 권장; `node_modules` 부재 시 "의존성 미설치 (구조 정상)"으로 구분)
+- `.harness-friction.jsonl`에 작업 마찰이 자동 기록되어 harness-feedback이 개선 Issue로 환류
+- 인프라/설정 작업은 인프라/설정 트랙으로 유닛 TDD 대신 통합 검증(빌드+실동작)을 적용
 
 그리고 운영 단계에서는 **컴패니언 스킬**이 정리·피드백·교차 자문을 돕는다 (아래 [컴패니언 스킬](#컴패니언-스킬) 참조).
 
@@ -35,7 +38,7 @@ Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 
 | 스킬 | 역할 | 산출물 |
 |------|------|--------|
 | **`/harness-setup`** | Phase 1: 프로젝트 스캔 + Q&A + 프로필 저장 | `.harness-profile.json` |
-| **`/harness-scaffold`** | Phase 2~4: 파일 생성 + 검증 + 보고 | 19개 파일 + `.harness-manifest.json` |
+| **`/harness-scaffold`** | Phase 2~4: 파일 생성 + 검증 + 보고 | 19개 파일(기본) + `.harness-friction.jsonl` + `.harness-manifest.json` (옵트인 시 E2E·pre-push 추가) |
 
 ### 자동 체이닝
 
@@ -145,20 +148,21 @@ stateDiagram-v2
 | | `agents/simplifier.md` | Refactor: 단순화 |
 | | `agents/debugger.md` | On-demand: 디버깅 |
 | | `agents/security-reviewer.md` | Post-Green: 보안 리뷰 |
-| **추적** | `feature_list.json` | 기능 목록 + 검증 상태 추적 (steps ↔ E2E 1:1) |
+| **추적** | `feature_list.json` | 기능 목록 + 검증 상태 추적 (steps ↔ E2E 1:1, `category: infra/config` 분류) |
 | | `claude-progress.txt` | 세션별 작업 기록 + TDD STATE |
 | **스크립트** | `init.sh` | 의존성 설치 + 개발 서버 실행 + 준비 확인 |
 | | `scripts/structural-test.ts` | 아키텍처 의존성 규칙 자동 검증 (위반 시 exit 1) |
 | | `scripts/doc-freshness.ts` | 문서 최신성 검사 |
-| | `scripts/harness-check.sh` | 하네스 자가진단 8항목 (⑧ E2E 스캐폴드는 playwright.config.ts 존재 시에만 검사, `npm run harness:check`) |
+| | `scripts/harness-check.sh` | 하네스 자가진단 (구조 ①②③·품질 ④⑤⑥·경고 ⑦⑧⑨; ⑧ E2E·⑨ pre-push는 옵트인 시에만, `node_modules` 부재 시 ④⑤⑥ "의존성 미설치로 보류"·exit 0, `npm run harness:check`) |
 | **품질** | `docs/QUALITY_SCORE.md` | 6개 카테고리 품질 점수표 |
 | | `docs/TECH_DEBT.md` | 기술 부채 추적 (4단계 심각도) + 자동 검사 승격 대기 큐 |
-| | `docs/HARNESS_FRICTION.md` | 마찰 로그 (피드백 수집) |
+| | `docs/HARNESS_FRICTION.md` | 마찰 이벤트 유형·심각도 정적 참조표 + 이슈 보고 안내 (실제 이벤트는 `.harness-friction.jsonl` 기록) |
+| | `.harness-friction.jsonl` | 마찰 이벤트 자동 기록 싱크 — append-only JSONL, 빈 파일로 생성 (always-on, harness-feedback이 파싱) |
 | **기타** | `docs/product-specs/` 외 3개 | 제품 요구사항·설계 결정·실행 계획·참고 자료 디렉토리 |
 | | `package.json` | `lint:arch`, `validate`, `doc:check`, `harness:check` 스크립트 추가 |
 | | `.harness-manifest.json` | 버전 추적 매니페스트 |
 
-> **옵트인 산출물** (문답에서 동의한 경우만): AGENTS.md "보조 스킬" 섹션(외부 통합 연계), ESLint 보조 규칙(설정 파일에 마커 블록), `test:run` 스크립트(watch 러너 가드), 자동 커밋 정책. 동의하지 않으면 어떤 흔적도 생성되지 않는다.
+> **옵트인 산출물** (문답에서 동의한 경우만): E2E 스캐폴드(`playwright.config.ts` + `e2e/` + `test:e2e`, 프론트엔드), pre-push `@critical` 게이트(`.githooks/pre-push`), 브라우저 MCP 진단 배선(`debugger.md`), AGENTS.md "보조 스킬" 섹션(외부 통합 연계), ESLint 보조 규칙(설정 파일에 마커 블록), `test:run` 스크립트(watch 러너 가드), 자동 커밋 정책. 동의하지 않으면 어떤 흔적도 생성되지 않는다. (`.harness-friction.jsonl` 마찰 기록은 옵트인이 아니라 always-on이다.)
 
 ---
 
@@ -170,6 +174,23 @@ stateDiagram-v2
 | **FSD** (`fsd`) | app/, pages/, widgets/, features/, entities/, shared/ | 레이어 + cross-slice + public API |
 | **도메인 기반** (`domain-based`) | 도메인명 폴더 아래 components, hooks 등 | 도메인 간 직접 import 금지 + 공유→도메인 역방향 금지 |
 | **자유 구조** (`custom`) | 위 패턴에 해당 안 됨 | 프로필에서 기계 검사 가능한 규칙만 (동적 생성) |
+
+---
+
+## E2E 검증 (프론트엔드 옵트인)
+
+프론트엔드 프로젝트에 한해 Playwright 기반 E2E 계층을 셋업할 수 있다. 전부 **옵트인**이며, 프로필에 `e2e` 블록이 없으면 어떤 파일도 생성하지 않는다. 프론트엔드 내장 프리셋(react-next·react-router-fsd·react-vite)은 `e2e: { enabled: true }`를 권장 기본으로 제시하되, 문답에서 거부/무응답하면 생략한다(옵트인 계약 불변). 백엔드(express-api)는 대상이 아니다.
+
+| 항목 | 내용 |
+|------|------|
+| **생성 파일** | `playwright.config.ts`·`e2e/tsconfig.json`·`e2e/README.md`(managed) + `e2e/fixtures/*`·`e2e/specs/smoke.e2e.ts`(custom 스타터). `package.json`에 `test:e2e` + `@playwright/test` add-only 머지 (설치는 안내만, 실행 안 함) |
+| **충돌 회피** | `*.e2e.ts` 네이밍으로 Vitest 글롭과 분리. `vitest.config`·root `tsconfig`는 수정하지 않음 |
+| **TDD 배선** | VERIFY(E2E) Phase 4.7 — 해당 feature 스펙(`--grep @feature:{id}`)을 E2E 러너로 실행해 통과해야 완료. Test Engineer가 `created`/`skipped`/`not_applicable` 판정(침묵=BLOCK) |
+| **작성 트리거** | UI 상호작용 **또는** 시각/레이아웃 회귀 위험(스크롤·오버플로·정렬·반응형). jsdom 유닛은 이 회귀를 못 잡으므로 L4 E2E 전용 |
+| **pre-push 게이트** (옵트인 `e2e.prePush`) | `.githooks/pre-push`가 `validate` + `@critical` E2E를 차단 검증. `git config`는 실행하지 않음 — 활성화는 수동(`git config core.hooksPath .githooks`) |
+| **MCP 진단** (옵트인 `e2e.mcp`, 독립) | debugger가 스펙 없는 UI 증상을 라이브 브라우저로 탐색. 공유 `.mcp.json` 비커밋 — 개발자 로컬 `claude mcp add` 등록 |
+
+> **구조만 보장**한다 — 파일·스크립트·태그는 생성하되, 스위트의 통과(green)는 앱별 부팅(env·라우트)에 의존하므로 실행하지 않는다.
 
 ---
 
@@ -209,7 +230,7 @@ stateDiagram-v2
 | 스킬 | 트리거 | 역할 |
 |------|--------|------|
 | **harness-cleanup** | "하네스 정리" | 운영 사이클(주간/격주/월간) 실행 — 문서 부식·QUALITY_SCORE 재측정·TECH_DEBT·승격 큐·passes 재검증. 소스 코드는 수정하지 않고 TDD 사이클에 위임 |
-| **harness-feedback** | "하네스 피드백 분석해줘" | HARNESS_FRICTION.md 마찰 로그를 분석해 반복 패턴을 식별하고 이 리포에 개선 Issue 생성 |
+| **harness-feedback** | "하네스 피드백 분석해줘" | `.harness-friction.jsonl` 마찰 이벤트(JSONL)를 분석해 반복 패턴을 식별하고 이 리포에 개선 Issue 생성 |
 | **multi-model-consult** | "멀티모델 자문" / "교차 자문" | Codex·Gemini CLI에 관점을 분담해 자문하고 Claude가 합성(합의/상충/최종방향/액션). 읽기 전용, 하네스 비의존 범용 도구 |
 
 ---
@@ -280,6 +301,7 @@ harness-setup/
 ├── templates/
 │   ├── agents/                       # TDD subagent 정의 템플릿 (7개)
 │   ├── rules/                        # .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow)
+│   ├── e2e/                          # E2E 스캐폴드 템플릿 (playwright.config·tsconfig·README, 프론트엔드 옵트인)
 │   ├── structural-test-layer.ts      # 레이어 기반 아키텍처 검증 템플릿
 │   ├── structural-test-fsd.ts        # FSD 아키텍처 검증 템플릿
 │   ├── structural-test-domain.ts     # 도메인 기반 아키텍처 검증 템플릿
@@ -347,6 +369,15 @@ harness-setup/
 
 ### 추측 설계 금지
 실제 마찰/데이터가 없는 기능은 만들지 않는다. 외부 통합 규약은 두 선례(superpowers·multi-model-consult)가 확보된 뒤에야 일반화했고, 해시 재현성 같은 개선은 방향만 확정하고 실제 오탐이 누적될 때 구현하기로 둔다.
+
+### E2E 옵트인 모듈 (1.11.0~1.17.0)
+E2E는 항상 옵트인이며, 충돌을 피하기 위해 스펙을 `*.e2e.ts`로 네이밍하고(Vitest 글롭 비충돌) root `tsconfig`는 절대 건드리지 않는다. 구조(파일·스크립트·태그)만 보장하고 스위트 통과는 앱 부팅에 의존하므로 실행하지 않는다. TDD 사이클에는 VERIFY(E2E) Phase 4.7 + `@critical` pre-push로 배선했고, MCP 진단은 공유 `.mcp.json`을 커밋하지 않고 개발자 로컬 등록으로 둔다(nagware·머지 회피).
+
+### 마찰 자동 기록 — JSONL 싱크 (1.18.0)
+마찰 이벤트를 `.harness-friction.jsonl`에 한 줄 JSON으로 append한다. 이전의 마크다운 테이블 행 삽입은 무거워 부하 시 누락됐다(한 달 실사용에서 헤더만 남고 0건). 프로필 필드 없이 always-on이며, `HARNESS_FRICTION.md`는 정적 참조 문서로 격하했다. Stop hook은 발화 비보장·`settings.json` 의존성 때문에 채택하지 않고(measure-first) 저비용 `echo` append를 택했다.
+
+### 인프라/설정 트랙 (1.20.0)
+설정·배선 작업(feature_list `category: infra`/`config`)은 억지 유닛 테스트 대신 통합 검증(빌드+실동작)으로 검증한다. 남용 방지를 위해 사전 선언(재분류 금지)·부정 테스트("의미 있는 실패 테스트를 쓸 수 있으면 인프라 아님")·범위 한정을 두고, 모호하면 TDD로 돌아간다. Reviewer가 필수로 분류 타당성을 독립 감사하며, 보안 표면(.env·auth·provider 배선 등)에 닿으면 category가 infra라도 Security Reviewer가 필수다(이슈 #6 해소). 진입은 `claude-progress.txt` + `.harness-friction.jsonl`에 이중 기록한다.
 
 ---
 

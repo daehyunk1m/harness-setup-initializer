@@ -7,6 +7,9 @@
 
 ## [미출시]
 
+### 수정 (Changed)
+- README.md: 버전 1.12.0→1.20.0 최신화(8개 마이너 드리프트 해소). `## E2E 검증(프론트엔드 옵트인)` 섹션 신설(생성 파일·충돌 회피·TDD 배선·작성 트리거·pre-push·MCP), 설계 결정에 E2E 옵트인 모듈(1.11.0~1.17.0)·마찰 자동 기록 JSONL 싱크(1.18.0)·인프라/설정 트랙(1.20.0) 서브섹션 추가. 생성 파일 표 정정: harness-check 설명(8항목→구조/품질/경고+의존성 미설치 보류)·HARNESS_FRICTION.md 역할(정적 참조 문서로 격하)·`.harness-friction.jsonl` 행 신설·feature_list category·옵트인 산출물 목록(E2E/pre-push/MCP). harness-feedback 입력원 정정(.harness-friction.jsonl), 디렉토리 트리에 templates/e2e/ 추가. "19개 파일" 기본 카운트는 정본 사양과 일치하므로 유지(마찰 JSONL=data 카테고리, E2E=옵트인으로 베이스라인 제외).
+
 ### 검증 (Verified)
 - **TODO-53 신규 셋업 경로 실전 테스트 완료** (Session 43): `_sandbox/vite-spa`(react-vite) 픽스처 신규 생성 경로 **2회 실주행(Opus급 + Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" 9/9**. 결정적 게이트(표준 판정·structural-test 0위반·Q2 enforced·AGENTS 100줄 예산·JSON 유효성)는 모델 독립 동일, 모델 판단 출력(feature_list 5↔3·AGENTS.md 69↔59줄)만 가드 내 변동 → Session 34 "구조 보장/의미 비보장" 설계 실증. 라이브 첫 검증: 셋업 의미 게이트(semanticApprovalAt)·eslintAssist flat surgical insertion(§5.15)·E2E pre-seed. 사전 적대적 검증(7-에이전트 워크플로)으로 픽스처 소스 수정 불필요 확정. 스킬 사양 무변경 — 버전 유지 1.17.0.
 
