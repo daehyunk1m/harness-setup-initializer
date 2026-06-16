@@ -42,6 +42,19 @@
 5. TDD STATE 블록과 git 이력의 정합성 확인
 ```
 
+### Step 1.5: 세션 ID 발급
+
+세션마다 1회 고유 ID를 발급하고 claude-progress.txt에 기록한다. 이 세션의 모든 마찰 줄(§ 마찰 로그)이 동일 값을 참조하므로, `harness-feedback`이 같은 날 복수 세션을 구분해 그룹핑·패턴 분석할 수 있다.
+
+```
+1. claude-progress.txt에 이미 "SESSION_ID: "로 시작하는 줄이 있으면(재개 세션) 그 값을 그대로 사용한다
+2. 없으면 ID를 1회 생성한다 — 형식: {ISO 시각}-{4자 난수}
+   - 시각은 UTC, 콜론은 하이픈으로 치환 (파일명·줄 안전): 2026-06-16T09-12-03Z
+   - 난수는 소문자 영숫자 4자: a3f9
+   - 예: 2026-06-16T09-12-03Z-a3f9
+3. claude-progress.txt에 "SESSION_ID: <값>" 한 줄을 기록한다
+```
+
 ### Step 2: 작업 선택
 ```
 1. feature_list.json에서 passes: false인 항목을 확인한다
@@ -126,11 +139,11 @@ while attempt <= {{MAX_IMPLEMENTER_ATTEMPTS}}:
     Implementer 호출 (이전 에러 컨텍스트 포함)
     {{VALIDATE_COMMAND}} 실행
     if PASS → Review로 진행
-    if attempt >= 2 → 마찰 로그 기록 (implementer-retry)
+    if attempt >= 2 → 마찰 이벤트 기록(implementer-retry) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
     attempt += 1
 
 if 실패:
-    마찰 로그 기록 (debugger-escalation)
+    마찰 이벤트 기록(debugger-escalation) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
     Debugger 에스컬레이션
 ```
 
@@ -144,7 +157,7 @@ while debugger_attempt <= {{MAX_DEBUGGER_ATTEMPTS}}:
     debugger_attempt += 1
 
 if 실패:
-    마찰 로그 기록 (user-escalation)
+    마찰 이벤트 기록(user-escalation) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
     사용자에게 진단 보고서 제시
     TDD STATE를 claude-progress.txt에 저장
     세션 중단
@@ -159,7 +172,7 @@ if 실패:
 **분기**:
 - PASS → Security 체크 (해당 시) → Complete
 - NEEDS_REFACTOR → Phase 5 (Refactor)
-- NEEDS_FIX → 마찰 로그 기록 (review-fix) → Phase 3 (Green) 재진입 (시도 횟수 누적)
+- NEEDS_FIX → 마찰 이벤트 기록(review-fix) — § 마찰 로그 참조(.harness-friction.jsonl에 append) → Phase 3 (Green) 재진입 (시도 횟수 누적)
 
 **자동 검사 승격 처리**: Reviewer Output에 "자동 검사 승격 후보"가 있으면 (Reviewer는 read-only이므로 기록은 오케스트레이터가 한다):
 1. `docs/TECH_DEBT.md`의 "자동 검사 승격 대기 큐"에서 같은 규칙의 기존 행을 찾는다
@@ -199,7 +212,7 @@ feature.category가 {{SECURITY_CATEGORIES}} 중 하나일 때만 실행.
 
 **분기**:
 - PASS → 기능 완료 처리.
-- FAIL(로직) → 마찰 로그 기록(`e2e-fail`) → Phase 3 (Green) 재진입, **시도 횟수 누적**(`{{MAX_IMPLEMENTER_ATTEMPTS}}` 한도 — NEEDS_FIX와 동일).
+- FAIL(로직) → 마찰 이벤트 기록(`e2e-fail`) — § 마찰 로그 참조(.harness-friction.jsonl에 append) → Phase 3 (Green) 재진입, **시도 횟수 누적**(`{{MAX_IMPLEMENTER_ATTEMPTS}}` 한도 — NEEDS_FIX와 동일).
 - FAIL(플레이키니스 의심) → Debugger 브라우저 재현(§ debugger.md 0번)으로 로직 실패 vs 플레이키니스 판별. 플레이키니스 확인 시 코드 환각 수정 금지 → 보고 후 Debugger Circuit Breaker(2회 → 사용자 에스컬레이션).
 
 무한 루프는 기존 시도 한도 + Debugger Circuit Breaker가 차단한다 — VERIFY(E2E)는 독립 무한 재시도를 도입하지 않는다.
@@ -214,7 +227,7 @@ Reviewer가 NEEDS_REFACTOR를 반환했을 때만 실행.
 
 **검증**: `{{VALIDATE_COMMAND}}` 실행
 - PASS → Complete
-- FAIL (2회) → 마찰 로그 기록 (refactor-rollback) → 리팩터링 전부 되돌리고, un-refactored 코드로 Complete
+- FAIL (2회) → 마찰 이벤트 기록(refactor-rollback) — § 마찰 로그 참조(.harness-friction.jsonl에 append) → 리팩터링 전부 되돌리고, un-refactored 코드로 Complete
 
 ---
 
@@ -250,7 +263,8 @@ TDD 사이클이 성공적으로 완료되면:
 3. claude-progress.txt 세션 요약 작성
 4. 진행 중인 TDD 사이클이 있으면:
    - TDD STATE 블록 저장
-   - 마찰 로그 기록 (session-incomplete)
+   - 마찰 이벤트 기록(session-incomplete) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
+     (사이클 미완료로 종료될 때의 안전망 기록 — 종료 시점에 반드시 1줄 append)
 5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 (§ 자동 커밋 정책 모드: off=제안 / confirm=승인 후 / auto=자동):
    - TDD 사이클 완료: feat 커밋
    - 사이클 미완료: checkpoint 커밋 (chore({scope}): checkpoint — {상태})
@@ -283,12 +297,28 @@ e2e_spec_paths: {작성한 .e2e.ts 경로 목록 또는 없음}
 
 ## 마찰 로그
 
-TDD 사이클 중 마찰 이벤트가 발생하면 `docs/HARNESS_FRICTION.md`의 로그 테이블에 행을 추가한다.
+TDD 사이클 중 마찰 이벤트가 발생하면 `.harness-friction.jsonl`(프로젝트 루트, append-only)에 **소독된 JSON 한 줄을 append**한다. 무거운 마크다운 테이블 편집(읽기→탐색→삽입→재작성) 대신 단일 append이므로 부하 상황에서도 건너뛰지 않는다. 이렇게 쌓인 줄을 `harness-feedback`이 읽어 패턴을 분석한다.
 
-**기록 형식**:
+**기록 방법** — 한 줄을 그대로 append한다(`>>`):
 ```
-| {YYYY-MM-DD} | {이벤트} | {심각도} | {feature ID} | {에러 메시지 또는 원인 한 줄} |
+echo '{"ts":"2026-06-16T12:34:56Z","session":"<SESSION_ID>","event":"implementer-retry","severity":"high","feature":"F-12","detail":"<소독된 한 줄>"}' >> .harness-friction.jsonl
 ```
+
+**필드** (한 줄 = 1 이벤트):
+| 필드 | 값 |
+|------|------|
+| `ts` | 이벤트 발생 시각, ISO8601 UTC (예: `2026-06-16T12:34:56Z`) |
+| `session` | § 세션 시작 Step 1.5에서 발급한 SESSION_ID (claude-progress.txt의 `SESSION_ID:` 값) |
+| `event` | 아래 이벤트 유형 enum |
+| `severity` | `low` \| `medium` \| `high` \| `critical` (이벤트 유형 표의 심각도) |
+| `feature` | 현재 feature ID, 없으면 `""` |
+| `detail` | 소독된 원인 한 줄 (아래 detail 소독 규칙) |
+
+**detail 소독 규칙** (append 전 오케스트레이터가 적용 — JSON이 깨지지 않게):
+1. 큰따옴표 `"` → 작은따옴표 `'`
+2. 줄바꿈(LF)·캐리지리턴(CR)을 공백으로 치환(제거)
+3. 백슬래시 `\` 제거
+4. 50자 초과면 50자로 절단
 
 **이벤트 유형**:
 | 이벤트 | 기록 시점 | 심각도 |
@@ -302,6 +332,7 @@ TDD 사이클 중 마찰 이벤트가 발생하면 `docs/HARNESS_FRICTION.md`의
 | `session-incomplete` | TDD 사이클 미완료 상태로 세션 종료 시 | low |
 
 **규칙**:
-- 파일이 없으면 기록을 건너뛴다 (에러 아님)
-- 같은 feature의 같은 이벤트가 같은 세션에서 반복되면 첫 번째만 기록한다
-- 상세 필드는 에러 메시지의 핵심 한 줄 또는 원인 요약 (50자 이내)
+- `.harness-friction.jsonl`이 없으면 append를 건너뛴다 (에러 아님 — 스캐폴드 시 빈 파일로 생성되지만, 비-하네스 환경 대비)
+- 같은 feature의 같은 이벤트가 같은 세션(동일 SESSION_ID)에서 반복되면 첫 번째만 기록한다
+- `detail`은 에러 메시지의 핵심 한 줄 또는 원인 요약을 위 소독 규칙으로 가공한 결과 (≤50자)
+- 한 이벤트 = `>>`로 정확히 한 줄만 append (여러 줄 금지 — 관용 파서가 줄 단위로 읽는다)
