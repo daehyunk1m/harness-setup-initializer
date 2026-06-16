@@ -350,11 +350,26 @@
   - `CLAUDE.md` 파일 맵에 SKILL-SCAFFOLD.md 추가, 개발 규칙/테스트/원칙 업데이트
 
 ### TODO-53: 2-스킬 플로우 실전 테스트 (신규 셋업 경로)
-- **상태**: [ ] 미완료
+- **상태**: [x] 완료 (Session 43, 2026-06-16 — `_sandbox/vite-spa` 픽스처 2회 실주행)
 - **파일**: 실제 프로젝트에서 테스트
 - **문제**: 분리된 2-스킬 플로우의 신규 셋업 경로가 실전에서 정상 동작하는지 검증 필요 (업그레이드 경로는 TODO-66/70/73에서 검증 완료)
 - **해결**: `/harness-setup` → `.harness-profile.json` 생성 확인 → `/harness-scaffold` → 19개 파일 생성 확인. 특히 프로필 JSON 스키마 정합성, scaffold 스킬의 프로필 읽기, 누락 필드 기본값 처리 검증. 잔여 관찰 포인트: 신규 프리셋 매칭(exclude), eslintAssist 마커 블록, feature_list 라우트 추론, harness-cleanup 첫 실행
 - **픽스처 매트릭스 확장** (2026-06-12 멀티모델 자문 권고 병합): React SPA 1종 검증에서 다양화 — 후보: 빈 TS 패키지, Next.js, Express 백엔드, pnpm workspace 모노레포, ESLint 없는 프로젝트, CRLF 줄바꿈, 손상된 package.json. 전부를 한 번에 하지 말고 신규 셋업 테스트 1~2종부터
+- **결과** (Session 43, 2026-06-16 — `_sandbox/vite-spa`(taskboard-vite) react-vite 픽스처 신규 생성 경로 **2회 실주행, 둘 다 "표준 하네스 가동" 9/9**):
+
+  | 관찰 포인트 | 판정 | 근거 |
+  |---|---|---|
+  | 신규 프리셋 매칭 (react-vite + exclude) | ✅ | optional 5/5, 경쟁 3종 required 부재로 탈락 → react-vite 단독 |
+  | 프로필↔scaffold 계약 / 누락필드 기본값 | ✅ | manifest v1.17.0, 정상 |
+  | eslintAssist 옵트인 + flat 마커 블록 | ✅ | Sonnet 실행 옵트인 → §5.15 surgical insertion(7 레이어 no-restricted-imports + max-lines:300), `--print-config` 유효·services 배선 확인 |
+  | E2E pre-seed (1.17.0, 최고가치) | ✅ | `e2e.enabled=true`→기본답 "예", playwright.config+e2e/(README.md managed) 6파일, test:e2e 머지 |
+  | feature_list ② 기능모듈 추론 | ✅ | 라우터 부재→① 미발동, services/features 후보 비어있지않음, 전부 passes:false |
+  | hook 체이닝 / 셋업 의미 게이트 | ✅ | 자동 체이닝, **셋업 의미 게이트 첫 실주행 발동**(semanticApprovalAt 기록 — 이전엔 시뮬레이션만) |
+  | superpowers + multi-model-consult 통합 | ✅ | 둘 다 감지·옵트인·보조스킬 합산 렌더, AGENTS.md ≤100. installPath 틸드 위험(사전 우려) 미재현 |
+  | harness:check 신규셋업 판정 | ✅(install 후) | ①②③ + lint:arch 0위반 + Q2 enforced → 표준 가동. node_modules 부재 시 ⑤ 실패로 일시 MVH → **TODO-100 승격** |
+  | **교차 모델** (Opus급 vs Sonnet 4.6 1M high) | ✅ | 결정적 게이트 동일(표준 판정·0위반·enforced·100줄·JSON), 모델 판단만 가드 내 변동(feature 5↔3·AGENTS 69↔59) → "구조 보장/의미 비보장" 설계 실증 |
+- **승격**: MVH 오라벨링 → TODO-100(개선 후보, 구현 별도). 픽스처 사전 적대적 검증(7-에이전트 워크플로, 소스 수정 불필요 확정) + 주행 가이드 = `_sandbox/RUN-GUIDE.md`(gitignore).
+- **미검증 이월**: ⚠️ Q2 미강제 강등(이 픽스처 enforced라 미발동, 시뮬레이션 검증 유지) · ⚠️ superpowers **미설치** 경로(이 환경은 설치됨) · ⚠️ harness-cleanup 첫 실행(셋업 후 별도, 미관찰). 픽스처 매트릭스 확장(express-api/엣지케이스)은 추가 후보로 유지.
 
 ### TODO-54: .harness-profile.json 스키마 문서화
 - **상태**: [x] 완료 (2026-06-11)
@@ -783,3 +798,14 @@
 - **승격 근거(2번째 데이터포인트)**: 2b 하네스(1.14.0) 도그푸딩 — 컨테이너 내부 스크롤/독립 토글/공간 분배 작업이 `shouldAutoExpand(count)` 헬퍼 유닛 테스트만 TDD(RED→GREEN)하고, load-bearing 레이아웃 동작(페이지 스크롤 0·peek 136px=3행·50/50 분배)은 ad-hoc Playwright 스크린샷으로 1회 확인 후 `.e2e.ts` **미코드화**. 1.13.1 haja TaskItem 레이아웃에 이은 2번째 사례 → 핵심원칙 #5(반복=승격) 임계 도달, 사용자 "지금 승격" 결정.
 - **해소(구현)**: test-engineer.md(트리거 "UI 상호작용 또는 시각/레이아웃 회귀 위험" + 시각/레이아웃 정의·jsdom blind·"브라우저 1회 확인은 가드 아님→측정 가능한 단언으로 코드화" + verdict created/not_applicable 미러), coding-standards.md(jsdom 한계 명시), session-routine.md(완료 게이트 "브라우저 검증→스펙 코드화" 전제), harness-checklist.md §4.2. 부수: stale "(후속) 증분 2b" 참조 3건 정리. 신규 프로필 필드·플레이스홀더·파일 0(31 불변), managed 자동 감지 전파, 마이그레이션 불필요. MINOR.
 - **후속 관찰**: 도그푸딩 시 verdict 출력(created/skipped/not_applicable, 침묵=BLOCK)이 실제로 발동했는지 — 이번 요약엔 판정 블록이 안 보였음(요약 누락 vs 미발동 미확인). 다음 파일럿에서 레이아웃 작업이 트리거 확장 후 실제 `.e2e.ts`를 생성하는지 검증.
+
+---
+
+## Session 43: 신규 셋업 실전 테스트 발견 (2026-06-16)
+
+### TODO-100: harness-check.sh 의존성 미설치 사전 감지 — MVH 오라벨링 완화
+- **상태**: [ ] 미완료 (개선 후보, MINOR — 구현 별도)
+- **발견**: TODO-53 신규 셋업 실전 테스트(`_sandbox/vite-spa` = taskboard-vite, 2026-06-16) 실주행. 신규 픽스처에 node_modules 부재 → Phase 3 `harness:check` ⑤ validate가 `vitest: command not found`(exit 127)로 실패 → "최소 하네스(MVH)" 판정. 원인은 의존성 미설치(하네스 결함 아님)이고 `npm install` 1회로 "표준 하네스 가동" 승격됨. 절대 규칙(자동 npm install 금지)은 정상 준수. 사용자 결정: "TODO로 등록(개선 후보)"
+- **문제**: `harness-check.sh`(사용자가 반복 실행하는 영속 스크립트)가 node_modules 부재를 ④⑤ 품질 실패로 접어 MVH로 판정한다. "의존성 미설치(전이적·1단계 자가해소)"와 "실제 품질 실패(구조·규칙 결함)"를 구분하지 못해, 방금 셋업한 사용자에게 MVH가 오해를 준다
+- **해결(방향)**: `harness-check.sh`가 ④⑤ 실행 **앞에서** node_modules 존재를 사전 감지 → 부재 시 ④⑤를 하드 MVH로 접지 말고 "⚠️ 의존성 미설치 — `npm install` 후 `npm run harness:check` 재실행 시 표준 판정 예상" 구분 상태로 분기(exit 코드 정책은 `references/harness-checklist.md` §8과 정합 유지). **자동 설치는 하지 않음(절대 규칙 보존)**. 구조 항목(①②③) 판정에는 영향 주지 않고 품질 항목만 "미설치로 보류"로 표기. 동시 업데이트 후보: `harness-scaffold/SKILL.md` §6.13(Phase 3 검증 안내), `references/harness-checklist.md` §8
+- **검증 근거**: TODO-53 실주행이 예측대로 MVH→install→표준 전이를 재현. 픽스처 적대적 사전검증(7-에이전트 워크플로)에서도 harness:check만 `partial`(절차 전제)로 식별 — RUN-GUIDE §2/§8.1에 npm install 선행 필수로 기록됨

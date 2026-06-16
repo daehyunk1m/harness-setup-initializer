@@ -5,6 +5,16 @@
 
 ---
 
+## [미출시]
+
+### 검증 (Verified)
+- **TODO-53 신규 셋업 경로 실전 테스트 완료** (Session 43): `_sandbox/vite-spa`(react-vite) 픽스처 신규 생성 경로 **2회 실주행(Opus급 + Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" 9/9**. 결정적 게이트(표준 판정·structural-test 0위반·Q2 enforced·AGENTS 100줄 예산·JSON 유효성)는 모델 독립 동일, 모델 판단 출력(feature_list 5↔3·AGENTS.md 69↔59줄)만 가드 내 변동 → Session 34 "구조 보장/의미 비보장" 설계 실증. 라이브 첫 검증: 셋업 의미 게이트(semanticApprovalAt)·eslintAssist flat surgical insertion(§5.15)·E2E pre-seed. 사전 적대적 검증(7-에이전트 워크플로)으로 픽스처 소스 수정 불필요 확정. 스킬 사양 무변경 — 버전 유지 1.17.0.
+
+### 추가 (Added)
+- .tracking/TODO.md: TODO-100 등록 — harness-check.sh 의존성 미설치 사전 감지(개선 후보, MINOR, 구현 별도). node_modules 부재 시 ⑤ validate 실패로 일시 MVH 오라벨링되는 것을 "의존성 미설치 — npm install 후 재실행" 구분 상태로 분기(자동 설치 금지 규칙 보존). TODO-53 실주행 발견.
+
+---
+
 ## [1.17.0] — 2026-06-16 (E2E 모듈 마감 — 이슈 #12 증분 4, TODO-97)
 
 ### 추가 (Added)
