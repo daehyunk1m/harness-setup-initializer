@@ -15,6 +15,27 @@
 
 ---
 
+## [1.18.0] — 2026-06-16 (마찰 자동 기록 — 저비용 JSONL 싱크, 이슈 #9, TODO-84)
+
+### 추가 (Added)
+- **`.harness-friction.jsonl` managed 데이터 싱크** (이슈 #9, TODO-84): 마찰 이벤트가 append-only JSONL 1줄로 자동 기록된다. 한 줄 = 1 이벤트 — 필드 `ts`(ISO8601 UTC) / `session`(세션 고유 ID) / `event`(이벤트 enum) / `severity`(`low`\|`medium`\|`high`\|`critical`) / `feature`(feature ID 또는 `""`) / `detail`(소독된 원인 ≤50자). harness-scaffold가 빈 파일을 생성하고 manifest에 **category `data`로 등록**(템플릿 해시 드리프트 검사 제외 — feature_list와 동일 취급; harness-feedback이 파일 부재와 0건을 구분).
+- templates/rules/session-routine.md: 세션 시작에 **`SESSION_ID` 생성·기록** — `{ISO 시각}-{4자 난수}`(예 `2026-06-16T09-12-03Z-a3f9`)를 1회 생성해 `claude-progress.txt`에 `SESSION_ID: <값>`으로 기록, 그 세션의 모든 마찰 줄이 동일 값 참조(harness-feedback의 세션 단위 그룹핑·같은 날 복수 세션 구분). 세션 종료 시 미완료면 `session-incomplete`(low) append.
+- references/harness-checklist.md·templates/harness-check.sh: 필수 managed 파일 점검에 `.harness-friction.jsonl` 추가.
+
+### 변경 (Changed)
+- templates/rules/session-routine.md: 마찰 기록을 "마크다운 테이블 행 삽입"에서 **단일 JSON 라인 append**(`echo '{...}' >> .harness-friction.jsonl`)로 교체 + **detail 소독 규칙** 명시(큰따옴표 `"`→`'`, 줄바꿈/CR 제거(공백), 백슬래시 `\` 제거, ≤50자 절단). 기록 시점은 기존 루프 의사코드와 동일, 같은 세션·feature·event 첫 회만(중복 억제).
+- templates/HARNESS_FRICTION.md: 로그 테이블·자동 렌더 개념 제거 → **정적 참조 문서로 격하**. 이벤트 유형/심각도 참조표 + 이슈 보고 안내 + "이벤트는 `.harness-friction.jsonl`에 자동 기록되며 '하네스 피드백 분석해줘'로 분석한다"는 포인터만 유지. manifest category `data`→`managed`(정적 문서화).
+- companion-skills/harness-feedback/SKILL.md: 입력을 `docs/HARNESS_FRICTION.md`(테이블) → `.harness-friction.jsonl`로 변경(`cat` 후 줄 단위, JSON 파싱은 LLM 내부 — 외부 의존 0). **관용 파싱** — JSON 실패 줄은 스킵하고 스킵 수를 보고(깨진 한 줄이 전체 분석을 죽이지 않음). 파일 부재 → "not found", 0줄 → "기록된 이벤트 없음". 이슈 본문 md 테이블 작성 시 detail의 `|`·줄바꿈 escape. 보고 임계값(critical 1회+/동일 2회+/high 2회+) 기존 유지.
+- SKILL.md·harness-scaffold/SKILL.md: 계약 동기화(새 managed 데이터 파일 반영). **프로필 신규 필드 없음(always-on)**. 생성 순서에 빈 `.harness-friction.jsonl` 추가, HARNESS_FRICTION.md 생성 규칙 갱신, Phase 4 "이제 할 수 있는 일" 카탈로그에 마찰 자동 기록 광고(always-on이라 게이트 무관 — 미와이어 광고 아님). 프로필 스키마 version 1.17.0→1.18.0.
+- references/versioning-policy.md: 1.18.0 행 추가.
+
+### 비고
+- **아키텍처 결정(옵션 i — Stop hook 없음)**: 멀티모델 자문(codex 정확성/gemini 단순화, `.claude/artifacts/consult/` 2026-06-16) 종합. 두 모델 합의(JSONL 싱크·always-on·`echo` LLM 직렬화 위험)는 채택, 충돌(codex 훅·렌더러 하드닝 vs gemini 전부 제거)은 스택 비종속·measure-first 원칙에 따라 **gemini 단순화를 주축 + codex 견고성 디테일(깨진 줄 격리·고유 세션 ID·detail 소독) 흡수**로 종합. Stop hook은 발화 비보장(크래시/강제종료)·`.claude/settings.json`+merge upsert+node-on-by-default+업그레이드 마이그레이션을 끌고와 v1 비채택 — 측정 후 누락 확인되면 후속 증분에서 추가.
+- **업그레이드 경로**: `harness upgrade` 시 ① session-routine.md·HARNESS_FRICTION.md 재렌더 ② 빈 `.harness-friction.jsonl` 생성 + manifest 등록. harness-feedback은 글로벌 컴패니언 스킬(install.sh 배포)이라 프로젝트별 마이그레이션 불필요. 파괴적 변경 없음.
+- **원칙 점검**: jsonl append=bash `echo`(스택 무관), harness-feedback 읽기=`cat`+LLM 파싱(외부 도구 0), 소스 코드 미수정(문서·데이터 파일만), 두 SKILL.md 계약 동기화. MINOR — 새 managed 데이터 파일 + 생성/소비 경로 변경, 하위 호환. 설계 정본: `.tracking/specs/2026-06-16-friction-auto-logging-design.md`.
+
+---
+
 ## [1.17.0] — 2026-06-16 (E2E 모듈 마감 — 이슈 #12 증분 4, TODO-97)
 
 ### 추가 (Added)

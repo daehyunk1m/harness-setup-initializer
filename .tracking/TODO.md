@@ -668,10 +668,11 @@
 - **해결**: install.sh를 `companion-skills/*` 루프로 전환 (SKILL.md 있는 디렉토리만, ln -sfn 멱등). feedback·cleanup·multi-model-consult 전부 글로벌 링크. §7 운용 스킬 안내를 --add-dir → 자연어 호출로 정정. project-context 설계 결정 갱신(opt-in → 글로벌 일원화). 2회 멱등 + 자기참조 없음 실측
 
 ### TODO-84: TDD 마찰 자동 기록 메커니즘 (구 Issue #9) — 구현 항목
-- **상태**: [ ] 미완료 (구현 항목 — 설계 필요)
-- **파일**: `templates/rules/session-routine.md`, (검토 시) Stop hook 또는 카운터 메커니즘
-- **문제**: 이슈 #9 — HARNESS_FRICTION.md 자동 기록이 산문 지시 의존. TDD 이벤트(implementer-retry 등) 자동 append 없어 마찰 로그 항상 비어 있고 harness-feedback 분석 데이터 0. (cleanup이 doc-stale 일부만 커버). multi-model-consult 자문에서 codex가 지적한 "LLM 산문 실행" 약점의 구체 사례
-- **해결 후보**: ① session-routine.md에 "Implementer 호출 직후 attempt 카운터 → ≥2면 HARNESS_FRICTION.md append"를 더 강한 명령형으로 (산문 강화, 저비용) ② Stop hook + friction-detect 스크립트로 claude-progress.txt/transcript 파싱 자동 append (강제, 복잡·hook 신뢰성 검증 필요) — 이슈 제안. **신중**: hook 복잡도 vs 산문 강화 trade-off, 실제 마찰 누적 데이터로 효과 측정. TODO-77(해시 결정화)과 같은 "LLM 산문 실행 약점" 계열
+- **상태**: [x] 완료 (2026-06-16, 1.18.0 — 이슈 #9 닫기)
+- **파일**: `templates/rules/session-routine.md`, `templates/HARNESS_FRICTION.md`, `harness-scaffold/SKILL.md`, `SKILL.md`, `companion-skills/harness-feedback/SKILL.md`, `references/harness-checklist.md`, `templates/harness-check.sh`
+- **문제**: 이슈 #9 — HARNESS_FRICTION.md 자동 기록이 산문 지시 의존. TDD 이벤트(implementer-retry 등) 자동 append 없어 마찰 로그 항상 비어 있고 harness-feedback 분석 데이터 0. multi-model-consult 자문에서 codex가 지적한 "LLM 산문 실행" 약점의 구체 사례
+- **결정** (설계 스펙 2026-06-16, 옵션 i — Stop hook 없음): 저비용 JSONL 싱크 `.harness-friction.jsonl`(append-only, manifest category `data`) 채택. 마크다운 테이블 행 삽입(읽기→탐색→삽입→재작성)이 무거워 부하 시 건너뛰어지는 게 근본 원인 — 산문 강화/카운터 자동화가 아니라 **단일 JSON 라인 append**로 교체. 멀티모델 자문(codex 정확성/gemini 단순화) 종합: gemini 단순화(훅·렌더러·node 제거)를 주축, codex 견고성 디테일(깨진 줄 격리·고유 SESSION_ID·detail 소독) 흡수. Stop hook은 발화 비보장·settings.json 끌고옴으로 v1 비채택(measure-first)
+- **해결**: ① session-routine 마찰 기록을 jsonl 1줄 append + detail 소독(`"`→`'`·줄바꿈/CR 제거·`\` 제거·≤50자), 세션 시작 SESSION_ID(`{ISO 시각}-{4자 난수}`)→claude-progress.txt, 종료 미완료 시 session-incomplete append ② HARNESS_FRICTION.md 정적 참조 문서로 격하 ③ scaffold가 빈 jsonl 생성 + manifest category `data` ④ harness-feedback jsonl 직접 파싱 + 관용 파싱(깨진 줄 스킵·보고)·escape ⑤ 두 SKILL.md 계약 동기화(프로필 신규 필드 없음 — always-on), checklist·harness-check.sh 필수 파일 추가. MINOR(1.18.0). 설계 정본: `.tracking/specs/2026-06-16-friction-auto-logging-design.md`
 
 ### TODO-85: 인프라/설정 작업 트랙 (구 Issue #6) — 구현 항목
 - **상태**: [ ] 미완료 (부분 해결 — infra 트랙 미구현)

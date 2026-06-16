@@ -223,6 +223,7 @@ MAJOR 범프 시 추가:
 | 1.15.0 릴리스 | Playwright MCP 진단 배선(이슈 #12 증분 3). 플레이스홀더 30→31(`{{MCP_DEBUG_PROTOCOL}}`), 프로필 `e2e.mcp` 서브필드. 신규 파일 0·옵트인·마이그레이션 불필요. | MINOR | 새 옵트인 기능(MCP 진단 경로) — 기존 하네스 호환 |
 | 1.16.0 릴리스 | E2E 작성 트리거에 시각/레이아웃 회귀 위험 포함 + jsdom 한계 명시 + 브라우저 검증→스펙 코드화(이슈 #12, TODO-99). 신규 필드·플레이스홀더·파일 0(31 불변). managed 자동 감지 전파·마이그레이션 불필요. | MINOR | 생성 하네스의 E2E 작성 행동 확장 — 기존 하네스 호환 |
 | 1.17.0 릴리스 | E2E 모듈 마감(이슈 #12 증분 4): §12.6.1 매핑 정렬(A)·프리셋 e2e 권장 기본(B)·U1 base-E2E 재감지(C, cascade)·작성 가이드 `e2e/README.md`(D, managed). 신규 플레이스홀더 0(31 불변)·옵트인·마이그레이션 불필요. | MINOR | 새 옵트인 산출물(README) + 기존 e2e config의 §12.6 자동 감지 편입 — 기존 하네스 호환 |
+| 1.18.0 릴리스 | 마찰 자동 기록(이슈 #9, TODO-84): `.harness-friction.jsonl` 새 managed 데이터 싱크 + session-routine 마찰 기록을 JSONL append로 교체 + HARNESS_FRICTION.md 정적 격하 + harness-feedback jsonl 파싱. 빈 파일 자동 생성·하위 호환·마이그레이션 불필요. | MINOR | 새 managed 데이터 파일 + 생성/소비 경로 변경 — 기존 하네스 호환 |
 
 → Session 14-17을 하나의 릴리스로 묶으면: **MINOR** (가장 높은 수준)
 → 만약 1.0.0에서 시작했다면: **1.1.0**
