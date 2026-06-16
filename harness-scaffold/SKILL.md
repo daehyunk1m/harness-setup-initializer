@@ -218,7 +218,8 @@ fi
 14. scripts/harness-check.sh (하네스 자가진단 — § 5.14, 검사 대상 스크립트들 뒤에 생성)
 15. docs/QUALITY_SCORE.md (품질 점수표 초기값)
 16. docs/TECH_DEBT.md (기술 부채 빈 템플릿)
-17. docs/HARNESS_FRICTION.md (마찰 로그 — 피드백 수집)
+17. docs/HARNESS_FRICTION.md (마찰 이벤트 정적 참조 문서 — § 5.12)
+17-b. .harness-friction.jsonl (빈 마찰 로그 싱크 — 프로젝트 루트, data 카테고리; harness-feedback이 파일 부재와 0건을 구분하도록 빈 파일로 생성 — § 5.12.1)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
 19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드)
 19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
@@ -798,10 +799,21 @@ git-workflow.md:
 ### 5.12 docs/HARNESS_FRICTION.md 생성 규칙
 
 - 이 스킬의 `templates/HARNESS_FRICTION.md` 템플릿을 그대로 복사하여 생성한다 (플레이스홀더 없음)
-- TDD 세션 중 발생하는 마찰 이벤트를 자동으로 기록하는 로그 파일이다
-- session-routine.md가 마찰 이벤트 감지 시 이 파일에 행을 추가한다
-- 기록 형식: `| {날짜} | {이벤트} | {심각도} | {feature} | {상세} |`
-- 이벤트 유형: `implementer-retry`, `debugger-escalation`, `user-escalation`, `review-fix`, `refactor-rollback`, `session-incomplete`
+- **정적 참조 문서**다 — 더 이상 마찰 로그 테이블을 담지 않는다. 마찰 이벤트는 `.harness-friction.jsonl`(프로젝트 루트, 진실 원본)에 한 줄씩 append되며, session-routine.md가 기록 주체다 (§ 5.12.1)
+- 담는 내용: 이벤트 유형/심각도 참조표, 하네스 이슈 보고 안내, 그리고 "마찰 이벤트는 `.harness-friction.jsonl`에 자동 기록되며 '하네스 피드백 분석해줘'로 분석한다"는 포인터
+- 이벤트 유형 (참조용): TDD — `implementer-retry`(high), `debugger-escalation`(critical), `user-escalation`(critical), `review-fix`(medium), `refactor-rollback`(high), `e2e-fail`(high), `session-incomplete`(low); 하네스 이슈 — `setup-mismatch`, `structural-test-false-positive/negative`, `init-failure`, `rule-conflict`, `agent-hallucination`, `doc-stale`(harness-cleanup가 기록)
+
+### 5.12.1 .harness-friction.jsonl 생성 규칙
+
+- 마찰 이벤트의 **진실 원본**이다 — 프로젝트 루트에 둔다(`docs/` 아래가 아님). append-only, git 커밋 대상
+- 스캐폴드 시 **빈 파일**로 생성한다: `: > .harness-friction.jsonl` (또는 `touch .harness-friction.jsonl`). harness-feedback이 파일 부재("not found")와 0건("기록된 이벤트 없음")을 구분할 수 있도록 빈 줄도 넣지 않는다
+- session-routine.md가 마찰 이벤트 감지 시 한 줄을 append한다. 한 줄 = 1 이벤트, JSON 객체:
+  ```json
+  {"ts":"2026-06-16T12:34:56Z","session":"2026-06-16T09-12-03Z-a3f9","event":"implementer-retry","severity":"high","feature":"F-12","detail":"타입 에러 3회 반복"}
+  ```
+  필드: `ts`(이벤트 발생 시각 ISO8601 UTC), `session`(세션 고유 ID — `{ISO 시각}-{4자 난수}` 예 `2026-06-16T09-12-03Z-a3f9`), `event`(이벤트 유형 enum), `severity`(`low`|`medium`|`high`|`critical`), `feature`(feature ID 또는 `""`), `detail`(소독된 원인 한 줄 ≤50자). 기록 시점·소독 규칙·세션 ID 생성은 생성되는 `.claude/rules/session-routine.md`가 정본
+- manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 템플릿 해시 드리프트 검사 제외(feature_list.json과 동일 취급). harness-feedback이 직접 읽고 분석하는 입력이다
+- **이 증분에서 Stop hook / `.claude/settings.json` / friction-detect.mjs는 생성하지 않는다** (옵션 i — 오케스트레이터의 저비용 append가 주 메커니즘)
 
 ### 5.13 .harness-manifest.json 생성 규칙
 
@@ -1123,8 +1135,8 @@ mkdir -p scripts/ docs/ agents/ .claude/rules/
 # 6.1 생성된 파일 존재 확인
 ls -la CLAUDE.md AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json init.sh
 
-# 6.2 docs/ 구조 확인 (HARNESS_FRICTION.md 포함)
-ls -la docs/ docs/HARNESS_FRICTION.md
+# 6.2 docs/ 구조 확인 (HARNESS_FRICTION.md 포함) + 마찰 싱크 확인
+ls -la docs/ docs/HARNESS_FRICTION.md .harness-friction.jsonl
 
 # 6.3 scripts/ 확인
 ls -la scripts/structural-test.ts scripts/doc-freshness.ts scripts/harness-check.sh
@@ -1263,7 +1275,8 @@ fi
 | scripts/structural-test.ts | ✅ | 아키텍처 규칙 검증 |
 | scripts/doc-freshness.ts | ✅ | 문서 최신성 검사 |
 | scripts/harness-check.sh | ✅ | 하네스 자가진단 (npm run harness:check) |
-| docs/HARNESS_FRICTION.md | ✅ | 마찰 로그 (피드백 수집) |
+| docs/HARNESS_FRICTION.md | ✅ | 마찰 이벤트 정적 참조 문서 |
+| .harness-friction.jsonl | ✅ | 마찰 로그 싱크 (빈 파일 — 자동 기록 대상) |
 | package.json | ✅ 수정 | lint:arch, validate, doc:check, harness:check 추가 |
 | {ESLint 설정 파일} | ✅ 수정 또는 ⚠️ 폴백 | eslintAssist 옵트인 시에만 표시 — 적용 시 "보조 규칙 추가 (마커 블록)", 폴백 시 "수동 적용 필요 — 아래 권고 스니펫" |
 | .harness-manifest.json | ✅ | 버전 추적 매니페스트 (v{version}) |
@@ -1318,6 +1331,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 품질·부채 추적 → docs/QUALITY_SCORE.md · docs/TECH_DEBT.md 갱신 (상세: docs/TECH_DEBT.md 승격 대기 큐)
 - 하네스 정리 → "하네스 정리" / "월간 점검" (상세: CLAUDE.md 운영 사이클 — 컴패니언, 글로벌 설치 전제)
 - 피드백 분석 → "하네스 피드백 분석해줘" (상세: CLAUDE.md 하네스 이슈 보고 — 컴패니언, 글로벌 설치 전제)
+- 마찰 자동 기록 → TDD 마찰 이벤트(implementer-retry 등)가 발생 시 `.harness-friction.jsonl`에 자동 기록 (상세: .claude/rules/session-routine.md § 마찰 로그) — always-on
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/README.md · playwright.config.ts) — e2e 옵트인 시에만 표시
@@ -1349,7 +1363,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **보조 스킬 줄**: § 5.16 실존 검증을 통과한 생존 `linkedSkills`가 1개 이상일 때만 렌더 (AGENTS.md "## 보조 스킬" 섹션과 **동일 생존 집합**). 생존 스킬 0개면 생략한다.
 - **TDD 사이클 줄**: 항상 렌더하되 파이프라인 단계를 열거하지 않고 session-routine.md를 가리킨다. Security Reviewer는 7개 에이전트의 하나로 **항상 생성**되지만 `tdd.securityCategories`에 매칭되는 feature가 있을 때만 호출되므로(session-routine Phase 4.5 SECURITY 호출 조건 — 빈 배열이면 매칭 feature가 없어 실호출되지 않음), 미호출 가능한 단계를 상시 능력으로 광고하지 않는다.
 - **하네스 정리 · 피드백 분석 줄**: 컴패니언 스킬(install.sh로 `~/.claude/skills/`에 글로벌 설치)이므로 "글로벌 설치 전제"로 제시한다 — 글로벌 미설치 환경에서는 호출되지 않을 수 있다.
-- **검증 게이트 · 자가진단 · 품질·부채 추적 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
+- **검증 게이트 · 자가진단 · 품질·부채 추적 · 마찰 자동 기록 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
 - **브라우저 E2E 줄**: `e2e.enabled === true`이고 § 5.17 산출물(`playwright.config.ts`)이 생성된 경우에만 렌더 — 산출물 생성을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 자체를 생략한다 (미와이어 능력 광고 불가).
 - **브라우저 MCP 줄**: `e2e.mcp.enabled === true`일 때만 렌더 — debugger.md MCP 블록 치환을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 생략(미와이어 능력 광고 불가).
 - **pre-push 게이트 줄**: `e2e.prePush === true`이고 § 5.18 산출물(`.githooks/pre-push`)이 생성/주입된 경우에만 렌더 — 산출물 생성 신호를 재사용하는 순수 투영. 미옵트인·폴백 시 줄 자체를 생략한다 (미와이어/미활성 능력 광고 불가).
@@ -1440,7 +1454,8 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 19 | `scripts/doc-freshness.ts` | managed | 템플릿 기반 문서 최신성 검사 |
 | 20 | `docs/QUALITY_SCORE.md` | data | 사용자/에이전트가 점수 기록 |
 | 21 | `docs/TECH_DEBT.md` | data | 사용자/에이전트가 부채 항목 축적 |
-| 22 | `docs/HARNESS_FRICTION.md` | data | session-routine이 마찰 이벤트 기록 |
+| 22 | `docs/HARNESS_FRICTION.md` | managed | 정적 참조 문서(이벤트 유형/심각도 참조표). 템플릿 기반, 사용자 콘텐츠 없음 |
+| 22-b | `.harness-friction.jsonl` | data | 마찰 이벤트 진실 원본(프로젝트 루트). 런타임 데이터 축적, 해시 드리프트 검사 제외 — feature_list.json과 동일 취급 |
 | 23 | `package.json` (scripts) | custom | 스킬은 특정 키만 추가, 사용자가 수정했을 수 있음 |
 | 24 | `scripts/harness-check.sh` | managed | 템플릿 기반 자가진단 스크립트 |
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
