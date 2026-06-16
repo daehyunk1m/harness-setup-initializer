@@ -812,3 +812,22 @@
 - **해결(방향)**: `harness-check.sh`가 ④⑤ 실행 **앞에서** node_modules 존재를 사전 감지 → 부재 시 ④⑤를 하드 MVH로 접지 말고 "⚠️ 의존성 미설치 — `npm install` 후 `npm run harness:check` 재실행 시 표준 판정 예상" 구분 상태로 분기(exit 코드 정책은 `references/harness-checklist.md` §8과 정합 유지). **자동 설치는 하지 않음(절대 규칙 보존)**. 구조 항목(①②③) 판정에는 영향 주지 않고 품질 항목만 "미설치로 보류"로 표기. 동시 업데이트 후보: `harness-scaffold/SKILL.md` §6.13(Phase 3 검증 안내), `references/harness-checklist.md` §8
 - **검증 근거**: TODO-53 실주행이 예측대로 MVH→install→표준 전이를 재현. 픽스처 적대적 사전검증(7-에이전트 워크플로)에서도 harness:check만 `partial`(절차 전제)로 식별 — RUN-GUIDE §2/§8.1에 npm install 선행 필수로 기록됨
 - **구현 (1.19.0, 2026-06-17)**: `templates/harness-check.sh`에 `DEPS_MISSING` 사전 감지(`[ -f package.json ] && [ ! -d node_modules ]`) 추가 → ④⑤⑥를 "⏸️ 의존성 미설치로 보류"로 분기, 종합 판정에 "의존성 미설치 (구조 정상)" exit 0 브랜치 신설(구조 실패가 우선이라 ①②③ 판정 불변). `references/harness-checklist.md` §7·§8 노트(Q2 미강제와 평행), `harness-scaffold/SKILL.md` §6.13 주석 + §7 단계 판정 행 동기화. **렌더 후 5 시나리오 실측**(정상=표준 exit 0 / deps부재=보류 exit 0 / 진짜 품질실패=exit 1 / 구조실패=exit 1 / 구조실패+deps부재=구조 우선 exit 1) 전부 설계대로. 자동 설치 금지 절대 규칙 보존, 신규 프로필 필드·플레이스홀더 0(managed 자동 감지 전파·마이그레이션 불필요). MINOR
+
+---
+
+## Session 47: 마찰 이슈 정리 — 1.21.0 (2026-06-17)
+
+> harness-feedback가 등록한 열린 마찰 이슈 2건(#13 low·#14) 중 **리소스 적은 것부터** 진행. #13(저비용·선결과제 없음) 먼저 마감, #14(고비용·dedup 선결과제)는 잔존.
+
+### TODO-101: E2E 아티팩트 .gitignore 머지 (이슈 #13)
+- **상태**: [x] 완료 (Session 47, 2026-06-17, 1.21.0)
+- **발견**: E2E 스캐폴드(§5.17)가 `playwright.config.ts`는 생성하면서 실행 산출물(`test-results/`·`playwright-report/`)을 `.gitignore`에 추가하지 않아 스모크 실행 후 untracked로 남음. haja-web-fe 파일럿에서 수동 추가. #12 본문 "빌드 설정 펜스(… gitignore)" 의도의 구현 누락분. low severity
+- **해결**: harness-scaffold §5.17에 `.gitignore` **외과적 add-only 머지** 추가 — `/test-results/`·`/playwright-report/`(Playwright 공식 루트앵커)를 마커 블록(`# harness-setup:e2e-artifacts:start~end`)으로 주입하는 node 스니펫. **멱등**(마커 존재 시 스킵, 파일 부재 시 마커만으로 생성), **중복 회피**(마커 밖 사용자 수동 항목은 토큰 매칭으로 제외 → 둘 다 있으면 no-op), **비실행**(텍스트 R/W만), **비침습**(기존 항목 재정렬·삭제 없음). 카테고리: 사용자 소유 마커 블록 → manifest files 미기록(§10.1 #33, ESLint·package.json 동급), §12.6 자동 감지 비대상. 검증 §6.16 + 자동수정 항목 + 생성순서 step 19. **소급**: §10.2 U3 step 6-b — add-only·멱등이라 기존 e2e 하네스에 업그레이드 시 멱등 소급(1.17.0 README 무소급과 대비)
+- **검증 근거**: 머지 스니펫 **12 시나리오 실측** — 기존 6(부재→생성 / 멱등스킵 / append / 두항목 수동무시 no-op / 부분추가 중복0 / 무개행 안전) + 적대적 리뷰 반영 신규 6 글로브(`test-results/*` 인식 / 이중 글로브 no-op / `**/` any-depth / 중첩경로 미일치=leak방지 / 음수패턴 존중 / 유사명 미일치=false-positive방지) — 전부 설계대로. 골든 픽스처(e2e-fixtures·run-fixtures) 회귀 통과. 신규 프로필 필드·플레이스홀더·파일 0, 옵트인(`e2e.enabled` 게이트). MINOR
+- **적대적 리뷰**: 3관점 워크플로(스니펫 엣지케이스 / 스펙·계약 정합성 / 업그레이드 전파)로 확정 12건 중 4건 수용 — dedup 글로브 강화(루트앵커 firstSeg), §5.17 playwright-report 생성조건 문구 정확화, cross-ref §10.3→§10.1 #33 정정, U1 재감지 출력목록 명시. 미반영 8건: case-sensitive(무해·doc 미약속)·§6.16 grep 정밀도(머지 후 false-positive 불가)·#33 넘버링(#25 eslint 선례 정합)·"19개 파일"(의도된 베이스라인·범위밖)·카탈로그(side-effect 비광고)·CHANGELOG callout(기존재)·manifest 예시 e2e 누락(기존·범위밖)·rationale 명시성(충분)
+
+### TODO-102: harness-feedback 호출 트리거 미정의 (이슈 #14) — 미착수
+- **상태**: [ ] 미착수 (열린 이슈 #14, 고비용)
+- **문제**: 마찰 **기록**은 자동화(1.18.0 jsonl append)됐으나 **보고**(harness-feedback 분석→이슈) 호출 트리거가 운영 사이클·session-routine·harness-cleanup 어디에도 없음 → 사용자 명시 호출 시에만 동작, jsonl이 쌓여도 dead-letter(파일럿에서 마찰 4건 적체 후 수동 요청 시점에야 #13 보고)
+- **선결 과제(고비용 원인)**: "미보고" 판별 메커니즘 설계 결정 필요 — 옵션 a(상태 파일 `.harness-feedback-state`) / b(jsonl 라인 `reported` 플래그) / c(harness-feedback이 `gh issue list` dedup). 현재 harness-feedback는 중복 확인 안 함(수동 관리)
+- **제안 방향(이슈 본문)**: session-routine 세션 종료에 "미보고 critical 1건+ 또는 누적 high N건+ 시 harness-feedback 제안/실행" 1단계 추가(무-훅, 1.18.0 원칙 유지). 보조: 운영 사이클(월간)에 "하네스 피드백 분석" 1줄

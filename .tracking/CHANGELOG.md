@@ -5,13 +5,24 @@
 
 ---
 
-## [미출시]
+## [1.21.0] — 2026-06-17 (E2E 아티팩트 .gitignore 머지 — 이슈 #13)
 
-### 수정 (Changed)
-- README.md: 버전 1.12.0→1.20.0 최신화(8개 마이너 드리프트 해소). `## E2E 검증(프론트엔드 옵트인)` 섹션 신설(생성 파일·충돌 회피·TDD 배선·작성 트리거·pre-push·MCP), 설계 결정에 E2E 옵트인 모듈(1.11.0~1.17.0)·마찰 자동 기록 JSONL 싱크(1.18.0)·인프라/설정 트랙(1.20.0) 서브섹션 추가. 생성 파일 표 정정: harness-check 설명(8항목→구조/품질/경고+의존성 미설치 보류)·HARNESS_FRICTION.md 역할(정적 참조 문서로 격하)·`.harness-friction.jsonl` 행 신설·feature_list category·옵트인 산출물 목록(E2E/pre-push/MCP). harness-feedback 입력원 정정(.harness-friction.jsonl), 디렉토리 트리에 templates/e2e/ 추가. "19개 파일" 기본 카운트는 정본 사양과 일치하므로 유지(마찰 JSONL=data 카테고리, E2E=옵트인으로 베이스라인 제외).
+### 추가 (Added)
+- **harness-scaffold/SKILL.md §5.17 `.gitignore` 아티팩트 무시 머지**: E2E 옵트인 시 Playwright 산출물(`/test-results/`·`/playwright-report/`)을 `.gitignore`에 **외과적 add-only 머지**한다(마커 블록 `harness-setup:e2e-artifacts:start~end`). 이슈 #13 해소 — 스캐폴드가 playwright.config.ts는 만들면서 산출물 무시는 누락해 스모크 실행 후 untracked로 남던 마찰(haja-web-fe 파일럿에서 수동 추가). #12 "빌드 설정 펜스(… gitignore)" 의도의 구현 누락분.
+  - **멱등·비침습**: 마커 존재 시 스킵, 파일 부재 시 마커 블록만으로 생성, 기존 항목 재정렬·삭제 없음. **중복 회피**: 사용자가 마커 밖에서 이미 무시 중인 항목은 추가하지 않음(토큰 매칭) — 둘 다 무시 중이면 no-op. 텍스트로만 읽고 씀(비실행 원칙).
+  - **카테고리**: `.gitignore`는 사용자 소유 — 마커 블록만 추가하므로 manifest files에 기록하지 않음(§10.1 #33, ESLint·package.json과 동급). §12.6 자동 감지 비대상.
+  - **검증/소급**: §6.16에 `.gitignore` E2E 무시 체크 + 자동 수정 항목 추가. §10.2 U3 step 6-b — 기존 e2e 옵트인 하네스에 업그레이드 시 멱등 재실행으로 **소급 적용**(add-only·멱등이라 안전, 1.17.0 README의 무소급과 대비). 6 시나리오 실측(생성·멱등스킵·append·no-op·부분추가·무개행) + 골든 픽스처 회귀 통과.
+
+### 변경 (Changed)
+- 생성 순서 step 19에 `.gitignore` 머지 명시. 프로필 스키마 version 1.20.0→1.21.0. references/versioning-policy.md: 1.21.0 행.
+- README.md: 버전 1.12.0→1.20.0 최신화(8개 마이너 드리프트 해소; 커밋 d84f53c). `## E2E 검증(프론트엔드 옵트인)` 섹션 신설, 설계 결정에 E2E 옵트인 모듈(1.11.0~1.17.0)·마찰 자동 기록 JSONL 싱크(1.18.0)·인프라/설정 트랙(1.20.0) 서브섹션 추가. 생성 파일 표 정정(harness-check·HARNESS_FRICTION.md 정적 격하·`.harness-friction.jsonl` 행·feature_list category·옵트인 산출물). harness-feedback 입력원·디렉토리 트리(templates/e2e/) 정정. "19개 파일" 베이스라인 유지.
 
 ### 검증 (Verified)
-- **TODO-53 신규 셋업 경로 실전 테스트 완료** (Session 43): `_sandbox/vite-spa`(react-vite) 픽스처 신규 생성 경로 **2회 실주행(Opus급 + Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" 9/9**. 결정적 게이트(표준 판정·structural-test 0위반·Q2 enforced·AGENTS 100줄 예산·JSON 유효성)는 모델 독립 동일, 모델 판단 출력(feature_list 5↔3·AGENTS.md 69↔59줄)만 가드 내 변동 → Session 34 "구조 보장/의미 비보장" 설계 실증. 라이브 첫 검증: 셋업 의미 게이트(semanticApprovalAt)·eslintAssist flat surgical insertion(§5.15)·E2E pre-seed. 사전 적대적 검증(7-에이전트 워크플로)으로 픽스처 소스 수정 불필요 확정. 스킬 사양 무변경 — 버전 유지 1.17.0.
+- **TODO-53 신규 셋업 경로 실전 테스트 완료** (Session 43): `_sandbox/vite-spa`(react-vite) 픽스처 신규 생성 2회 실주행(Opus급 + Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" 9/9. 결정적 게이트(표준 판정·structural-test 0위반·Q2 enforced·100줄·JSON)는 모델 독립 동일, 모델 판단 출력(feature 5↔3·AGENTS 69↔59)만 가드 내 변동 → "구조 보장/의미 비보장" 실증. 라이브 첫 검증: 셋업 의미 게이트·eslintAssist flat surgical·E2E pre-seed. 스킬 사양 무변경(검증 기록).
+
+### 비고
+- 신규 프로필 필드·플레이스홀더·파일 0건. 옵트인(`e2e.enabled` 게이트)이라 e2e 미옵트인 하네스 무영향. managed 파일 아닌 inline 머지 — 마이그레이션 불필요(U3 step 6-b 멱등 소급). MINOR, 하위 호환. 이슈 #13 종결.
+- **적대적 리뷰 반영**(3관점 워크플로 → 확정 12건 선별 4건 수용): ① dedup을 **루트 앵커 첫 세그먼트 매칭**으로 강화 — `test-results/*`·`**/test-results/` 글로브 변형 인식(기존 정확매치는 글로브에 중복 항목 추가했음), 중첩 경로(`foo/test-results/`)는 leak 방지 위해 미일치, 음수패턴(`!`) 존중. 재검증 **12 시나리오**(6 회귀 + 6 글로브) 전부 통과. ② §5.17 문구 정확화 — `playwright-report/`는 기본 리포터(list/github)에선 안 생기고 `html`/`show-report` 시 생성(선제 무시는 무해). ③ cross-ref 정정 §10.3 #33 → **§10.1 #33**(파일 카테고리 표 위치). ④ U1 E2E 재감지 출력목록에 `.gitignore` 머지 명시. 미반영 8건은 무해(case-sensitive·grep 정밀도)·기존 의도(베이스라인 "19개"·side-effect 비광고)·범위 밖(기존 manifest 예시)으로 판정.
 
 ---
 

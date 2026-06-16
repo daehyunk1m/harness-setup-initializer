@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.20.0",
+  "version": "1.21.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -221,7 +221,7 @@ fi
 17. docs/HARNESS_FRICTION.md (마찰 이벤트 정적 참조 문서 — § 5.12)
 17-b. .harness-friction.jsonl (빈 마찰 로그 싱크 — 프로젝트 루트, data 카테고리; harness-feedback이 파일 부재와 0건을 구분하도록 빈 파일로 생성 — § 5.12.1)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
-19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드)
+19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드) + `.gitignore` 아티팩트 무시 add-only 머지
 19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
 20. ESLint 보조 규칙 수정 (eslintAssist 옵트인 시에만 — § 5.15)
 21. .harness-manifest.json (버전 추적 매니페스트 — § 5.13, 항상 마지막 — Stop hook 종료 조건)
@@ -1058,6 +1058,42 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 - `e2e/README.md`는 **사람 개발자용** 정적 작성 가이드다(managed, 플레이스홀더 0 — 순수 정적 템플릿이라 재렌더 결정론 자명). 에이전트/TDD 규칙 내용을 복제하지 않고 정본(coding-standards.md·session-routine.md·test-engineer.md·debugger.md)을 **참조**한다. 조건부 절(MCP·pre-push)은 프로필 게이트 렌더가 아니라 정적 "if wired" 산문이다(§ 12.6 결정론 보존).
 - E2E 그린은 앱별 부팅(env/route-block)에 의존하므로 **스위트를 실행하지 않는다** — 구조(파일·스크립트 존재)만 보장한다 (의미 비보장, harness-checklist § 7 일관).
 
+#### .gitignore 아티팩트 무시 (add-only 머지)
+
+E2E 스위트를 실행하면 Playwright는 기본적으로 `test-results/`(트레이스·스크린샷·video)를 프로젝트 루트에 생성하고, 리포터 설정(`html`)이나 `npx playwright show-report` 사용 시 `playwright-report/`(HTML 리포트)를 추가로 생성한다(기본 템플릿 리포터는 `list`/`github`이라 `playwright-report/`는 항상 생기진 않으나, 선제적으로 무시해 둔다 — 생성 안 돼도 무해). 추적에서 제외하지 않으면 스모크 실행 후 untracked로 남는다(이슈 #13 — 파일럿에서 수동 추가). § 5.5 package.json·§ 5.15 ESLint와 동급의 **외과적 add-only 머지**로 `.gitignore`에 무시 항목을 주입한다 (비침습 — 기존 항목 재정렬·삭제 없음).
+
+- **대상 항목**: `/test-results/`, `/playwright-report/` (Playwright 공식 `.gitignore` 컨벤션 — 루트 앵커)
+- **마커 블록**: `# harness-setup:e2e-artifacts:start` ~ `# harness-setup:e2e-artifacts:end` (gitignore 주석 접두사 `#`)
+- **멱등**: 마커가 이미 있으면 스킵한다. 파일이 없으면 마커 블록만으로 생성한다
+- **중복 회피**: 마커 밖에서 사용자가 이미 같은 항목을 무시 중이면 그 항목은 추가하지 않는다(베스트에포트 — **루트 앵커 첫 세그먼트** 매칭으로 `test-results`, `test-results/`, `/test-results/`, `test-results/*`, `**/test-results/` 같은 글로브·앵커 변형을 모두 인식; `foo/test-results/` 같은 **중첩 경로**는 루트 디렉토리가 아니므로 일치시키지 않는다 — 누락보다 무해한 중복을 선호하는 안전 방향). 두 항목 모두 이미 무시 중이면 마커 자체를 추가하지 않는다(no-op — 사용자 수동 추가분과 충돌 회피)
+- **비실행 원칙**: `.gitignore`는 텍스트로만 읽고 쓴다 (실행/평가 없음)
+- **카테고리**: `.gitignore`는 사용자 소유 — 마커 블록만 추가하므로 manifest files에 **기록하지 않는다**(§ 5.15 ESLint·§ 5.5 package.json과 동급, § 10.1 #33). § 12.6 자동 감지 대상이 아니다
+
+```sh
+node -e '
+const fs = require("fs"), p = ".gitignore";
+const S = "# harness-setup:e2e-artifacts:start", E = "# harness-setup:e2e-artifacts:end";
+const entries = ["/test-results/", "/playwright-report/"];
+let body = fs.existsSync(p) ? fs.readFileSync(p, "utf8") : "";
+if (body.includes(S)) { console.log("ℹ️ .gitignore 마커 존재 — 스킵"); process.exit(0); }
+// 기존 무시 라인의 루트 앵커 첫 세그먼트를 수집 (글로브/음수/슬래시/any-depth 정규화 — 베스트에포트)
+const firstSeg = (l) => {
+  l = l.trim();
+  if (l.startsWith("!")) l = l.slice(1);          // 음수 패턴도 사용자 관리로 간주
+  l = l.replace(/^\//, "").replace(/^\*\*\//, ""); // 루트 앵커·any-depth(**/) 정규화
+  return l.split("/")[0];                          // test-results/* · **/test-results/ → "test-results"
+};
+const roots = new Set(body.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map(firstSeg));
+const nameOf = (e) => e.replace(/^\//, "").replace(/\/$/, "");  // "/test-results/" → "test-results"
+const add = entries.filter((e) => !roots.has(nameOf(e)));
+if (add.length === 0) { console.log("ℹ️ E2E 아티팩트 이미 무시됨 — no-op"); process.exit(0); }
+const block = [S, "# Playwright E2E 산출물 (harness-setup E2E 모듈)", ...add, E].join("\n");
+const pre = body ? (body.endsWith("\n") ? body + "\n" : body + "\n\n") : "";
+fs.writeFileSync(p, pre + block + "\n");
+console.log("✅ .gitignore 머지: " + add.join(", "));
+'
+```
+
 ---
 
 ### 5.18 pre-push 게이트 (옵트인 — e2e.prePush)
@@ -1206,6 +1242,12 @@ if [ -f playwright.config.ts ]; then
   ls -la playwright.config.ts e2e/tsconfig.json e2e/specs/smoke.e2e.ts 2>&1
   node -e "const p=require('./package.json'); console.log(p.scripts['test:e2e'] ? '✅ test:e2e script' : '❌ test:e2e 누락'); console.log(p.devDependencies && p.devDependencies['@playwright/test'] ? '✅ @playwright/test devDep' : '⚠️ @playwright/test devDep 미기록');"
   grep -q '{{' playwright.config.ts && echo "❌ playwright.config.ts 미치환 플레이스홀더" || echo "✅ playwright.config.ts 치환 완료"
+  # .gitignore E2E 아티팩트 무시 (마커 존재, 또는 사용자가 두 항목을 이미 무시 중인 no-op 케이스도 통과)
+  if grep -q 'harness-setup:e2e-artifacts' .gitignore 2>/dev/null || { grep -q 'test-results' .gitignore 2>/dev/null && grep -q 'playwright-report' .gitignore 2>/dev/null; }; then
+    echo "✅ .gitignore E2E 아티팩트 무시"
+  else
+    echo "❌ .gitignore E2E 아티팩트 무시 누락 (test-results/·playwright-report/)"
+  fi
 fi
 
 # 6.17 pre-push 게이트 검증 (e2e.prePush 옵트인 시에만 — 그린필드/주입 타깃 모두)
@@ -1238,6 +1280,7 @@ fi
 | manifest 누락/불일치 (6.12) | .harness-manifest.json을 프로필 기반으로 재생성 |
 | harness:check 구조 항목 실패 (6.13 ①②③) | 해당 파일 재생성/수정 후 1회 재실행 |
 | 보조 스킬 섹션 누락 (6.15, 옵트인 시) | § 5.16 렌더링 재실행 |
+| .gitignore E2E 아티팩트 무시 누락 (6.16, e2e 옵트인 시) | § 5.17 .gitignore add-only 머지 재실행 (멱등) |
 
 ### 자동 수정 불가 항목 (사용자 보고)
 
@@ -1473,6 +1516,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 30 | `e2e/fixtures/seed.ts` | custom | 앱별 시드 로직, 사용자 소유 (e2e 옵트인 시에만) |
 | 31 | `e2e/specs/smoke.e2e.ts` | custom | 스타터 스모크, 사용자가 회귀 스펙 축적 (e2e 옵트인 시에만) |
 | 32 | `.githooks/pre-push` | managed | 옵트인(e2e.prePush) 시에만. 그린필드=`.githooks/pre-push`, 기존 hooksPath/Husky 주입 시 호스트 훅 경로 |
+| 33 | `.gitignore` (마커 블록) | custom | e2e 옵트인 시 Playwright 아티팩트 무시 add-only 머지(§ 5.17). 마커 블록만 추가하므로 manifest files에 **기록하지 않음** (#25 ESLint·#23 package.json과 동급). § 12.6 자동 감지 비대상 |
 
 #### managed 파일의 사용자 수정 대응
 
@@ -1502,6 +1546,9 @@ Phase U3: 실행
   4. custom 파일 외과적 수정 (마이그레이션 지시 따름)
   5. data 스키마 패치 (필요 시 필드 추가, 기본값 적용)
   6. package.json scripts 추가 (기존 키 삭제 안 함)
+  6-b. e2e 옵트인 하네스(manifest.profile.e2e.enabled)면 § 5.17 .gitignore 아티팩트 무시 머지를
+       멱등 재실행 (마커/항목 있으면 no-op). add-only·멱등이라 step 6 package.json 머지와 동급으로
+       안전 — 기존 e2e 하네스에 소급 적용된다 (managed 파일 아니므로 § 12.6 자동 감지 비대상)
   7. manifest 갱신:
      - harness.version ← 현재 스킬 버전
      - harness.upgradedAt ← now (ISO 8601)
@@ -1771,7 +1818,9 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 >
 > 추가 신규 파일 생성은 U1 재감지 옵트인 경로로만 발생한다 (Phase U1 재감지).
 
-- **E2E 재감지** (1.17.0+ U1): 프론트엔드로 감지됐는데(SKILL.md § 1.4 = 신규셋업과 동일 신호 재사용 — testFramework.e2e가 playwright이거나 UI 프레임워크 감지) 프로필에 `e2e` 블록(특히 `e2e.enabled`)이 없으면, 업그레이드 U1 재감지에서 브라우저 E2E 계층(Playwright) 옵트인을 **제안**한다 (생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 § 5.17 생성(playwright.config.ts·e2e/tsconfig.json·e2e/README.md = managed + fixtures/seed/smoke = custom 신규 파일) + manifest 등록(profile.e2e + 신규 templateHash). `@playwright/test`는 § 5.5 add-only 머지 후 Phase U5 수동 안내(스킬 미설치). **cascade**: 수락한 경우 이어서 아래 pre-push 재감지를 **같은 U1 패스에서** 평가한다(신규셋업의 SKILL.md § 4.2 E2E→pre-push 순서를 미러). MCP 재감지는 `e2e.enabled`와 무관하므로 독립 평가된다.
+> **1.21.0**(이슈 #13, E2E 아티팩트 .gitignore 머지)도 마이그레이션이 없다 — 신규 프로필 필드·플레이스홀더·파일 0건이다. § 5.17의 `.gitignore` 머지는 **멱등 add-only**(마커 블록 + 토큰 중복 회피)라 `.githooks/pre-push`·ESLint 마커와 마찬가지로 managed 파일이 아니며 § 12.6 자동 감지 비대상이다. 전파 경로: **신규 셋업**(§ 5.17)과 **U1 E2E 재감지 옵트인**에서 생성되고, 기존 **e2e 옵트인** 하네스에는 업그레이드 Phase U3 step 6-b에서 멱등 재실행으로 **소급 적용**된다(1.17.0 README와 달리 add-only 멱등이라 소급이 안전 — 마커/항목 있으면 no-op). e2e 미옵트인 하네스는 § 5.17 전체를 스킵하므로 산출물 0건이다.
+
+- **E2E 재감지** (1.17.0+ U1): 프론트엔드로 감지됐는데(SKILL.md § 1.4 = 신규셋업과 동일 신호 재사용 — testFramework.e2e가 playwright이거나 UI 프레임워크 감지) 프로필에 `e2e` 블록(특히 `e2e.enabled`)이 없으면, 업그레이드 U1 재감지에서 브라우저 E2E 계층(Playwright) 옵트인을 **제안**한다 (생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 § 5.17 생성(playwright.config.ts·e2e/tsconfig.json·e2e/README.md = managed + fixtures/seed/smoke = custom 신규 파일 + `.gitignore` 아티팩트 무시 add-only 머지) + manifest 등록(profile.e2e + 신규 templateHash). `@playwright/test`는 § 5.5 add-only 머지 후 Phase U5 수동 안내(스킬 미설치). **cascade**: 수락한 경우 이어서 아래 pre-push 재감지를 **같은 U1 패스에서** 평가한다(신규셋업의 SKILL.md § 4.2 E2E→pre-push 순서를 미러). MCP 재감지는 `e2e.enabled`와 무관하므로 독립 평가된다.
 - **pre-push 재감지** (1.14.0+ U1): 기존(또는 금번 U1 패스에서 막 수락한) `e2e.enabled` 하네스에 `e2e.prePush`가 없고 git 저장소면, 업그레이드 U1 재감지에서 pre-push 게이트 옵트인을 **제안**한다 (생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 § 5.18 생성 로직(공존성 분기 포함) 실행 + manifest 등록. 활성화는 Phase U5 보고에서 수동 안내(스킬은 git config 미실행).
 - **MCP 재감지** (1.15.0+ U1): 기존 프론트엔드 하네스에 `e2e.mcp`가 없으면 업그레이드 U1에서 브라우저 MCP 진단 옵트인을 **제안**한다(생략 기본 — 거절/무응답 시 산출물 0건). 수락 시 debugger.md `{{MCP_DEBUG_PROTOCOL}}`를 § 5.19 블록으로 재치환(managed 재렌더링).
 
