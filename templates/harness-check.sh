@@ -1,16 +1,18 @@
 #!/bin/bash
 # 하네스 자가진단 — 판정 기준: 하네스 구성 체크리스트 § 8 (harness-setup 스킬)
 # 사용법: npm run harness:check
-# exit 0 = 표준 하네스 가동, exit 1 = 점검 실패 (아래 ❌ 항목 참조)
+# exit 0 = 표준 하네스 가동 또는 의존성 미설치 보류(구조 정상), exit 1 = 점검 실패 (아래 ❌ 항목 참조)
 #
 # 항목 구분:
 #   하네스 구조 (①②③) — 실패 시 하네스 자체가 깨진 상태
 #   프로젝트 품질 (④⑤) — 실패 시 하네스는 정상이나 코드 검증이 깨진 상태
 #   경고 전용 (⑥⑦⑧⑨) — exit code에 영향 없음
+# node_modules 부재 시: 품질 항목(④⑤)을 '의존성 미설치로 보류'로 표기하고 exit 0 (전이적 상태 — install 1회로 자가 해소, 하네스 결함 아님)
 
 STRUCT_FAIL=0
 QUALITY_FAIL=0
 Q2_UNENFORCED=0
+DEPS_MISSING=0
 
 echo "═══ 하네스 자가진단 ═══"
 echo ""
@@ -56,10 +58,23 @@ else
   STRUCT_FAIL=1
 fi
 
+# 의존성 사전 점검 — node_modules 부재 시 품질 항목(④⑤)은 실행 불가
+# 하네스 결함이 아니라 전이적 상태(npm install 1회로 자가 해소)다. 자동 설치는 하지 않는다(절대 규칙).
+echo ""
+echo "── 의존성 사전 점검 ──"
+if [ -f package.json ] && [ ! -d node_modules ]; then
+  DEPS_MISSING=1
+  echo "⏸️ node_modules 부재 — 품질 항목(④⑤)을 '의존성 미설치로 보류'로 표기 (구조 ①②③은 정상 판정)"
+else
+  echo "✅ 의존성 확인 — 품질 항목 정상 실행"
+fi
+
 # ④ 아키텍처 검증 (exit code 전파)
 echo ""
 echo "── ④ 아키텍처 검증 ──"
-if {{LINT_ARCH_COMMAND}}; then
+if [ "$DEPS_MISSING" -eq 1 ]; then
+  echo "⏸️ 의존성 미설치로 보류 — node_modules 설치 후 재실행하면 판정됩니다"
+elif {{LINT_ARCH_COMMAND}}; then
   echo "✅ 아키텍처 위반 없음"
 else
   echo "❌ 아키텍처 검증 실패"
@@ -78,7 +93,9 @@ fi
 # ⑤ 전체 검증 (exit code 전파)
 echo ""
 echo "── ⑤ 전체 검증 ──"
-if {{VALIDATE_COMMAND}}; then
+if [ "$DEPS_MISSING" -eq 1 ]; then
+  echo "⏸️ 의존성 미설치로 보류 — node_modules 설치 후 재실행하면 판정됩니다"
+elif {{VALIDATE_COMMAND}}; then
   echo "✅ validate 통과"
 else
   echo "❌ validate 실패"
@@ -88,7 +105,11 @@ fi
 # ⑥ 문서 최신성 (경고만 — doc-freshness는 항상 exit 0)
 echo ""
 echo "── ⑥ 문서 최신성 ──"
-{{DOC_CHECK_COMMAND}} || true
+if [ "$DEPS_MISSING" -eq 1 ]; then
+  echo "⏸️ 의존성 미설치로 보류 (doc:check는 경고 전용)"
+else
+  {{DOC_CHECK_COMMAND}} || true
+fi
 
 # ⑦ tsconfig paths에 pathAlias 존재 (경고만 — tsconfig는 JSONC라 grep 기반)
 echo ""
@@ -160,7 +181,15 @@ fi
 # 종합 판정
 echo ""
 echo "═══ 판정 ═══"
-if [ "$STRUCT_FAIL" -eq 0 ] && [ "$QUALITY_FAIL" -eq 0 ]; then
+if [ "$STRUCT_FAIL" -ne 0 ]; then
+  echo "❌ 하네스 구조 점검 실패 (①②③ 항목 확인) — 하네스 재생성 또는 업그레이드 권장"
+  exit 1
+elif [ "$DEPS_MISSING" -eq 1 ]; then
+  echo "⏸️ 의존성 미설치 — 하네스 구조는 정상, 품질 항목(④⑤)은 node_modules 부재로 보류"
+  echo "   → npm install (또는 yarn/pnpm install) 후 npm run harness:check 재실행 시 표준 하네스 판정 예상"
+  echo "   ℹ️ 하네스 결함이 아닌 의존성 미설치입니다 — 하네스는 의존성을 자동 설치하지 않습니다"
+  exit 0
+elif [ "$QUALITY_FAIL" -eq 0 ]; then
   if [ "$Q2_UNENFORCED" -eq 1 ]; then
     echo "⚠️ MVH 가동 (Q2 미강제) — structural-test에 기계 검사 규칙이 없습니다"
     echo "   아키텍처 제약이 문서에만 있고 기계적으로 강제되지 않습니다 (체크리스트 §3.2 미충족 → 표준 아님)"
@@ -170,10 +199,7 @@ if [ "$STRUCT_FAIL" -eq 0 ] && [ "$QUALITY_FAIL" -eq 0 ]; then
   echo "✅ 표준 하네스 가동 — 구조·실행 항목 통과"
   echo "ℹ️ 이 판정은 구조 설치+실행 가능성만 확인합니다 — 문서·규칙의 의미 정확성(분류·의존성 규칙이 옳은지)은 별도 검토 권장"
   exit 0
-elif [ "$STRUCT_FAIL" -eq 0 ]; then
-  echo "⚠️ 하네스 구조 정상 — 프로젝트 품질 검증 실패 (④⑤ 항목 확인)"
-  exit 1
 else
-  echo "❌ 하네스 구조 점검 실패 (①②③ 항목 확인) — 하네스 재생성 또는 업그레이드 권장"
+  echo "⚠️ 하네스 구조 정상 — 프로젝트 품질 검증 실패 (④⑤ 항목 확인)"
   exit 1
 fi

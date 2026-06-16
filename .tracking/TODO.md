@@ -805,8 +805,9 @@
 ## Session 43: 신규 셋업 실전 테스트 발견 (2026-06-16)
 
 ### TODO-100: harness-check.sh 의존성 미설치 사전 감지 — MVH 오라벨링 완화
-- **상태**: [ ] 미완료 (개선 후보, MINOR — 구현 별도)
+- **상태**: [x] 완료 (2026-06-17, 1.19.0)
 - **발견**: TODO-53 신규 셋업 실전 테스트(`_sandbox/vite-spa` = taskboard-vite, 2026-06-16) 실주행. 신규 픽스처에 node_modules 부재 → Phase 3 `harness:check` ⑤ validate가 `vitest: command not found`(exit 127)로 실패 → "최소 하네스(MVH)" 판정. 원인은 의존성 미설치(하네스 결함 아님)이고 `npm install` 1회로 "표준 하네스 가동" 승격됨. 절대 규칙(자동 npm install 금지)은 정상 준수. 사용자 결정: "TODO로 등록(개선 후보)"
 - **문제**: `harness-check.sh`(사용자가 반복 실행하는 영속 스크립트)가 node_modules 부재를 ④⑤ 품질 실패로 접어 MVH로 판정한다. "의존성 미설치(전이적·1단계 자가해소)"와 "실제 품질 실패(구조·규칙 결함)"를 구분하지 못해, 방금 셋업한 사용자에게 MVH가 오해를 준다
 - **해결(방향)**: `harness-check.sh`가 ④⑤ 실행 **앞에서** node_modules 존재를 사전 감지 → 부재 시 ④⑤를 하드 MVH로 접지 말고 "⚠️ 의존성 미설치 — `npm install` 후 `npm run harness:check` 재실행 시 표준 판정 예상" 구분 상태로 분기(exit 코드 정책은 `references/harness-checklist.md` §8과 정합 유지). **자동 설치는 하지 않음(절대 규칙 보존)**. 구조 항목(①②③) 판정에는 영향 주지 않고 품질 항목만 "미설치로 보류"로 표기. 동시 업데이트 후보: `harness-scaffold/SKILL.md` §6.13(Phase 3 검증 안내), `references/harness-checklist.md` §8
 - **검증 근거**: TODO-53 실주행이 예측대로 MVH→install→표준 전이를 재현. 픽스처 적대적 사전검증(7-에이전트 워크플로)에서도 harness:check만 `partial`(절차 전제)로 식별 — RUN-GUIDE §2/§8.1에 npm install 선행 필수로 기록됨
+- **구현 (1.19.0, 2026-06-17)**: `templates/harness-check.sh`에 `DEPS_MISSING` 사전 감지(`[ -f package.json ] && [ ! -d node_modules ]`) 추가 → ④⑤⑥를 "⏸️ 의존성 미설치로 보류"로 분기, 종합 판정에 "의존성 미설치 (구조 정상)" exit 0 브랜치 신설(구조 실패가 우선이라 ①②③ 판정 불변). `references/harness-checklist.md` §7·§8 노트(Q2 미강제와 평행), `harness-scaffold/SKILL.md` §6.13 주석 + §7 단계 판정 행 동기화. **렌더 후 5 시나리오 실측**(정상=표준 exit 0 / deps부재=보류 exit 0 / 진짜 품질실패=exit 1 / 구조실패=exit 1 / 구조실패+deps부재=구조 우선 exit 1) 전부 설계대로. 자동 설치 금지 절대 규칙 보존, 신규 프로필 필드·플레이스홀더 0(managed 자동 감지 전파·마이그레이션 불필요). MINOR

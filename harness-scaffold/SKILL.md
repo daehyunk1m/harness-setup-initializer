@@ -74,7 +74,7 @@ fi
 
 ```json
 {
-  "version": "1.18.0",
+  "version": "1.19.0",
   "preset": "react-next | custom",
   "projectName": "프로젝트명",
   "description": "한 줄 설명",
@@ -1179,6 +1179,7 @@ console.log(missing.length===0 ? '✅ files 항목 정합 ('+files.length+'개)'
 
 # 6.13 harness-check 실행 (자가진단 — references/harness-checklist.md § 8)
 [ -x scripts/harness-check.sh ] || chmod +x scripts/harness-check.sh
+# 셋업 직후 node_modules 미설치 상태면 ④⑤가 "⏸️ 의존성 미설치로 보류"(exit 0)로 표기된다 — 품질 실패 아님(npm install 후 재실행하면 표준 판정)
 npm run harness:check 2>&1 || echo "⚠️ harness:check 실패 — 하네스 구조 항목(①②③)과 프로젝트 품질 항목(④⑤)을 구분하여 보고"
 
 # 6.14 ESLint 보조 규칙 검증 (eslintAssist 옵트인 시에만 실행)
@@ -1301,7 +1302,8 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 전체 통과 → "**표준 하네스 가동** — 하네스 골격이 설치되고 검증 명령이 정상 동작합니다"
   - ⚠️ 이 판정은 *구조 설치 + 기계적 실행 가능성*만 의미한다. 생성된 문서·아키텍처 규칙의 **의미 정확성**(분류가 맞는지, 의존성 규칙이 옳은지, feature_list 상태가 진짜인지)은 판정 대상이 아니므로, 아래 '다음 단계'의 검토 항목(②·⑤)을 반드시 함께 안내한다 (기준: `references/harness-checklist.md` § 7 "판정의 범위 — 구조 vs 의미")
 - 전체 통과(구조+품질) + Q2 미강제(structural-test 마커 `unenforced`) → "**MVH 가동 (Q2 미강제)** — 구조·실행은 통과하나 structural-test에 기계 검사 규칙이 없어 아키텍처 제약이 강제되지 않습니다 (체크리스트 §3.2 미충족 → 표준 아님). ARCHITECTURE.md 수동 준수 또는 규칙 추가 권장". harness:check은 exit 0 (자유 구조의 정당한 약한 상태)
-- 구조 항목(①②③)만 통과, 품질 항목(④⑤) 실패 → "**MVH(최소 하네스) 가동** — 실패 항목: {목록}. 기존 코드의 검증 실패가 원인이며, validate가 통과해야 표준 하네스입니다"
+- 구조 항목(①②③) 통과 + 품질 항목(④⑤)이 "⏸️ 의존성 미설치로 보류" (node_modules 부재 — 출력 텍스트로 식별, exit code만으로는 표준과 구분 불가) → "**의존성 미설치 (구조 정상)** — 하네스 골격은 설치됐으나 node_modules 미설치로 품질 검증(④⑤)이 보류됐습니다. `npm install` 후 `npm run harness:check`를 재실행하면 표준/MVH로 판정됩니다". harness:check은 exit 0 (품질 실패 아닌 전이적 상태). 셋업 직후 흔한 상태이며, 하네스는 의존성을 자동 설치하지 않습니다(절대 규칙)
+- 구조 항목(①②③)만 통과, 품질 항목(④⑤) 실패(node_modules는 설치됨) → "**MVH(최소 하네스) 가동** — 실패 항목: {목록}. 기존 코드의 검증 실패가 원인이며, validate가 통과해야 표준 하네스입니다"
 - 구조 항목 실패 → 판정 보류, 실패 항목과 수정 방법 보고
 
 ### 다음 단계

@@ -10,8 +10,20 @@
 ### 검증 (Verified)
 - **TODO-53 신규 셋업 경로 실전 테스트 완료** (Session 43): `_sandbox/vite-spa`(react-vite) 픽스처 신규 생성 경로 **2회 실주행(Opus급 + Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" 9/9**. 결정적 게이트(표준 판정·structural-test 0위반·Q2 enforced·AGENTS 100줄 예산·JSON 유효성)는 모델 독립 동일, 모델 판단 출력(feature_list 5↔3·AGENTS.md 69↔59줄)만 가드 내 변동 → Session 34 "구조 보장/의미 비보장" 설계 실증. 라이브 첫 검증: 셋업 의미 게이트(semanticApprovalAt)·eslintAssist flat surgical insertion(§5.15)·E2E pre-seed. 사전 적대적 검증(7-에이전트 워크플로)으로 픽스처 소스 수정 불필요 확정. 스킬 사양 무변경 — 버전 유지 1.17.0.
 
-### 추가 (Added)
-- .tracking/TODO.md: TODO-100 등록 — harness-check.sh 의존성 미설치 사전 감지(개선 후보, MINOR, 구현 별도). node_modules 부재 시 ⑤ validate 실패로 일시 MVH 오라벨링되는 것을 "의존성 미설치 — npm install 후 재실행" 구분 상태로 분기(자동 설치 금지 규칙 보존). TODO-53 실주행 발견.
+---
+
+## [1.19.0] — 2026-06-17 (harness-check 의존성 미설치 사전 감지 — TODO-100)
+
+### 변경 (Changed)
+- **templates/harness-check.sh**: ④⑤ 품질 검증 실행 **앞에서** `node_modules` 존재를 사전 감지(`DEPS_MISSING`). 부재 시 ④(아키텍처)·⑤(통합 검증)·⑥(문서 최신성)을 실행하지 않고 "⏸️ 의존성 미설치로 보류"로 표기, 종합 판정을 **"의존성 미설치 (구조 정상)" → exit 0**로 분기. 구조 항목(①②③) 판정에는 영향 없음(구조 실패가 우선). 기존 동작 보존: deps 설치 + 품질 통과 → 표준(exit 0), deps 설치 + 품질 실패 → 품질 실패(exit 1).
+- references/harness-checklist.md §7·§8: "의존성 미설치 — 판정 보류" 노트 추가(Q2 미강제 노트와 평행). exit 0·전이적 상태·자동 설치 금지 명문화.
+- harness-scaffold/SKILL.md §6.13·§7 단계 판정: Phase 3 검증 주석 + "의존성 미설치 (구조 정상)" 판정 행 추가(출력 텍스트로 식별 — exit code만으로는 표준과 구분 불가).
+- SKILL.md·harness-scaffold/SKILL.md: 프로필 스키마 version 1.18.0→1.19.0(계약 동기). references/versioning-policy.md: 1.19.0 행 추가.
+
+### 비고
+- **근본 원인**: `harness-check.sh`가 `node_modules` 부재(갓 클론·셋업 직후 — `vitest: command not found` exit 127)를 ④⑤ 품질 실패로 접어 MVH/품질-실패로 오라벨링. "의존성 미설치(전이적·1단계 자가해소)"와 "실제 품질 실패(구조·규칙 결함)"를 구분 못 함. TODO-53 신규 셋업 실주행(`_sandbox/vite-spa`)에서 발견 — `npm install` 1회로 표준 승격 확인됨.
+- **검증**: 렌더 후 5 시나리오 실행 — 정상(표준 exit 0)·deps부재(보류 exit 0)·진짜 품질실패(exit 1)·구조실패(exit 1)·구조실패+deps부재(구조 우선 exit 1) 전부 설계대로.
+- **원칙 점검**: 자동 설치 안 함(절대 규칙 보존), 소스 미수정(스크립트 템플릿+문서만), 두 SKILL.md 계약 동기. MINOR — managed 템플릿 행동 개선, §12.6 자동 감지 전파, 마이그레이션 불필요. 하위 호환.
 
 ---
 
