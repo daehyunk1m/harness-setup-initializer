@@ -15,8 +15,9 @@
 ## 1. 무엇을 / 언제
 
 - **실행**: `npm run test:e2e` — 실제 브라우저로 `e2e/specs/**/*.e2e.ts`를 돌린다.
-- **`validate`와 분리**: 빠른 검증 루프(`npm run validate` = typecheck·lint·아키텍처·유닛)에는
-  E2E가 **포함되지 않는다**(브라우저·dev 서버 기동 비용). E2E는 별도로 돌린다.
+- **`validate`와 분리**: 빠른 검증 루프(`npm run validate` = 정적 검사 + 유닛 — 구체 구성은
+  프로젝트마다 동적 조합되며 정본은 `AGENTS.md` "명령어")에는 E2E가 **포함되지 않는다**
+  (브라우저·dev 서버 기동 비용). E2E는 별도로 돌린다.
 - **TDD 사이클 안의 위치**: feature 작업 중 RED 단계(Test Engineer)가 E2E 스펙을 작성하고,
   세션 루틴의 **VERIFY(E2E) (Phase 4.7)**가 해당 feature 스펙만 선택 실행한다.
   검증 레벨(L1 정적 / L2 유닛 / L3 통합 / L4 E2E)의 정의와 경계는 `.claude/rules/coding-standards.md`

@@ -93,7 +93,7 @@
 
 ### 1.3 설계 결정
 
-- **전체 프로필 저장**: 초기 설계에서는 `architectureType`, `srcRoot`, `pathAlias` 3개만 저장하려 했으나, SKILL.md의 플레이스홀더가 29개이고 소스가 `devServer`, `scripts`, `tdd`, `git`, `naming`, `layers` 등에 분산되어 있어 전체 프로필을 저장한다. 이렇게 해야 업그레이드 시 재스캔/재문답 없이 managed 파일을 재생성할 수 있다.
+- **전체 프로필 저장**: 초기 설계에서는 `architectureType`, `srcRoot`, `pathAlias` 3개만 저장하려 했으나, SKILL.md의 플레이스홀더가 31개이고 소스가 `devServer`, `scripts`, `tdd`, `git`, `naming`, `layers` 등에 분산되어 있어 전체 프로필을 저장한다. 이렇게 해야 업그레이드 시 재스캔/재문답 없이 managed 파일을 재생성할 수 있다.
 - **templateHash + 자동 감지**: 버전 번호 대신 해시를 사용한다. 현재 파일 해시와 manifest 해시를 비교하면 사용자 수정 여부를 판별할 수 있다. 추가로, 소스 템플릿을 재렌더링한 해시와 manifest 해시를 비교하면 템플릿 변경 여부도 자동 감지할 수 있다. 이로써 managed 파일은 마이그레이션 없이도 자동 갱신되며, 마이그레이션은 custom/new/remove/profile/data 변경 전용으로 역할이 분리된다.
 - **단일 파일**: 파일별 주석 스탬프 대신 하나의 JSON 파일로 관리한다. LLM이 한 번에 전체 상태를 파악할 수 있고, 생성 파일에 불필요한 주석을 남기지 않는다.
 

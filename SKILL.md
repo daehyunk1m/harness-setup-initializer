@@ -1154,7 +1154,7 @@ Phase U1에서 각 managed 파일에 대해:
 | `e2e/tsconfig.json` | `templates/e2e/tsconfig.json` |
 | `e2e/README.md` | `templates/e2e/README.md` |
 
-> **노트**: e2e managed 파일(`playwright.config.ts`, `e2e/tsconfig.json`, `e2e/README.md`)도 위 매핑에 포함된다 — 옵트인(`e2e.enabled`) 하네스에서만 생성되며, 매핑이 있으므로 다음 업그레이드부터 § 12.6 자동 감지 대상이 된다(템플릿 변경 전파). manifest는 실제 생성된 파일만 기록하므로(harness-scaffold/SKILL.md § 5.13), 비-e2e 하네스에서는 이 행들이 참조조차 되지 않는다. custom e2e 파일(`e2e/fixtures/test.ts`·`e2e/fixtures/seed.ts`·`e2e/specs/smoke.e2e.ts`)은 사용자 소유라 매핑에서 제외한다.
+> **노트**: e2e managed 파일(`playwright.config.ts`, `e2e/tsconfig.json`, `e2e/README.md`)도 위 매핑에 포함된다 — 옵트인(`e2e.enabled`) 하네스에서만 생성된다. 단 **전파 경계는 파일별로 다르다**: `playwright.config.ts`·`e2e/tsconfig.json`은 기존 e2e 하네스 manifest에 이미 있어 본 릴리스(1.17.0)의 매핑 편입으로 **다음 업그레이드부터 § 12.6 자동 감지를 새로 받는다**(템플릿 변경 전파). 반면 `e2e/README.md`는 1.17.0 신규 managed 파일이라 기존(1.11.0~1.16.0) e2e 하네스 manifest엔 없어 **소급 자동 감지되지 않는다** — § 12.6은 manifest 기록 파일의 업데이트 전용이므로, README는 신규 셋업·U1 재감지 옵트인 경로로만 생성된다(파일별 정직 명시: harness-scaffold/SKILL.md § 10.3 1.17.0 노트). manifest는 실제 생성된 파일만 기록하므로(harness-scaffold/SKILL.md § 5.13), 비-e2e 하네스에서는 이 행들이 참조조차 되지 않는다. custom e2e 파일(`e2e/fixtures/test.ts`·`e2e/fixtures/seed.ts`·`e2e/specs/smoke.e2e.ts`)은 사용자 소유라 매핑에서 제외한다.
 
 `docs/` 하위 디렉토리 등 매핑에 없는 managed 파일은 이 자동 감지 대상에서 제외하고, 마이그레이션으로만 관리한다. `custom` 아키텍처 유형의 `scripts/structural-test.ts`는 동적 생성되므로(템플릿 매핑 없음) 자동 감지에서 제외된다 — layer-based/fsd/domain-based는 `structural-test-{architectureType}.ts` 매핑으로 자동 감지된다.
 
