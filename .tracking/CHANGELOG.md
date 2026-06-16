@@ -12,6 +12,31 @@
 
 ---
 
+## [1.20.0] — 2026-06-17 (인프라/설정 트랙 — 이슈 #6, TODO-85)
+
+### 추가 (Added)
+- **templates/rules/session-routine.md `## 인프라/설정 트랙`**: 설정·배선 작업(category `infra`/`config`)에 RED→GREEN 유닛 TDD를 통합 검증(빌드+실동작)으로 대체하는 트랙. 이슈 #6의 "인프라 작업 시 TDD 전면 우회" 구조적 문제 해소 — 억지 유닛 테스트와 전체 TDD 우회를 둘 다 방지.
+  - **남용 방지 게이트 (사용자 '최대 엄격' 선택)**: ① 사전 선언(feature_list category, 리뷰 가능·GREEN 중 재분류 금지) ② 부정 테스트("의미 있는 실패 테스트를 쓸 수 있으면 인프라 아님", 조건3에 우선) ③ 변경 범위 한정. 모호 → TDD.
+  - **독립 검증**: Reviewer가 인프라 트랙에서 **필수(30줄 스킵 예외 무효)**이며 분류 타당성을 독립 감사(부정 테스트가 실제로 거짓이었는지). 자기판정만으로 검증 누적 스킵 불가.
+  - **보안 표면 트리거**: category가 `infra`라도 변경이 보안 표면(.env·secrets·auth/세션/토큰·provider 배선·CORS·쿠키)에 닿으면 Security Reviewer 필수 — 이슈 #6의 AuthProvider 배선이 정확히 이 경우(category로만 트리거하던 갭 수정).
+  - **감사 추적**: 트랙 진입을 claude-progress.txt(사람 가독) + `.harness-friction.jsonl` `infra-track-entry` 이벤트(기계 가독·append-only·harness-feedback 집계)에 이중 기록.
+  - **다단계·다세션 인프라**: Phase별 개별 infra 항목(F-infra-0/1…)으로 feature_list 분해 — passes/priority/last_session로 진행 표현(별도 블록 불요). 이슈 #6 문제점 #5 해소.
+- TDD STATE 블록에 `track: {tdd | infra}` 필드 + 구식 블록 재개 시 감사 줄 교차 복원 규칙(침묵=tdd 디폴트 금지).
+
+### 변경 (Changed)
+- templates/rules/coding-standards.md 금지 사항: "테스트 없이 완료 금지"/"Plan 후에도 TDD"에 **정의된 인프라 예외** + "인프라 오분류 금지"(테스트 가능하면 인프라 아님) 추가.
+- templates/agents/security-reviewer.md: 호출 조건에 인프라 트랙 보안 표면 트리거 추가. templates/agents/reviewer.md: 인프라 분류 감사(§5) 책무 + Input 추가.
+- harness-scaffold/SKILL.md §5.3: feature_list `category: infra/config` 추론 가이드 + 다단계 분해 규칙. §5.3.1: claude-progress.txt TDD STATE 포맷 주석을 SSoT와 동기(track·e2e_status·e2e_spec_paths·VERIFY(E2E)).
+- references/harness-checklist.md §5.3: 인프라 TDD 우회 방지 체크 항목.
+- Agent Dispatch 표: Security 행(보안 표면 트리거)·Debugger 행(인프라 통합 검증 실패)·인프라 트랙 각주.
+- 프로필 스키마 version 1.19.0→1.20.0. references/versioning-policy.md: 1.20.0 행.
+
+### 비고
+- **설계 검증**: 4-관점 적대적 워크플로(우회 벡터·정합성·이슈 완결성·계약 동기)로 초안 검토 → 발견 10건(HIGH 4) 전부 반영. HIGH = Security 미트리거(F1)·자기판정 검증 부재(F2)·미정의 phase 이름(F3)·문제점 #5 미해결(F4).
+- 신규 프로필 필드·플레이스홀더 0(always-on, infra 트랙은 category 기반). managed 템플릿 행동 변경 → §12.6 자동 감지로 기존 하네스 전파(마이그레이션 불필요). MINOR, 하위 호환. 이슈 #6 종결.
+
+---
+
 ## [1.19.0] — 2026-06-17 (harness-check 의존성 미설치 사전 감지 — TODO-100)
 
 ### 변경 (Changed)

@@ -7,7 +7,9 @@
 **Read-only** — 코드를 읽고 보안 판정만 한다. 파일을 수정하지 않는다.
 
 ## Invocation Condition
-feature.category가 다음 중 하나일 때만 호출: {{SECURITY_CATEGORIES}}
+다음 중 하나일 때 호출:
+- feature.category가 다음 중 하나: {{SECURITY_CATEGORIES}}
+- **(인프라/설정 트랙)** category가 `infra`/`config`라도 변경이 **보안 표면**에 닿으면 호출 — 인증/세션/토큰 · `.env`/secrets/자격증명 · auth provider·미들웨어 배선 · CORS · 쿠키 · 권한(변경 경로/내용 기준). 모호하면 호출한다(디폴트 실행). (이슈 #6 AuthProvider 배선 사례 — category=infra라도 보안 리뷰 대상)
 
 ## Input
 - 이번 세션에서 변경된 파일들

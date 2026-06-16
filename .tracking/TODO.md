@@ -675,10 +675,11 @@
 - **해결**: ① session-routine 마찰 기록을 jsonl 1줄 append + detail 소독(`"`→`'`·줄바꿈/CR 제거·`\` 제거·≤50자), 세션 시작 SESSION_ID(`{ISO 시각}-{4자 난수}`)→claude-progress.txt, 종료 미완료 시 session-incomplete append ② HARNESS_FRICTION.md 정적 참조 문서로 격하 ③ scaffold가 빈 jsonl 생성 + manifest category `data` ④ harness-feedback jsonl 직접 파싱 + 관용 파싱(깨진 줄 스킵·보고)·escape ⑤ 두 SKILL.md 계약 동기화(프로필 신규 필드 없음 — always-on), checklist·harness-check.sh 필수 파일 추가. MINOR(1.18.0). 설계 정본: `.tracking/specs/2026-06-16-friction-auto-logging-design.md`
 
 ### TODO-85: 인프라/설정 작업 트랙 (구 Issue #6) — 구현 항목
-- **상태**: [ ] 미완료 (부분 해결 — infra 트랙 미구현)
-- **파일**: `harness-scaffold/SKILL.md` §5.3(feature_list), `templates/rules/session-routine.md`
-- **문제**: 이슈 #6 — Plan 모드로 인프라 작업 시 TDD 우회. **세션 루틴 우회는 Plan 모드 통합(Issue #5, 1.0.0)으로 차단됨**(회귀체크·feature_list·완료처리 필수 명시). 잔존: feature_list에 infra category 부재, 설정 작업(30줄 미만 다파일)에 RED→GREEN TDD 부적합
-- **해결 후보**: feature_list 생성 규칙에 `category: "infra"` 가이드 + session-routine 간소화 조건에 "인프라/설정 작업: Architect·Test Engineer 스킵, 통합 검증(빌드+실동작)으로 대체" 트랙 추가. 단 TDD 우회 남용 방지 장치 필요 (infra 판정 기준 명확화)
+- **상태**: [x] 완료 (2026-06-17, 1.20.0 — 이슈 #6 닫기)
+- **파일**: `templates/rules/session-routine.md`(§ 인프라/설정 트랙 신설·TDD STATE track·Agent Dispatch·Phase 4/4.5·마찰 로그), `templates/rules/coding-standards.md`(금지 사항 예외), `templates/agents/security-reviewer.md`·`reviewer.md`, `harness-scaffold/SKILL.md` §5.3·§5.3.1, `references/harness-checklist.md` §5.3, `templates/HARNESS_FRICTION.md`
+- **문제**: 이슈 #6 — Plan 모드로 인프라 작업 시 TDD 우회. **세션 루틴 우회는 Plan 모드 통합(Issue #5, 1.0.0)으로 차단됨**(회귀체크·feature_list·완료처리 필수 명시). 잔존: feature_list에 infra category 부재, 설정 작업(30줄 미만 다파일)에 RED→GREEN TDD 부적합, 간소화 조건이 개별 단계에만 있어 전체 스킵 경로 부재
+- **해결 (사용자 '최대 엄격' 선택)**: `## 인프라/설정 트랙` 신설 — category `infra`/`config`에 Architect·유닛 RED 스킵 + 통합 검증(빌드+실동작) 대체. **남용 방지 게이트**: 사전 선언(재분류 금지) + 부정 테스트(조건3 우선) + 변경 범위 한정 + 모호→TDD. **독립 검증**: Reviewer 필수(30줄 스킵 무효)·분류 타당성 감사. **보안 표면 트리거**: infra라도 보안 표면 닿으면 Security 필수(이슈 #6 AuthProvider 사례). **감사 추적**: claude-progress.txt + `.harness-friction.jsonl` `infra-track-entry` 이중. **다단계 인프라**: Phase별 분해(문제점 #5). "전체 스킵 유일 경로=인프라 트랙" 노트로 임의 우회 차단.
+- **검증**: 4-관점 적대적 워크플로(우회/정합성/완결성/계약)로 초안 검토 → 발견 10건(HIGH 4: Security 미트리거·자기판정 검증 부재·미정의 phase 이름·문제점 #5) 전부 반영. 신규 필드·플레이스홀더 0(always-on, category 기반), managed 자동 감지 전파·마이그레이션 불필요. 골든 픽스처 회귀 통과. MINOR(1.20.0)
 
 ### TODO-86: 자동 커밋&푸시 confirm 모드 (구 Issue #4)
 - **상태**: [x] 완료 (2026-06-13, 1.8.0 — 이슈 #4 닫기)

@@ -295,7 +295,7 @@
 - **설계 절제**: _protocol.md는 실제 2선례에만 근거 — 플러그인 시스템류 미래 추측 설계 배제 (추측 설계 금지 원칙)
 
 ### 1.7.1 (깃 이슈 정리: #7·#8 해결)
-- 열린 이슈 5건을 1.7.0 기준 대조 — 해결 2건 수정·닫기, 미해결 3건 구현 항목 등록(TODO-84~86). 이후 TODO-86은 1.8.0(이슈 #4), TODO-84는 1.18.0(이슈 #9)으로 종결, TODO-85(이슈 #6 인프라 트랙)만 미해결로 남음
+- 열린 이슈 5건을 1.7.0 기준 대조 — 해결 2건 수정·닫기, 미해결 3건 구현 항목 등록(TODO-84~86). 이후 TODO-86은 1.8.0(이슈 #4), TODO-84는 1.18.0(이슈 #9), TODO-85는 1.20.0(이슈 #6 인프라 트랙)으로 종결 — 등록 3건 전부 닫힘
 - #8: install.sh를 companion-skills/* 루프로 → feedback/cleanup 글로벌 링크 (생성 CLAUDE.md "하네스 피드백 분석해줘" 안내와 디스커버리 일치). #7: 부트스트랩 "3.3"→"1.0.0" 문서 정정 (실질 버그는 semver 전환으로 해결됨)
 - 컴패니언 배치 설계 결정: opt-in → install.sh 글로벌 링크 일원화
 
@@ -324,6 +324,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.20.0 (인프라/설정 트랙 — 이슈 #6, TODO-85)
+- **1.20.0** (2026-06-17) — Plan 모드로 인프라 작업(예: Supabase 연동 — AuthProvider/QueryClientProvider 배선, useAuth→useAuthContext 교체, queryClient.ts 생성) 시 TDD 세션 루틴이 **전면 우회**되던 구조적 문제(이슈 #6, TODO-85)를 마감. 세션 시작 루틴 우회는 이미 Plan 모드 통합(이슈 #5, 1.0.0)으로 차단됐고, 잔존 두 측면 — feature_list에 infra category 부재 + 설정 작업(30줄 미만 다파일)에 RED→GREEN TDD 부적합 — 을 **인프라/설정 트랙**으로 해소. **해결**: `templates/rules/session-routine.md`에 `## 인프라/설정 트랙` 신설 — category `infra`/`config` 작업에 한해 Architect·유닛 RED(Test Engineer)를 스킵하고 **통합 검증(빌드+실동작)으로 대체**한다. 이슈 #6 핵심 갭("간소화 조건이 개별 단계에만 있고 전체 스킵 경로가 없자 에이전트가 임의로 전부 건너뜀")을 "전체 사이클 스킵의 유일한 경로 = 인프라 트랙" 노트로 닫는다. **남용 방지 게이트(사용자 '최대 엄격' 선택)**: ① 사전 선언(feature_list category — 리뷰 가능, GREEN 중 재분류 금지) ② 부정 테스트("의미 있는 실패 테스트를 쓸 수 있으면 인프라 아님" — 조건3에 우선) ③ 변경 범위 한정, 모호 → TDD. **독립 검증**: Reviewer가 인프라 트랙에서 필수(30줄 스킵 무효)이며 분류 타당성을 독립 감사. **보안 표면 트리거**: category가 infra라도 변경이 보안 표면(.env·secrets·auth/세션/토큰·provider 배선·CORS·쿠키)에 닿으면 Security Reviewer 필수. **감사 추적**: 트랙 진입을 claude-progress.txt + `.harness-friction.jsonl` `infra-track-entry`(기계 가독·append-only)에 이중 기록. **다단계 인프라**: Phase별 개별 infra 항목(F-infra-0/1…)으로 feature_list 분해(passes/priority로 진행 표현 — 이슈 #6 문제점 #5 해소). **설계 검증**: 4-관점 적대적 워크플로(우회 벡터·정합성·이슈 완결성·계약 동기)로 초안 검토 → 발견 10건(HIGH 4: Security 미트리거·자기판정 검증 부재·미정의 phase 이름·문제점 #5 미해결) 전부 반영 후 릴리스. 신규 프로필 필드·플레이스홀더 0(always-on, category 기반), managed 템플릿 행동 변경이라 §12.6 자동 감지로 기존 하네스 전파(마이그레이션 불필요). MINOR, 하위 호환. 이슈 #6 종결.
 
 ### 1.19.0 (harness-check 의존성 미설치 사전 감지 — TODO-100)
 - **1.19.0** (2026-06-17) — `npm run harness:check`(사용자가 반복 실행하는 영속 자가진단 스크립트)가 `node_modules` 부재 상태에서 ④ 아키텍처 검사·⑤ 통합 검증을 도구 부재(`vitest: command not found` exit 127)로 실패시켜 **MVH/품질-실패로 오라벨링**하던 문제(TODO-100, TODO-53 신규셋업 실주행에서 발견)를 완화. "의존성 미설치(전이적·`npm install` 1회로 자가 해소)"와 "실제 품질 실패(구조·규칙 결함)"를 구분하지 못해 갓 셋업한 사용자에게 하네스 결함으로 오인됐다. **해결**: `templates/harness-check.sh`가 ④⑤ 실행 **앞에서** `node_modules` 존재를 사전 감지(`DEPS_MISSING`) → 부재 시 ④⑤(및 ⑥ 문서 최신성)을 실행하지 않고 "⏸️ 의존성 미설치로 보류"로 표기, 종합 판정을 **"의존성 미설치 (구조 정상)" → exit 0**로 분기한다. 구조 항목(①②③) 판정에는 영향 주지 않으며(구조 실패가 우선), exit 코드 정책은 `references/harness-checklist.md` §8과 정합 — exit 0은 "구조 정상의 정당한 상태"(표준/MVH-Q2미강제/의존성-미설치-보류), exit 1은 진짜 점검 실패(구조 실패 또는 *실행된* ④⑤의 실패)에 보존. **자동 설치는 하지 않는다(절대 규칙 보존)**. 판정 식별은 출력 텍스트(`⏸️ 의존성 미설치`)로 하며 exit code만으로는 표준과 구분 불가 — harness-scaffold §7 단계 판정 행과 §6.13 주석에 명시. checklist §7·§8에 "의존성 미설치 — 판정 보류" 노트(Q2 미강제 노트와 평행). **검증**: 렌더 후 5 시나리오 실행(정상=표준 exit 0 / deps부재=보류 exit 0 / 진짜 품질실패=exit 1 / 구조실패=exit 1 / 구조실패+deps부재=구조 우선 exit 1) 전부 설계대로. 신규 프로필 필드·플레이스홀더 0, managed 템플릿 행동 개선이라 §12.6 자동 감지로 기존 하네스에 전파(마이그레이션 불필요). MINOR, 하위 호환.

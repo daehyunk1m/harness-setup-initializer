@@ -17,6 +17,7 @@
 | `refactor-rollback` | high | Simplifier 2회 실패 → 리팩터링 전체 롤백 |
 | `e2e-fail` | high | VERIFY(E2E)가 FAIL 반환 |
 | `session-incomplete` | low | TDD 사이클 미완료 상태로 세션 종료 |
+| `infra-track-entry` | low | 인프라/설정 트랙 진입 — **감사 마커**(마찰 아님). detail에 게이트 통과 사유. harness-feedback이 트랙 사용 빈도·오분류 패턴 집계에 활용 |
 
 ### 하네스 이슈
 
