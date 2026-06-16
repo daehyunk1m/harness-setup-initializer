@@ -67,5 +67,7 @@
     "e2e": "playwright"
   },
 
-  "docFreshnessDays": 14
+  "docFreshnessDays": 14,
+
+  "e2e": { "enabled": true }
 }
