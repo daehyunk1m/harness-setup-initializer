@@ -209,7 +209,7 @@ harness-setup 스킬의 현재 스캐폴딩 범위는 **표준 하네스**까지
 
 ```bash
 # 1. 필수 파일
-ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json init.sh
+ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl init.sh
 
 # 2. AGENTS.md 100줄 제한
 wc -l AGENTS.md

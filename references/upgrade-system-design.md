@@ -134,7 +134,7 @@ node -e "const c=require('crypto'),f=require('fs'); console.log('sha256:'+c.crea
 | 19 | `scripts/doc-freshness.ts` | managed | 템플릿 기반 문서 최신성 검사 |
 | 20 | `docs/QUALITY_SCORE.md` | **data** | 사용자/에이전트가 점수 기록 |
 | 21 | `docs/TECH_DEBT.md` | **data** | 사용자/에이전트가 부채 항목 축적 |
-| 22 | `docs/HARNESS_FRICTION.md` | **data** | session-routine이 마찰 이벤트 기록 |
+| 22 | `docs/HARNESS_FRICTION.md` | **managed** | 정적 참조 문서(이벤트 유형/심각도 참조표). 실제 이벤트는 `.harness-friction.jsonl`에 기록 |
 | 23 | `package.json` (scripts) | **custom** | 스킬은 특정 키만 추가. 사용자가 수정했을 수 있음 |
 
 ### 2.3 managed 파일의 변경 감지 및 대응

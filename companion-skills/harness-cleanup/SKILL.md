@@ -179,7 +179,7 @@ W4의 harness:check 결과와 M1~M2를 종합해 하네스 단계(표준/MVH)를
 
 - 행 추가만 한다 (기존 행 수정/삭제 금지)
 - CLEANUP_LOG는 추가형 이벤트 로그라 doc-freshness 검사 대상이 아니다 (staleness 경고 무의미 — 검사 대상 정책: harness-scaffold/SKILL.md § 5.7)
-- 하네스 자체의 문제(예: harness:check 구조 항목 실패, 규칙 충돌)를 발견했으면 `docs/HARNESS_FRICTION.md`에도 기록한다 (`doc-stale`, `setup-mismatch` 등) — 반복되면 harness-feedback 스킬로 Issue화한다
+- 하네스 자체의 문제(예: harness:check 구조 항목 실패, 규칙 충돌)를 발견했으면 `.harness-friction.jsonl`에 JSON 한 줄을 append한다 (스키마: `{"ts":"<ISO8601>","session":"<SESSION_ID 또는 \"\">","event":"doc-stale","severity":"low","feature":"","detail":"<소독된 원인 ≤50자>"}`, `setup-mismatch` 등 이벤트 유형 사용) — 반복되면 harness-feedback 스킬로 Issue화한다
 
 ---
 

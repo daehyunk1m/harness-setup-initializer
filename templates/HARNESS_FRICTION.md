@@ -15,6 +15,7 @@
 | `user-escalation` | critical | Debugger도 실패 → 사용자 개입 필요 |
 | `review-fix` | medium | Reviewer가 NEEDS_FIX 반환 |
 | `refactor-rollback` | high | Simplifier 2회 실패 → 리팩터링 전체 롤백 |
+| `e2e-fail` | high | VERIFY(E2E)가 FAIL 반환 |
 | `session-incomplete` | low | TDD 사이클 미완료 상태로 세션 종료 |
 
 ### 하네스 이슈

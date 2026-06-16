@@ -288,7 +288,7 @@ harness-setup/
 │   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트 템플릿
 │   ├── QUALITY_SCORE.md              # 품질 점수표 템플릿
 │   ├── TECH_DEBT.md                  # 기술 부채 문서 템플릿
-│   └── HARNESS_FRICTION.md           # 마찰 로그 템플릿
+│   └── HARNESS_FRICTION.md           # 정적 참조 문서 템플릿 (이벤트 유형/심각도 참조표; 실제 이벤트는 .harness-friction.jsonl 기록)
 ├── companion-skills/                 # 컴패니언 스킬 (install.sh 글로벌 링크)
 │   ├── harness-cleanup/              # 엔트로피 정리 — 운영 사이클 실행
 │   ├── harness-feedback/             # 마찰 로그 분석 → GitHub Issue

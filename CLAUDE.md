@@ -23,7 +23,7 @@
 | `templates/harness-check.sh` | 하네스 자가진단 스크립트 템플릿 (체크리스트 §8 구현) | 낮음 |
 | `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
 | `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
-| `templates/HARNESS_FRICTION.md` | 마찰 로그 템플릿 | 낮음 |
+| `templates/HARNESS_FRICTION.md` | 정적 참조 문서 템플릿 (이벤트 유형/심각도 참조표). 실제 이벤트는 `.harness-friction.jsonl` 싱크에 기록 | 낮음 |
 | `test/` | **스킬 자체 검증** — structural-test 골든 픽스처 + 러너(`run-fixtures.sh`). 템플릿이 허용/금지 import를 정확히 구분하는지 검증. 생성 프로젝트와 무관 | 낮음 |
 | `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
 | `companion-skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
