@@ -1144,8 +1144,11 @@ Phase U1에서 각 managed 파일에 대해:
 | `scripts/doc-freshness.ts` | `templates/doc-freshness.ts` |
 | `scripts/harness-check.sh` | `templates/harness-check.sh` |
 | `.githooks/pre-push` | `templates/githooks/pre-push` |
+| `playwright.config.ts` | `templates/playwright.config.ts` |
+| `e2e/tsconfig.json` | `templates/e2e/tsconfig.json` |
+| `e2e/README.md` | `templates/e2e/README.md` |
 
-> **노트(플래그)**: 기존 e2e managed 파일(`playwright.config.ts`, `e2e/tsconfig.json`)은 이 매핑에 **부재**한다 (1.11.0 옵트인 모듈 선례 — 자동 감지 제외). pre-push는 보안·정확성 업데이트 전파가 필요해 매핑에 포함한다. 두 e2e 파일의 매핑 정렬은 별도 후속(증분 4 / 본 증분 범위 밖)으로 TODO에 남긴다.
+> **노트**: e2e managed 파일(`playwright.config.ts`, `e2e/tsconfig.json`, `e2e/README.md`)도 위 매핑에 포함된다 — 옵트인(`e2e.enabled`) 하네스에서만 생성되며, 매핑이 있으므로 다음 업그레이드부터 § 12.6 자동 감지 대상이 된다(템플릿 변경 전파). manifest는 실제 생성된 파일만 기록하므로(harness-scaffold/SKILL.md § 5.13), 비-e2e 하네스에서는 이 행들이 참조조차 되지 않는다. custom e2e 파일(`e2e/fixtures/test.ts`·`e2e/fixtures/seed.ts`·`e2e/specs/smoke.e2e.ts`)은 사용자 소유라 매핑에서 제외한다.
 
 `docs/` 하위 디렉토리 등 매핑에 없는 managed 파일은 이 자동 감지 대상에서 제외하고, 마이그레이션으로만 관리한다. `custom` 아키텍처 유형의 `scripts/structural-test.ts`는 동적 생성되므로(템플릿 매핑 없음) 자동 감지에서 제외된다 — layer-based/fsd/domain-based는 `structural-test-{architectureType}.ts` 매핑으로 자동 감지된다.
 
