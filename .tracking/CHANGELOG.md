@@ -5,6 +5,25 @@
 
 ---
 
+## [1.17.0] — 2026-06-16 (E2E 모듈 마감 — 이슈 #12 증분 4, TODO-97)
+
+### 추가 (Added)
+- templates/e2e/README.md: 사람 개발자용 E2E 작성 가이드(managed, 정적, 플레이스홀더 0) — 8절(무엇/언제·`e2e/` 레이아웃·fixtures/seed·셀렉터/태그·시각/레이아웃 회귀 트리거·실행·조건부 MCP/pre-push). 에이전트-규칙 내용은 복제하지 않고 정본(coding-standards·session-routine·test-engineer·debugger) 참조. (D2=managed, `e2e.enabled` 엄격 게이트)
+- harness-scaffold/SKILL.md §10.3: U1 **base-E2E 재감지** 불릿 — 비-e2e 프론트엔드 하네스가 업그레이드 시 E2E 계층을 옵트인 제안(생략 기본). 수락 시 같은 U1 패스에서 pre-push 재감지로 **cascade**(D3, 신규셋업 §4.2 순서 미러). MCP 재감지는 독립 유지.
+
+### 변경 (Changed)
+- presets/react-next·react-router-fsd·react-vite.json: `e2e:{enabled:true}` 권장 기본(pre-seed, D1) 추가. §4.2 옵트인 질문은 유지하되 기본 답을 "예"로 제시 — 거부/무응답이면 생략(옵트인 계약 불변). express-api(백엔드) 비대상.
+- SKILL.md §6 프리셋 스키마·§9 커스텀 가이드·필드 규칙(666)·§4.2(356), harness-scaffold/SKILL.md(183): e2e 필드 "프리셋 비대상" → "프론트엔드 프리셋 권장 기본 제공, 옵트인 확인 유지" 일관 재서술.
+- SKILL.md §12.6.1 파일-템플릿 매핑: e2e managed 3파일(playwright.config.ts·e2e/tsconfig.json·e2e/README.md) 편입(A, 증분 2b 이월 정렬). custom e2e 3파일은 user-owned로 제외.
+- harness-scaffold/SKILL.md §5.17 생성 테이블/규칙·§10.1 분류 테이블(README #28, pre-push #31→#32)·생성순서 step19·Phase 4 카탈로그 E2E 줄: e2e/README.md 배선.
+- references/harness-checklist.md §4.2·versioning-policy.md: 1.17.0 행 추가.
+
+### 비고
+- **무마이그레이션 전파 경계(정직)**: §12.6 자동 감지는 manifest 기록 파일의 **업데이트 전용**(신규 파일 생성은 `[new]` 마이그레이션 영역). 따라서 `e2e/README.md`는 신규 셋업·U1 재감지 옵트인 경로로만 생성되고, **기존(1.11.0~1.16.0) e2e 하네스엔 소급 생성하지 않는다**(비침습·옵트인 보존). config 2종은 기존 e2e 하네스 manifest에 이미 있어 §12.6.1 편입으로 자동 감지를 새로 받음. §10.3 1.17.0 노트에 파일별 명시.
+- 신규 플레이스홀더 0(31 불변). 프로필 스키마 JSON 블록 byte-identical(version 1.16.0→1.17.0 동시). 골든 픽스처 4종(run/e2e/mcp/prepush) 통과. MINOR, 마이그레이션 불필요.
+
+---
+
 ## [1.16.0] — 2026-06-16 (E2E 레이아웃 회귀 트리거 확장 — 이슈 #12, TODO-99)
 
 ### 변경 (Changed)

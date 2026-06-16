@@ -751,7 +751,7 @@
 
 ### TODO-95b: E2E 모듈 증분 2b — pre-push 인프라 (후속, 목표 1.14.0)
 - **상태**: [x] 완료 (2026-06-16, 1.14.0)
-- **해소**: 9개 난제 중 8개 정본 §8 방향대로 해소, 난제 ⑥(eslint override) 드롭(YAGNI — e2e/는 srcRoot 밖, 승격 조건 보존). 활성화 수동(D1). 골든 픽스처 통과. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md. 구현 계획: docs/superpowers/plans/2026-06-16-e2e-prepush-2b.md. **후속 플래그**: e2e managed 파일(playwright.config.ts/e2e tsconfig)의 §12.6.1 매핑 정렬은 증분 4로 이월
+- **해소**: 9개 난제 중 8개 정본 §8 방향대로 해소, 난제 ⑥(eslint override) 드롭(YAGNI — e2e/는 srcRoot 밖, 승격 조건 보존). 활성화 수동(D1). 골든 픽스처 통과. 설계 정본: docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md. 구현 계획: docs/superpowers/plans/2026-06-16-e2e-prepush-2b.md. **후속 플래그**: e2e managed 파일(playwright.config.ts/e2e tsconfig)의 §12.6.1 매핑 정렬은 증분 4로 이월 → **TODO-97(1.17.0)에서 완료**
 - **내용**: 무의존 pre-push 훅(`.githooks/pre-push` + core.hooksPath, 결정 b) — @critical 스펙 게이팅. e2e 전용 eslint override(eslintAssist 시 별도 마커). 설계 정본 §8 참조
 - **착수 전 해소할 9개 난제(적대적 자문)**: ① 기존 Husky/hooksPath 공존성("충돌 시 경고"와 "강제" 양립불가 → 적응형 마커 주입) ② PM 비종속(`node_modules/.bin/playwright` 직접) ③ monorepo repo-root 계산(하위 패키지는 명시적 한계) ④ @critical 탐지(`--list --grep`, 소스 grep 오탐 회피, 0-exit 픽스처 검증) ⑤ 실제 설치 판정(package.json 존재 ≠ 실행 가능) ⑥ 별도 eslint 마커(`harness-setup:e2e-eslint`) ⑦ 멱등성(core.hooksPath는 manifest 밖 외부 상태) ⑧ 보안 고지(push 시 임의 코드 실행) ⑨ 신규 managed 파일 마이그레이션 M-1.13.0-to-1.14.0(e2e.enabled 시만, 기존 훅 4-상태). 신규 파일 발생 → MINOR(1.14.0 — 1.13.0은 파일럿 마찰 수정에 소비됨)
 
@@ -760,11 +760,13 @@
 - **해소**: 배치 e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 충돌)·비커밋 B안(멀티모델 자문 — nagware·머지 회피)·분리 옵트인 `e2e.mcp`·`{{MCP_DEBUG_PROTOCOL}}`(30→31)·debugger 지침+로컬 `claude mcp add` 등록. 설계 정본 `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md`, 플랜 `docs/superpowers/plans/2026-06-16-e2e-mcp-incr3.md`.
 - **내용**: Playwright MCP 등 브라우저 자동화 MCP 연계 (integrations.<name> 메커니즘). 설계 §11 증분 3 범위
 
-### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 + U1 재감지 + §12.6.1 정렬 (후속)
-- **상태**: [ ] 미착수 (스코핑 완료 — 핸드오프 정본 작성됨)
-- **핸드오프 정본**: `docs/superpowers/specs/2026-06-16-e2e-incr4-handoff.md` (Session 41 작성 — 4항목 병렬 스카우트 종합, file:line 앵커·결정 프레이밍 포함). 새 세션은 이 문서부터.
-- **내용(4항목, 목표 1.17.0 MINOR)**: **A** §12.6.1 e2e managed 매핑 정렬(2b 이월 — SKILL.md:1128-1148에 playwright.config.ts·e2e/tsconfig.json 2행 + 1148 deferral 주석 제거, 무결정·먼저) · **B** 프리셋 e2e 기본값(프론트 3종, express 제외; D1: auto-enable vs pre-seed 권장) · **C** U1 재감지 base `e2e.enabled`(harness-scaffold §10.3 1743 앞, D3: cascade 권장) · **D** 사용자 E2E 작성 가이드(권장 `templates/e2e/README.md` managed·e2e.enabled 게이트; D2: 위치/카테고리). 전 항목 신규 플레이스홀더 0(31 불변)·마이그레이션 불필요 설계 가능.
-- **착수 전 사용자 확정**: D1·D2·D3(의견 개입)·D4(단일 vs 분할). A는 결정 없이 바로 가능.
+### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 + U1 재감지 + §12.6.1 정렬
+- **상태**: [x] 완료 (Session 42, 2026-06-16 — 1.17.0)
+- **핸드오프 정본**: `docs/superpowers/specs/2026-06-16-e2e-incr4-handoff.md` (Session 41 작성). 확정 결정 D1=pre-seed·D2=e2e/README.md managed·D3=cascade·D4=단일(AskUserQuestion, 권장안 전부 채택). 설계: `docs/superpowers/specs/2026-06-16-e2e-incr4-design.md`, 계획: `docs/superpowers/plans/2026-06-16-e2e-incr4.md`.
+- **구현(4항목)**: **A** §12.6.1에 e2e managed 3파일(playwright.config.ts·e2e/tsconfig.json·e2e/README.md) 매핑 편입 + 1148 deferral 제거. **B** 프론트엔드 프리셋 3종 `e2e:{enabled:true}` 권장 기본(pre-seed — §4.2 옵트인 질문 유지·기본답 "예", express 비대상, version/prePush/mcp 비시드) + §6/§9/필드규칙 3곳 일관 재서술. **C** U1 base-E2E 재감지 불릿(비-e2e 프론트엔드 하네스 업그레이드 옵트인) + pre-push cascade. **D** `templates/e2e/README.md`(managed·정적·플레이스홀더 0·8절, 에이전트-규칙 정본 참조 비복제) + §5.17/§10.1(README #28, pre-push #32)/step19/Phase4/checklist/versioning 배선.
+- **핵심 설계 발견(핸드오프 과소명세 보완)**: §12.6 자동 감지는 manifest 기록 파일 **업데이트 전용**(신규 파일은 `[new]` 마이그레이션 영역) → README는 신규셋업·U1 재감지 옵트인 경로로만 생성, **기존 e2e 하네스 소급 생성 안 함**(비침습·옵트인 보존). config 2종은 기존 manifest에 이미 있어 §12.6.1 편입으로 자동 감지 신규 획득. §10.3 1.17.0 노트에 파일별 전파 경계 정직 명시.
+- **검증**: 신규 플레이스홀더 0(31 불변)·프로필 스키마 JSON byte-identical·골든 픽스처 4종 통과·적대적 검증(워크플로). MINOR, 마이그레이션 불필요.
+- **잔여 관찰(이월)**: 신규 셋업 실전 테스트(TODO-53)에서 E2E 옵트인 경로(프리셋 권장 기본→§4.2 질문→README 생성)·U1 재감지 실주행 검증.
 
 ### TODO-98: haja 1.9→1.12 업그레이드 파일럿 마찰 3건 (1.13.0)
 - **상태**: [x] 완료 (Session 38, 2026-06-16)
