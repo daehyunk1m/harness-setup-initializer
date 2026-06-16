@@ -760,9 +760,11 @@
 - **해소**: 배치 e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 충돌)·비커밋 B안(멀티모델 자문 — nagware·머지 회피)·분리 옵트인 `e2e.mcp`·`{{MCP_DEBUG_PROTOCOL}}`(30→31)·debugger 지침+로컬 `claude mcp add` 등록. 설계 정본 `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md`, 플랜 `docs/superpowers/plans/2026-06-16-e2e-mcp-incr3.md`.
 - **내용**: Playwright MCP 등 브라우저 자동화 MCP 연계 (integrations.<name> 메커니즘). 설계 §11 증분 3 범위
 
-### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 (후속)
-- **상태**: [ ] 미착수
-- **내용**: 프리셋에 e2e 기본값 반영(react-vite 등), 사용자 문서(E2E 작성 가이드). U1 재감지(업그레이드 시 e2e 옵트인 제안) 패턴도 검토. 설계 §11 증분 4 범위
+### TODO-97: E2E 모듈 증분 4 — 프리셋 + 문서 + U1 재감지 + §12.6.1 정렬 (후속)
+- **상태**: [ ] 미착수 (스코핑 완료 — 핸드오프 정본 작성됨)
+- **핸드오프 정본**: `docs/superpowers/specs/2026-06-16-e2e-incr4-handoff.md` (Session 41 작성 — 4항목 병렬 스카우트 종합, file:line 앵커·결정 프레이밍 포함). 새 세션은 이 문서부터.
+- **내용(4항목, 목표 1.17.0 MINOR)**: **A** §12.6.1 e2e managed 매핑 정렬(2b 이월 — SKILL.md:1128-1148에 playwright.config.ts·e2e/tsconfig.json 2행 + 1148 deferral 주석 제거, 무결정·먼저) · **B** 프리셋 e2e 기본값(프론트 3종, express 제외; D1: auto-enable vs pre-seed 권장) · **C** U1 재감지 base `e2e.enabled`(harness-scaffold §10.3 1743 앞, D3: cascade 권장) · **D** 사용자 E2E 작성 가이드(권장 `templates/e2e/README.md` managed·e2e.enabled 게이트; D2: 위치/카테고리). 전 항목 신규 플레이스홀더 0(31 불변)·마이그레이션 불필요 설계 가능.
+- **착수 전 사용자 확정**: D1·D2·D3(의견 개입)·D4(단일 vs 분할). A는 결정 없이 바로 가능.
 
 ### TODO-98: haja 1.9→1.12 업그레이드 파일럿 마찰 3건 (1.13.0)
 - **상태**: [x] 완료 (Session 38, 2026-06-16)
