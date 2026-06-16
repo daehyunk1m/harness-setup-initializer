@@ -3,3 +3,7 @@
 .claude/hooks/
 node_modules/
 .claude/artifacts/
+
+# 신규 셋업 실전 테스트용 임시 픽스처 (TODO-53) — 스킬 저장소가 추적하지 않음.
+# 각 픽스처는 자체 git repo로 초기화되어 별도 세션에서 /harness-setup 주행 대상이 된다.
+_sandbox/
