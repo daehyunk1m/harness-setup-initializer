@@ -220,7 +220,7 @@ fi
 16. docs/TECH_DEBT.md (기술 부채 빈 템플릿)
 17. docs/HARNESS_FRICTION.md (마찰 로그 — 피드백 수집)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
-19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리
+19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드)
 19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
 20. ESLint 보조 규칙 수정 (eslintAssist 옵트인 시에만 — § 5.15)
 21. .harness-manifest.json (버전 추적 매니페스트 — § 5.13, 항상 마지막 — Stop hook 종료 조건)
@@ -1028,6 +1028,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 |------|---------|--------|------|
 | `playwright.config.ts` | managed | `templates/playwright.config.ts` | `{{DEV_SERVER_COMMAND}}` ← devServer.command, `{{DEV_SERVER_PORT}}` ← devServer.port |
 | `e2e/tsconfig.json` | managed | `templates/e2e/tsconfig.json` | 없음 |
+| `e2e/README.md` | managed | `templates/e2e/README.md` | 없음 |
 | `e2e/fixtures/test.ts` | custom | `templates/e2e/fixtures/test.ts` | 없음 |
 | `e2e/fixtures/seed.ts` | custom | `templates/e2e/fixtures/seed.ts` | 없음 |
 | `e2e/specs/smoke.e2e.ts` | custom | `templates/e2e/specs/smoke.e2e.ts` | 없음 |
@@ -1036,7 +1037,8 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 
 - `playwright.config.ts`의 `testMatch`는 `**/*.e2e.ts`이고, Vitest 기본 글롭(`**/*.{test,spec}.ts`)은 `.e2e.ts`를 수집하지 않는다 — 따라서 vitest.config 수정이 불필요하다 (이슈 #12의 load-bearing 결정).
 - `e2e/tsconfig.json`은 root tsconfig를 `extends`하고 e2e 디렉토리만 컴파일한다. **root tsconfig는 수정하지 않는다.** root의 include가 e2e를 포함하면 harness-check ⑧이 경고한다 (§ 5.14).
-- custom 파일(fixtures/seed/smoke)은 이미 존재하면 덮어쓰지 않는다 (사용자 소유). managed 파일(config/tsconfig)은 § 12.6 자동 감지로 템플릿 변경을 전파한다.
+- custom 파일(fixtures/seed/smoke)은 이미 존재하면 덮어쓰지 않는다 (사용자 소유). managed 파일(config/tsconfig/README)은 § 12.6 자동 감지로 템플릿 변경을 전파한다.
+- `e2e/README.md`는 **사람 개발자용** 정적 작성 가이드다(managed, 플레이스홀더 0 — 순수 정적 템플릿이라 재렌더 결정론 자명). 에이전트/TDD 규칙 내용을 복제하지 않고 정본(coding-standards.md·session-routine.md·test-engineer.md·debugger.md)을 **참조**한다. 조건부 절(MCP·pre-push)은 프로필 게이트 렌더가 아니라 정적 "if wired" 산문이다(§ 12.6 결정론 보존).
 - E2E 그린은 앱별 부팅(env/route-block)에 의존하므로 **스위트를 실행하지 않는다** — 구조(파일·스크립트 존재)만 보장한다 (의미 비보장, harness-checklist § 7 일관).
 
 ---
@@ -1318,7 +1320,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 피드백 분석 → "하네스 피드백 분석해줘" (상세: CLAUDE.md 하네스 이슈 보고 — 컴패니언, 글로벌 설치 전제)
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
-- 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/, playwright.config.ts) — e2e 옵트인 시에만 표시
+- 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/README.md · playwright.config.ts) — e2e 옵트인 시에만 표시
 - 브라우저 MCP 진단 → debugger가 스펙 없는 UI 증상을 라이브 브라우저로 탐색 (상세: agents/debugger.md § 0.5) — e2e.mcp 옵트인 시에만 표시
 - pre-push 게이트 → 활성화 후 `git push` 시 `@critical` 자동 검증 (활성화 방법: 아래 'pre-push 게이트 활성화 안내'; 상세: .githooks/pre-push · references/harness-checklist.md §4.2) — e2e.prePush 옵트인 + 훅 생성 시에만 표시
 > 위 줄은 정본을 가리킬 뿐 능력을 재정의하지 않는다 — 상세는 .claude/rules/session-routine.md · AGENTS.md · CLAUDE.md 참조.
@@ -1444,10 +1446,11 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
 | 26 | `playwright.config.ts` | managed | 템플릿 기반 E2E 설정 (e2e 옵트인 시에만) |
 | 27 | `e2e/tsconfig.json` | managed | 템플릿 기반 e2e 컴파일 경계 (e2e 옵트인 시에만) |
-| 28 | `e2e/fixtures/test.ts` | custom | per-test fixture, 사용자가 시드 훅 추가 (e2e 옵트인 시에만) |
-| 29 | `e2e/fixtures/seed.ts` | custom | 앱별 시드 로직, 사용자 소유 (e2e 옵트인 시에만) |
-| 30 | `e2e/specs/smoke.e2e.ts` | custom | 스타터 스모크, 사용자가 회귀 스펙 축적 (e2e 옵트인 시에만) |
-| 31 | `.githooks/pre-push` | managed | 옵트인(e2e.prePush) 시에만. 그린필드=`.githooks/pre-push`, 기존 hooksPath/Husky 주입 시 호스트 훅 경로 |
+| 28 | `e2e/README.md` | managed | E2E 작성 가이드 (사람 개발자용 정적 문서, e2e 옵트인 시에만) |
+| 29 | `e2e/fixtures/test.ts` | custom | per-test fixture, 사용자가 시드 훅 추가 (e2e 옵트인 시에만) |
+| 30 | `e2e/fixtures/seed.ts` | custom | 앱별 시드 로직, 사용자 소유 (e2e 옵트인 시에만) |
+| 31 | `e2e/specs/smoke.e2e.ts` | custom | 스타터 스모크, 사용자가 회귀 스펙 축적 (e2e 옵트인 시에만) |
+| 32 | `.githooks/pre-push` | managed | 옵트인(e2e.prePush) 시에만. 그린필드=`.githooks/pre-push`, 기존 hooksPath/Husky 주입 시 호스트 훅 경로 |
 
 #### managed 파일의 사용자 수정 대응
 

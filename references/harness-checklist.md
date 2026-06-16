@@ -121,6 +121,7 @@
 - (1.14.0, 증분 2b) `@critical` 태그 E2E의 **cross-feature 회귀**는 옵트인 pre-push 게이트(`.githooks/pre-push`)가 push 시점에 강제한다 (`validate` → `@critical`). per-feature VERIFY(Phase 4.7)와 분리된 마지막 방어선이며, 활성화는 수동(`git config core.hooksPath`)이다. CI 부재 환경에서 "안 보이는 테스트" 방치를 막는 강제 경로.
 - (옵트인 `e2e.mcp`) 스펙 없는 UI 증상은 debugger가 브라우저 MCP(`@playwright/mcp`)로 탐색 진단 — known `.e2e.ts` 실패는 러너가 정본(MCP 비사용).
 - (1.16.0, TODO-99) E2E 작성 트리거가 "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장 — jsdom(L2)이 못 잡는 오버플로·정렬·스크롤·넘침 회귀는 상호작용이 없어도 E2E 대상(test-engineer.md). 브라우저 육안 1회 확인은 회귀 가드가 아니며 `.e2e.ts`로 코드화한다(session-routine 완료 게이트).
+- (1.17.0, 증분 4) e2e 옵트인 시 `e2e/README.md`(사람 개발자용 작성 가이드, managed)가 생성된다 — 무엇/언제·`e2e/` 레이아웃·fixtures·셀렉터/태그·시각/레이아웃 회귀 트리거·실행을 정본(coding-standards·session-routine·test-engineer·debugger) 참조와 함께 안내한다(에이전트-규칙 내용 비복제).
 
 ### 4.3 환경 재현성
 
