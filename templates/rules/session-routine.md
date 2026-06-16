@@ -195,7 +195,7 @@ feature.category가 {{SECURITY_CATEGORIES}} 중 하나일 때만 실행.
 - `skipped` / `not_applicable` → VERIFY를 건너뛴다 (명시적 선언이 있어야만 스킵).
 - 판정 유실/모호(재개 세션 등) → **BLOCK**: `e2e/specs`를 feature ID(`@feature:{featureID}`)로 재탐색하거나, 불명확하면 사용자에게 확인을 요청한다. 침묵은 PASS가 아니다.
 
-**실행**: 해당 feature 스펙만 선택 실행한다(전체 스위트 아님) — E2E 러너 `{{E2E_COMMAND}}`에 `--grep @feature:{featureID}`를 적용한다(유닛 러너 `{{TEST_COMMAND}}`가 **아님** — `.e2e.ts`는 유닛 테스트 글롭에 수집되지 않아 유닛 러너로는 0개 실행되어 거짓 PASS가 된다). (전체 @critical 게이팅은 증분 2b의 pre-push 책임.)
+**실행**: 해당 feature 스펙만 선택 실행한다(전체 스위트 아님) — E2E 러너 `{{E2E_COMMAND}}`에 `--grep @feature:{featureID}`를 적용한다(유닛 러너 `{{TEST_COMMAND}}`가 **아님** — `.e2e.ts`는 유닛 테스트 글롭에 수집되지 않아 유닛 러너로는 0개 실행되어 거짓 PASS가 된다). (전체 @critical 게이팅은 pre-push 훅의 책임.)
 
 **분기**:
 - PASS → 기능 완료 처리.
@@ -220,7 +220,7 @@ Reviewer가 NEEDS_REFACTOR를 반환했을 때만 실행.
 
 ## 기능 완료 처리
 
-**전제**: `e2e.enabled`이고 Test Engineer E2E status=created이면, 완료 처리 전에 **Phase 4.7 VERIFY(E2E)를 통과**해야 한다(미통과·미판정이면 완료 처리를 중단).
+**전제**: `e2e.enabled`이고 Test Engineer E2E status=created이면, 완료 처리 전에 **Phase 4.7 VERIFY(E2E)를 통과**해야 한다(미통과·미판정이면 완료 처리를 중단). 또한 작업 중 **시각/레이아웃을 브라우저로 직접 확인**했다면(MCP 진단·수동 스크린샷 포함), 그 동작이 `.e2e.ts` 회귀 스펙으로 **코드화**되어 있어야 완료로 처리한다 — 1회 육안 확인은 회귀 가드가 아니므로, 미코드화 시 Test Engineer에게 스펙 작성을 요청한 뒤 완료한다.
 
 TDD 사이클이 성공적으로 완료되면:
 

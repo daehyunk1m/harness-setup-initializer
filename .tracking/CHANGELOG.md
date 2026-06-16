@@ -5,6 +5,23 @@
 
 ---
 
+## [1.16.0] — 2026-06-16 (E2E 레이아웃 회귀 트리거 확장 — 이슈 #12, TODO-99)
+
+### 변경 (Changed)
+- templates/agents/test-engineer.md: E2E 작성 트리거를 "UI 상호작용" → "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장. 시각/레이아웃 회귀 위험(스크롤·오버플로·정렬·넘침·반응형·고정 뷰포트 공간 분배) 정의 + "jsdom은 못 잡음 → 상호작용 없어도 E2E 대상" + "브라우저 1회 육안 확인은 회귀 가드 아님 → `.e2e.ts`로 코드화(측정 가능한 단언)". verdict `created`/`not_applicable` 기준도 미러 갱신.
+- templates/rules/coding-standards.md: 검증 레벨에 **jsdom 한계** 명시 — L2 유닛(jsdom)은 레이아웃 엔진 부재로 오버플로·정렬·스크롤·넘침을 검증 못 함, 이 회귀 클래스는 L4 E2E 전용.
+- templates/rules/session-routine.md: 기능 완료 게이트에 "시각/레이아웃을 브라우저로 직접 확인했다면 `.e2e.ts` 코드화 후 완료" 전제 추가.
+- references/harness-checklist.md §4.2: 1.16.0 트리거 확장 항목 반영.
+
+### 수정됨 (Fixed)
+- stale "(후속) 증분 2b" 참조 3건 정리(test-engineer.md·coding-standards.md·session-routine.md) — 증분 2b는 1.14.0에 출하됨.
+
+### 비고
+- **동기**: 2b 하네스(1.14.0) 도그푸딩에서 레이아웃 작업이 헬퍼 유닛 테스트만 TDD하고 load-bearing 레이아웃 동작은 ad-hoc 스크린샷 1회 확인 후 미코드화 — 1.13.1 haja TaskItem에 이은 2번째 데이터포인트 → 핵심원칙 #5(반복=승격).
+- 신규 프로필 필드·플레이스홀더·파일 0(31 불변). 전부 managed 편집 → §12.6 자동 감지 전파, `e2e.enabled` 게이트라 미옵트인 하네스 무영향. MINOR, 마이그레이션 불필요.
+
+---
+
 ## [1.15.0] — 2026-06-16 (Playwright MCP 진단 배선 — 이슈 #12 증분 3)
 
 ### 추가 (Added)

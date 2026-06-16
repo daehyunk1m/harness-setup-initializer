@@ -145,6 +145,7 @@
   - **멀티모델 적대적 검증**(codex 결함/gemini 운영): 게이트를 LLM 기억 → 명시적 판정+TDD STATE+`@feature:` grep 키로 결정화, VERIFY 범위 축소(feature 스펙만), 증분 2 → 2a/2b 분할. 도그푸딩 6회차
   - 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, **신규 파일·git config·플레이스홀더 0(29 불변)**, 마이그레이션 불필요. 골든 픽스처 회귀 통과
 
+- **Session 41 (06-16)**: 1.16.0 — E2E 레이아웃 회귀 트리거 확장 (이슈 #12, TODO-99 보류→승격). 2b 하네스(1.14.0) 도그푸딩에서 레이아웃 작업(컨테이너 내부 스크롤·독립 토글·공간 분배)이 `shouldAutoExpand` 헬퍼 유닛만 TDD하고 load-bearing 레이아웃(페이지 스크롤 0·peek 3행·50/50 분배)은 ad-hoc 스크린샷 1회 확인 후 `.e2e.ts` 미코드화 — 1.13.1 TaskItem에 이은 **2번째 데이터포인트** → 핵심원칙 #5(반복=승격), 사용자 "지금 승격" 결정. E2E 트리거를 "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장 + jsdom 한계 명시(coding-standards) + 완료 게이트 "브라우저 검증→스펙 코드화"(session-routine) + verdict created/not_applicable 미러(test-engineer) + checklist §4.2. 부수: stale "(후속) 증분 2b" 참조 3건 정리. 신규 필드·플레이스홀더·파일 0(31 불변), managed 자동 감지 전파, 마이그레이션 불필요. MINOR. **태그 보정 동반**: 누락된 v1.13.0(34f03e1)·v1.13.1(1c4ae90) annotated 태그 생성·원격 푸시 → v1.9.0~v1.16.0 연속.
 - **Session 40 (06-16)**: 1.15.0 — Playwright MCP 진단 배선 (이슈 #12 증분 3). 배치 = e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT). 비커밋 B안(공유 `.mcp.json` 미생성 — 멀티모델 자문 codex·gemini의 nagware·머지 회피 권고). `e2e.mcp` 분리 옵트인(`enabled`/`version`, `e2e.enabled`와 독립). `{{MCP_DEBUG_PROTOCOL}}`(30→31) — debugger.md 조건부 MCP 진단 블록 + 개발자 로컬 `claude mcp add` 등록. harness-scaffold §5.19 + Phase 4 카탈로그/보고 + U1 재감지, `test/mcp-fixtures.sh` 골든 픽스처. 신규 산출물 파일 0·옵트인·생략 기본 → 마이그레이션 불필요.
 
 - **Session 39 (06-16)**: 1.14.0 — E2E pre-push 게이트 (이슈 #12 증분 2b). 옵트인 e2e.prePush → .githooks/pre-push, validate→@critical, 수동 활성화(D1), eslint override 드롭(D4), harness-check ⑨, 골든 픽스처. Subagent-driven 실행, 각 Task 2단계 리뷰.
@@ -156,7 +157,7 @@
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
   - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.15.0** (Playwright MCP 진단 배선 — 이슈 #12 증분 3)
+**현재 버전: 1.16.0** (E2E 레이아웃 회귀 트리거 확장 — 이슈 #12, TODO-99)
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
@@ -215,7 +216,7 @@
 | P4 기능 리스트 | ✅ 완료 | passes 판정 기준 구체화 |
 | P5 Initializer Agent | ✅ 스킵 | 스킬 자체가 초기화 역할 — 별도 프롬프트 불필요 |
 | P6 Coding Agent 루틴 | ✅ 완료 | TDD subagent 파이프라인 (7 agents) + .claude/rules/ 분리 |
-| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가. 1.11.0: E2E L4 스캐폴드(옵트인) — Playwright 구조 생성, 스위트 통과는 앱별 부팅 의존. 1.12.0: E2E TDD 배선(VERIFY Phase 4.7 + @critical + debugger 재현, 증분 2a). 1.13.0: VERIFY(E2E) 러너 정합(`{{E2E_COMMAND}}`) — 유닛 러너 거짓 PASS 차단(haja 파일럿). 1.14.0: pre-push 게이트(@critical cross-feature 강제, 옵트인·수동 활성화). 1.15.0: MCP 탐색 진단 배선(옵트인, 증분 3) — 공유 .mcp.json 없이 debugger 지침+로컬 등록 |
+| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가. 1.11.0: E2E L4 스캐폴드(옵트인) — Playwright 구조 생성, 스위트 통과는 앱별 부팅 의존. 1.12.0: E2E TDD 배선(VERIFY Phase 4.7 + @critical + debugger 재현, 증분 2a). 1.13.0: VERIFY(E2E) 러너 정합(`{{E2E_COMMAND}}`) — 유닛 러너 거짓 PASS 차단(haja 파일럿). 1.14.0: pre-push 게이트(@critical cross-feature 강제, 옵트인·수동 활성화). 1.15.0: MCP 탐색 진단 배선(옵트인, 증분 3) — 공유 .mcp.json 없이 debugger 지침+로컬 등록. 1.16.0: E2E 작성 트리거에 시각/레이아웃 회귀 위험 포함 — jsdom-blind 회귀 가드(TODO-99 승격) |
 | P8 아키텍처 자동 검사 | ✅ 완료 | 버전 체크, 동점 해소, 누락 레이어 경고 |
 | P9 품질/부채 관리 | ✅ 완료 | docFreshnessDays 파라미터화. 1.1.0: 자동 검사 승격 대기 큐 + 승격 루프 (체크리스트 §3.3) |
 | P10 엔트로피 관리 | ✅ 컴패니언 커버 | doc-freshness.ts 감지 + 운영 사이클 문서화 + harness:check 자가진단 + **harness-cleanup 스킬(1.4.0)이 주간/격주/월간 루틴 실행** (--add-dir opt-in) |

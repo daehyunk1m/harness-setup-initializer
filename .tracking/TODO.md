@@ -773,7 +773,9 @@
 - **상태**: [x] 완료 (Session 38, 2026-06-16)
 - **내용**: haja TaskItem 도그푸딩에서 에이전트가 `@critical` 여부로 E2E 판정 도출 + `not_applicable` 즉흥 분류 → test-engineer.md §3.5에 created/skipped/not_applicable 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + 판정은 @critical과 무관(2b pre-push 전용) 명기. PATCH
 
-### TODO-99: E2E 트리거 시각/레이아웃 회귀 사각 (보류 — 의견 개입 결정)
-- **상태**: [ ] 보류 (데이터포인트 더 수집 후 결정)
+### TODO-99: E2E 트리거 시각/레이아웃 회귀 사각 → 승격·구현 (1.16.0)
+- **상태**: [x] 완료 (2026-06-16, 1.16.0 — 2번째 데이터포인트로 보류→승격)
 - **배경**: test-engineer.md:20의 E2E 작성 트리거가 "feature가 **UI 상호작용**일 때"로 상호작용 중심. 텍스트 줄바꿈·정렬 같은 **시각/레이아웃 회귀**는 상호작용이 아니라 트리거 밖으로 빠지나, 정작 이런 회귀는 (a) E2E/브라우저만 검증 가능하고 (b) jsdom 유닛 테스트는 레이아웃 엔진이 없어 클래스 존재만 확인할 뿐 실제 오버플로/정렬을 검증 못 함 → 회귀 가드 공백
-- **검토안**: E2E 트리거를 "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장 + jsdom 한계 명시. 단 하네스 E2E 강도에 대한 의견 개입이고 현재 1개 데이터포인트 → 같은 패턴 반복 시(핵심원칙 #5: 반복=승격) 착수. haja seed를 localBullets 포맷에 연결한 "긴 제목 넘침 없음" 정식 E2E 스펙이 첫 후보
+- **승격 근거(2번째 데이터포인트)**: 2b 하네스(1.14.0) 도그푸딩 — 컨테이너 내부 스크롤/독립 토글/공간 분배 작업이 `shouldAutoExpand(count)` 헬퍼 유닛 테스트만 TDD(RED→GREEN)하고, load-bearing 레이아웃 동작(페이지 스크롤 0·peek 136px=3행·50/50 분배)은 ad-hoc Playwright 스크린샷으로 1회 확인 후 `.e2e.ts` **미코드화**. 1.13.1 haja TaskItem 레이아웃에 이은 2번째 사례 → 핵심원칙 #5(반복=승격) 임계 도달, 사용자 "지금 승격" 결정.
+- **해소(구현)**: test-engineer.md(트리거 "UI 상호작용 또는 시각/레이아웃 회귀 위험" + 시각/레이아웃 정의·jsdom blind·"브라우저 1회 확인은 가드 아님→측정 가능한 단언으로 코드화" + verdict created/not_applicable 미러), coding-standards.md(jsdom 한계 명시), session-routine.md(완료 게이트 "브라우저 검증→스펙 코드화" 전제), harness-checklist.md §4.2. 부수: stale "(후속) 증분 2b" 참조 3건 정리. 신규 프로필 필드·플레이스홀더·파일 0(31 불변), managed 자동 감지 전파, 마이그레이션 불필요. MINOR.
+- **후속 관찰**: 도그푸딩 시 verdict 출력(created/skipped/not_applicable, 침묵=BLOCK)이 실제로 발동했는지 — 이번 요약엔 판정 블록이 안 보였음(요약 누락 vs 미발동 미확인). 다음 파일럿에서 레이아웃 작업이 트리거 확장 후 실제 `.e2e.ts`를 생성하는지 검증.

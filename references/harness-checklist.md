@@ -120,6 +120,7 @@
 - [ ] (e2e 옵트인 시) E2E가 TDD 사이클에 배선됨 — RED(Test Engineer)가 `@feature:{ID}` 태그로 작성, VERIFY(E2E)(session-routine Phase 4.7)가 해당 feature 스펙 실행, Debugger가 브라우저 재현. L4의 구현 경로(harness-setup 증분 2a)
 - (1.14.0, 증분 2b) `@critical` 태그 E2E의 **cross-feature 회귀**는 옵트인 pre-push 게이트(`.githooks/pre-push`)가 push 시점에 강제한다 (`validate` → `@critical`). per-feature VERIFY(Phase 4.7)와 분리된 마지막 방어선이며, 활성화는 수동(`git config core.hooksPath`)이다. CI 부재 환경에서 "안 보이는 테스트" 방치를 막는 강제 경로.
 - (옵트인 `e2e.mcp`) 스펙 없는 UI 증상은 debugger가 브라우저 MCP(`@playwright/mcp`)로 탐색 진단 — known `.e2e.ts` 실패는 러너가 정본(MCP 비사용).
+- (1.16.0, TODO-99) E2E 작성 트리거가 "UI 상호작용 **또는 시각/레이아웃 회귀 위험**"으로 확장 — jsdom(L2)이 못 잡는 오버플로·정렬·스크롤·넘침 회귀는 상호작용이 없어도 E2E 대상(test-engineer.md). 브라우저 육안 1회 확인은 회귀 가드가 아니며 `.e2e.ts`로 코드화한다(session-routine 완료 게이트).
 
 ### 4.3 환경 재현성
 
