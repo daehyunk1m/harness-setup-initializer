@@ -312,6 +312,7 @@ TDD 사이클이 성공적으로 완료되면:
    - 마찰 이벤트 기록(session-incomplete) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
      (사이클 미완료로 종료될 때의 안전망 기록 — 종료 시점에 반드시 1줄 append)
 4.2 의도 적재 — 이 세션의 `claude-progress.txt` `요구:` 줄 + 오작동 발화를 의도 줄로 증류해 `.harness-intent.jsonl`에 append (§ 의도 로그). 의도 발화 없으면 0줄(정상)
+4.3 의도 증류 nudge — 이번 세션에 의도를 1건 이상 적재했으면 한 줄 제안만: "이번 세션 의도 {N}건 적재 — '의도 정리'로 INTENT_BACKLOG 동기화 권장"(자동 실행 안 함; 무거운 sync는 온디맨드/격주 B1)
 4.5 피드백 보고 트리거 — cursor 이후 미보고 마찰을 평가해 충족 시 한 줄 제안 (§ 피드백 보고 트리거)
 5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 (§ 자동 커밋 정책 모드: off=제안 / confirm=승인 후 / auto=자동):
    - TDD 사이클 완료: feat 커밋
