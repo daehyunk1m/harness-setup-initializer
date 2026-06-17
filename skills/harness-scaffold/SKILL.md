@@ -198,11 +198,11 @@ fi
 반드시 아래 순서대로 생성한다 (의존 관계 때문):
 
 ```
-1. docs/ 디렉토리 구조 (빈 폴더):
-   - `docs/product-specs/` — 제품 요구사항 문서
-   - `docs/design-docs/` — 설계 결정 기록
-   - `docs/exec-plans/` — 작업별 실행 계획
-   - `docs/references/` — 참고 자료
+1. docs/ 디렉토리 구조:
+   - `docs/product-specs/` — 제품 요구사항 문서. **빈 폴더가 아니라** `README.md`(관례) + `_template.md`(양식)를 생성한다 (§ 5.12.6, managed)
+   - `docs/design-docs/` — 설계 결정 기록 (빈 폴더)
+   - `docs/exec-plans/` — 작업별 실행 계획 (빈 폴더)
+   - `docs/references/` — 참고 자료 (빈 폴더)
 2. ARCHITECTURE.md (아키텍처 규칙 — 다른 문서에서 참조)
 3. AGENTS.md (전체 문서 맵 — ARCHITECTURE.md 경로 참조)
 4. CLAUDE.md (Claude Code 전용 지침 — @AGENTS.md import + Agent Dispatch)
@@ -857,6 +857,16 @@ git-workflow.md:
 - `intent-distill` 스킬이 `.harness-intent.jsonl` ↔ `@feature` E2E 커버리지를 대조해 이 문서를 머지-싱크한다(미커버 갭 추가 / 커버됨 제거 / 사용자 주석·waiver 보존).
 - manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 런타임 축적, 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음(TECH_DEBT.md와 동일 취급).
 - intent-distill 미실행 시 빈 채로 남는다(무해). E2E 미옵트인 프로젝트에선 distill이 "판정 보류"라 백로그가 비어 있다.
+
+### 5.12.6 docs/product-specs/ PRD substrate 생성 규칙
+
+- `docs/product-specs/`에 두 managed 파일을 이 스킬의 템플릿에서 **그대로 복사**하여 생성한다 (플레이스홀더 없음 — INTENT_LEDGER.md와 동일한 정적 복사):
+  - `templates/product-specs/README.md` → `docs/product-specs/README.md` (디렉토리 관례·마커 규칙·feature_list 진입점·운영 노트)
+  - `templates/product-specs/_template.md` → `docs/product-specs/_template.md` (PRD 양식 — `@feature` 마커 + 섹션 앵커 주석 + Edge Cases anti-blank 가이드)
+- **per-feature PRD stub은 생성하지 않는다** — PRD는 온디맨드(작업 시점)로 `_template.md`를 복사해 `docs/product-specs/{featureID}-{slug}.md`로 작성한다. 작성된 PRD는 사용자 소유 비-manifest-추적 파일이다(작성 E2E 스펙과 동급).
+- **바인딩**: PRD↔feature는 PRD 파일 안의 whole-line 리터럴 `@feature:{id}` 1줄로 묶인다. 발견 규칙 = `grep -Rl -Fx "@feature:{id}" docs/product-specs/` (E2E `@feature` 태그와 규칙 대칭 — 위치만 제목→전체줄로 다름). 파일명 slug는 비권위 탐색 힌트다.
+- **always-on**: 프로필 게이트 없이 무조건 생성한다. 두 파일은 manifest category `managed`(§ 5.13·§ 10.1), 작성 PRD는 미기록. 신규 플레이스홀더 0.
+- 의도↔PRD 커버리지 derive·미검증 명세 표면화는 후속(2b-2)이다 — 2b-1은 substrate(관례·템플릿)만 제공한다.
 
 ### 5.13 .harness-manifest.json 생성 규칙
 
