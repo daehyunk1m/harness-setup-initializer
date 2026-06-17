@@ -220,6 +220,7 @@ fi
 16. docs/TECH_DEBT.md (기술 부채 빈 템플릿)
 17. docs/HARNESS_FRICTION.md (마찰 이벤트 정적 참조 문서 — § 5.12)
 17-b. .harness-friction.jsonl (빈 마찰 로그 싱크 — 프로젝트 루트, data 카테고리; harness-feedback이 파일 부재와 0건을 구분하도록 빈 파일로 생성 — § 5.12.1)
+17-c. .harness-feedback-cursor (빈 보고 위치 북마크 — 프로젝트 루트, data 카테고리 — § 5.12.2)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
 19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드) + `.gitignore` 아티팩트 무시 add-only 머지
 19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
@@ -820,6 +821,14 @@ git-workflow.md:
 - manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 템플릿 해시 드리프트 검사 제외(feature_list.json과 동일 취급). harness-feedback이 직접 읽고 분석하는 입력이다
 - **이 증분에서 Stop hook / `.claude/settings.json` / friction-detect.mjs는 생성하지 않는다** (옵션 i — 오케스트레이터의 저비용 append가 주 메커니즘)
 
+### 5.12.2 .harness-feedback-cursor 생성 규칙
+
+피드백 보고 트리거(session-routine § 피드백 보고 트리거)와 harness-feedback의 **보고 위치 북마크**다. jsonl과 별개 파일이라 append-only를 보존한다.
+
+- 스캐폴드 시 빈 초기값으로 생성한다: `echo '{"processedLines": 0, "lastReportedAt": null}' > .harness-feedback-cursor`
+- manifest category는 **`data`**다 (§ 5.13·§ 10.1) — feature_list.json·.harness-friction.jsonl과 동일 취급(해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음).
+- 부재 시 graceful: 트리거·harness-feedback이 `processedLines:0`(전체 미보고)로 동작하므로, 기존 하네스(업그레이드)는 첫 보고 시 자동 생성된다(마이그레이션 불필요). 업그레이드 직후 첫 세션 종료엔 누적 백로그가 "미보고 N건"으로 노출된다(의도 — 이슈 #14의 목적).
+
 ### 5.13 .harness-manifest.json 생성 규칙
 
 Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harness-manifest.json`을 생성한다. 이 파일은 하네스의 버전과 생성 이력을 추적하는 **단일 참조 파일**이다.
@@ -914,7 +923,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 | `harness.structuralTestEnforcement` | structural-test가 기계 검사 규칙을 실제로 강제하는지: `"enforced"` 또는 `"unenforced"` (§ 5.4 `{{Q2_ENFORCEMENT}}`와 동일값). 미강제면 harness:check이 MVH로 강등. 감사·업그레이드용 파생 기록 — 런타임 SSoT는 생성 스크립트 헤더 마커 |
 | `harness.semanticApprovalAt` | Phase 4 "아키텍처 정확성 확인" 게이트에서 사용자가 생성된 규칙의 의미 정확성을 승인한 시각 (ISO 8601). 미확인이면 `null`. 구조 검증이 보장 못 하는 의미 정확성의 사람 확인 기록 |
 | `profile` | 입력 프로필 중 **재치환에 필요한 부분집합** (아래 생성 규칙 1의 필드 목록). 업그레이드 시 재스캔 없이 managed 파일 재생성·custom 외과 수정에 사용 |
-| `files.{path}.category` | `managed` / `custom` / `data` (§ 10.1 참조) |
+| `files.{path}.category` | `managed` / `custom` / `data` (§ 10.1 참조). data 파일(`feature_list.json`·`.harness-friction.jsonl`·`.harness-feedback-cursor`)은 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음 |
 | `files.{path}.templateHash` | 생성 시점 파일 내용의 SHA-256 해시. 사용자 수정 여부 판별 |
 | `files.{path}.generatedAt` | 해당 파일의 마지막 생성/갱신 시각 |
 
@@ -1506,6 +1515,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 21 | `docs/TECH_DEBT.md` | data | 사용자/에이전트가 부채 항목 축적 |
 | 22 | `docs/HARNESS_FRICTION.md` | managed | 정적 참조 문서(이벤트 유형/심각도 참조표). 템플릿 기반, 사용자 콘텐츠 없음 |
 | 22-b | `.harness-friction.jsonl` | data | 마찰 이벤트 진실 원본(프로젝트 루트). 런타임 데이터 축적, 해시 드리프트 검사 제외 — feature_list.json과 동일 취급 |
+| 22-c | `.harness-feedback-cursor` | data | 보고 위치 북마크(프로젝트 루트). 런타임 데이터, 해시 드리프트 검사 제외 — feature_list.json·.harness-friction.jsonl과 동일 취급 |
 | 23 | `package.json` (scripts) | custom | 스킬은 특정 키만 추가, 사용자가 수정했을 수 있음 |
 | 24 | `scripts/harness-check.sh` | managed | 템플릿 기반 자가진단 스크립트 |
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
