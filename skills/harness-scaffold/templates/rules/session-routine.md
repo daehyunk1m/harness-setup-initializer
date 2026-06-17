@@ -425,7 +425,7 @@ echo '{"ts":"2026-06-16T12:34:56Z","session":"<SESSION_ID>","event":"implementer
 
 ## 의도 로그
 
-세션 종료 시(§ 세션 종료 Step 4.2) 이 세션의 제품 의도·오작동 발화를 `.harness-intent.jsonl`(프로젝트 루트, append-only)에 **소독된 JSON 한 줄씩 append**한다. 입력은 `claude-progress.txt`의 `요구:` 줄 + 사용자의 오작동 설명이다(파생이지 중복작성 아님). 누적된 원장은 추후 PRD·E2E 근거로 증류한다(Phase 2 — 미배선).
+세션 종료 시(§ 세션 종료 Step 4.2) 이 세션의 제품 의도·오작동 발화를 `.harness-intent.jsonl`(프로젝트 루트, append-only)에 **소독된 JSON 한 줄씩 append**한다. 입력은 `claude-progress.txt`의 `요구:` 줄 + 사용자의 오작동 설명이다(파생이지 중복작성 아님). 누적된 원장은 intent-distill이 `@feature` E2E와 대조해 `docs/INTENT_BACKLOG.md`로 증류한다('의도 정리').
 
 **기록 방법** — 한 줄을 그대로 append한다(`>>`):
 ```
@@ -441,7 +441,7 @@ echo '{"ts":"2026-06-17T04:30:00Z","session":"<SESSION_ID>","kind":"intended","s
 | `surface` | 영역 태그 (소문자-kebab, 예: `progress`) — 증류 grouping용 |
 | `feature` | 관련 feature ID, 없으면 `""` |
 | `statement` | 소독된 의도 한 줄 (아래 소독 규칙, ≤200자) |
-| `encoded` | `{"prd":false,"e2e":false,"test":false}` — **항상 all-false**(Phase 2 증류가 갱신) |
+| `encoded` | `{"prd":false,"e2e":false,"test":false}` — **항상 all-false, 비권위**(커버리지는 intent-distill이 INTENT_BACKLOG.md로 파생; distill 미갱신) |
 
 **statement 소독 규칙** (append 전 오케스트레이터가 적용 — § 마찰 로그 detail 규칙과 동일, 길이만 다름):
 1. 큰따옴표 `"` → 작은따옴표 `'`

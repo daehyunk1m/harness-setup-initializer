@@ -21,11 +21,11 @@
 **목표**
 - 세션 종료 시 그 세션의 제품 의도/오작동 발화를 `.harness-intent.jsonl`(append-only, git 추적)에 0줄 이상 적재한다.
 - friction의 검증된 저수준 기계(SESSION_ID·소독·append·`data` 카테고리·git 전략)를 **의도적으로 동일하게** 재사용해 두 채널의 유지보수가 갈라지지 않게 한다.
-- Phase 2(증류)가 스키마 마이그레이션 없이 `encoded` 자리만 갱신하면 되도록 원장 스키마를 처음부터 안정화한다.
+- Phase 2a(intent-distill)가 스키마 마이그레이션 없이 커버리지를 실구조에서 파생하도록 원장 스키마를 처음부터 안정화한다(`encoded`는 비권위 capture-time 스냅샷 — distill은 갱신하지 않는다).
 - friction 채널과 **분리 운영** — `unintended`(제품 버그 관찰)가 friction 이벤트와 혼선되지 않는다.
 
 **비목표 (Phase 2로 이월)**
-- intent-distill 분석 스킬, PRD diff 제안, E2E 백로그 생성, `encoded` 갱신.
+- PRD diff 제안, E2E 백로그 생성. (intent-distill은 Phase 2a에서 배선됨 — encoded는 비권위 capture-time 스냅샷이라 갱신 안 함.)
 - 의도 ↔ `feature_list.steps` ↔ `@feature:{id}` ↔ PRD 섹션 양방향 추적, 커버리지 리포트.
 - 매핑에서 발견한 **PRD 출력단 갭** 해소(빈 `docs/product-specs/`·`feature_list.id→PRD` 링크 필드 부재 — §12.1).
 
@@ -41,7 +41,7 @@
 | D1 | 적재 주체/시점 | **세션 종료 배치 (오케스트레이터)** | friction은 기계적 트리거(재시도/리뷰실패)에서 즉시 기록하나, "의도 발화"는 의미적 사건이라 결정론적 트리거 지점이 없다. 세션 종료 시 `요구:` 줄 + 오작동 발화를 1회 증류 → 노이즈 최소·훅 불필요·결정론적 단일 지점. claude-progress가 이미 `요구:`를 쓰므로 파생이지 중복작성 아님. (실시간/Stop훅 기각.) |
 | D2 | 활성화 | **always-on (friction 병렬)** | 프로필 플래그 없음. friction이 process friction을 무조건 기록하듯 product intent도 보편적. 의도 없는 세션은 0줄(graceful)이라 부담 0. 프로필 스키마·게이팅·scaffold 분기 추가를 피하고 friction과 대칭. |
 | D3 | 레코드 스키마 | **`{ts, session, kind, surface, feature, statement, encoded}`** | friction의 `ts/session/feature`·소독·append를 상속. `event`+`severity` 자리를 `kind`+`surface`로 치환(의도 채널 의미), `detail`(≤50)을 `statement`(≤200)로 확장 — 의도는 부차가 아니라 **주 페이로드**. |
-| D4 | `encoded` 필드 | **지금 포함, Phase 1 항상 all-false** | 원장이 git 추적 PRD 근거라 스키마 안정성에 가치. Phase 2 증류가 마이그레이션 없이 이 자리만 갱신. 비용은 항상 같은 dead 값 1개. |
+| D4 | `encoded` 필드 | **지금 포함, Phase 1 항상 all-false** | 원장이 git 추적 PRD 근거라 스키마 안정성에 가치. `encoded`는 비권위 capture-time 스냅샷 — Phase 2a(intent-distill)는 커버리지를 실구조에서 파생하며 encoded를 갱신하지 않는다(derived-live, 멀티모델 자문 반영). 비용은 항상 같은 dead 값 1개. |
 | D5 | `unintended` ↔ friction 경계 | **직교 (프로세스 vs 제품)** | friction = TDD 기계가 저항(재시도/리뷰실패/E2E실패/롤백). intent(unintended) = 제품이 무엇을 해야 하는지에 대한 진술. F007처럼 한 버그가 프로세스 마찰 0으로 통과 가능 → 겹치지 않음. 한 버그가 둘 다 유발하면 각자 다른 면을 기록(중복 아님 — 다른 싱크·다른 분석기). |
 | D6 | 위치 | **`.harness-intent.jsonl` (프로젝트 루트)** | friction 대칭. `data` 카테고리, cursor·scaffold 단계·검증이 모두 루트 배치를 전제. 정적 참조 doc만 `docs/INTENT_LEDGER.md`(HARNESS_FRICTION.md 평행). |
 
@@ -62,7 +62,7 @@
   | `surface` | 영역 태그(kebab, 예: `progress`, `section-expand`) | friction `severity` 자리. Phase 2 grouping용. 자유 소문자 |
   | `feature` | 관련 feature ID 또는 `""` | friction과 동일 |
   | `statement` | 소독된 의도 한 줄, **≤200자** | friction `detail`(≤50) 자리. 주 페이로드라 확장 |
-  | `encoded` | `{"prd":false,"e2e":false,"test":false}` | 승격 상태. **Phase 1 항상 all-false**(D4). Phase 2 distill이 갱신 |
+  | `encoded` | `{"prd":false,"e2e":false,"test":false}` | 승격 상태. **Phase 1 항상 all-false**(D4). 비권위 capture-time 스냅샷 — distill은 갱신하지 않는다(derived-live) |
 - **카테고리**: `data` (feature_list.json·.harness-friction.jsonl·.harness-feedback-cursor와 동급, §5.13·§10.1) — 커밋되어 살아남고, 템플릿 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음.
 - **git 추적**: `.gitignore` 미추가. git-workflow.md 커밋 규칙에 따라 적재 시 커밋(friction과 동일).
 - **빈 파일 초기화**: 분석기가 파일 부재와 0건을 구분하도록 빈 줄 없이 생성(친 채널과 동일 — §4.4).
@@ -88,7 +88,7 @@
 ### 4.3 `templates/INTENT_LEDGER.md` (신규 managed 템플릿, 정적·비치환) → `docs/INTENT_LEDGER.md`
 
 - `HARNESS_FRICTION.md`(§5.12)와 평행한 **정적 참조 문서**(플레이스홀더 없음, 그대로 복사 생성).
-- 담는 내용: 스키마 참조표, `kind` enum(intended/unintended) 정의, `surface` 태그 가이드, **friction-경계 설명**, `.harness-intent.jsonl` 포인터, `encoded`에 대한 "Phase 2 distill이 채움" 주석.
+- 담는 내용: 스키마 참조표, `kind` enum(intended/unintended) 정의, `surface` 태그 가이드, **friction-경계 설명**, `.harness-intent.jsonl` 포인터, `encoded`에 대한 "비권위 capture-time 스냅샷 — distill 미갱신(derived-live)" 주석.
 - doc-freshness(§5.7)는 HARNESS_FRICTION.md와 **동일 취급**(이벤트-로그 인접 정적 참조 — staleness 제외 또는 동일 분류).
 
 ### 4.4 `harness-scaffold/SKILL.md` (정규 사양 편집)
@@ -99,7 +99,7 @@
   - 둘 다 18(package.json) 전. cursor(`.harness-intent-cursor`)는 소비자(Phase 2 distill)가 없으므로 Phase 1에 **생성하지 않음**.
 - **§5.13 manifest**: `.harness-intent.jsonl`(category=`data`) + `docs/INTENT_LEDGER.md`(category=`managed`) 파일 엔트리 추가. §5.13·§10.1 data 파일 목록 행에 `.harness-intent.jsonl` 추가. **프로필 스냅샷 변경 없음**(D2).
 - **§6 Phase 3 검증**: 친 채널 확인 라인(§6.2 `ls -la docs/ docs/HARNESS_FRICTION.md .harness-friction.jsonl`)에 `docs/INTENT_LEDGER.md .harness-intent.jsonl` 추가.
-- **§7 능력 게이팅 (중요)**: always-on이므로 능력 라인 **무조건 표시**. 단 **수집만 광고** — *"세션 종료 시 제품 의도가 `.harness-intent.jsonl`에 적재됨 (Phase 2에서 PRD/E2E 증류 예정)"*. **증류·승격 능력은 Phase 2(미와이어)라 현재 능력으로 광고 금지** — CLAUDE.md §7 렌더링 규칙(미와이어 능력 광고 불가) 준수. "예정"은 미래 표지일 뿐 현재 능력 주장 아님.
+- **§7 능력 게이팅 (중요)**: always-on이므로 능력 라인 **무조건 표시**. 의도 적재(수집) + 의도 증류(intent-distill 번들 스킬) 모두 광고한다 — intent-distill이 Phase 2a에서 배선됨. `encoded`는 비권위 capture-time 스냅샷이라 distill이 갱신하지 않음(derived-live, 멀티모델 자문 반영).
 - **(선택) 생성 CLAUDE.md/AGENTS.md 포인터**: friction이 §5.1.1에 "`.harness-friction.jsonl`에 append" 1줄을 두듯, 의도 적재 1줄 포인터를 평행 추가할 수 있다(수집만 — session-routine이 권위 정본).
 
 ### 4.5 검증 배선 (harness-check.sh / harness-checklist.md)
@@ -113,8 +113,8 @@
 [세션 종료] Step 4.2 「의도 적재」: '요구:' 줄 + 오작동 발화를 N줄(0+)로 증류
               → kind/surface/feature 분류 + 소독(friction 규칙) + encoded all-false
               → echo '{...}' >> .harness-intent.jsonl   (friction과 동일 SESSION_ID)
-[영속]      git 추적 (PRD 근거 누적). Phase 2 distill이 encoded를 갱신할 때까지 대기.
-[Phase 2]   (비-스코프) intent-distill → PRD diff·E2E 백로그·encoded 갱신
+[영속]      git 추적 (PRD 근거 누적). encoded는 비권위 스냅샷 — distill이 갱신 안 함(derived-live).
+[Phase 2a]  intent-distill → .harness-intent.jsonl ↔ @feature E2E 대조 → docs/INTENT_BACKLOG.md 커버리지 동기화("의도 정리")
 ```
 
 의도 없는 세션 → 0줄(graceful). friction의 "종료 시 1회 기록" 패턴과 동형.
@@ -181,7 +181,8 @@
 
 ## 12. 명시적 비-스코프 (Phase 2)
 
-intent-distill 분석 스킬 · PRD diff 제안 · E2E 백로그 생성 · `encoded` 갱신 · `.harness-intent-cursor` · 의도↔`feature_list.steps`↔`@feature:{id}`↔PRD 양방향 추적 · 커버리지 리포트 · 월간 사이클 「의도 증류」(M3.5) 편입.
+PRD diff 제안 · E2E 백로그 생성 · `encoded` 갱신(비권위 스냅샷이라 distill 미갱신 — derived-live) · `.harness-intent-cursor` · 의도↔`feature_list.steps`↔`@feature:{id}`↔PRD 양방향 추적 · 커버리지 리포트 · 월간 사이클 「의도 증류」(M3.5) 편입.
+(intent-distill 분석 스킬은 Phase 2a에서 배선됨 — 이 비-스코프에서 제외.)
 
 ### 12.1 발견: PRD 출력단 갭 (Phase 2가 함께 해소)
 
