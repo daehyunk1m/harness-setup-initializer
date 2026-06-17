@@ -223,6 +223,7 @@ fi
 17-c. .harness-feedback-cursor (빈 보고 위치 북마크 — 프로젝트 루트, data 카테고리 — § 5.12.2)
 17-d. docs/INTENT_LEDGER.md (의도 원장 정적 참조 문서 — § 5.12.3)
 17-e. .harness-intent.jsonl (빈 의도 원장 싱크 — 프로젝트 루트, data 카테고리; 부재와 0건 구분 위해 빈 파일 — § 5.12.4)
+17-f. docs/INTENT_BACKLOG.md (의도 커버리지 백로그 — intent-distill 동기화 대상, data 카테고리; 빈 백로그로 생성 — § 5.12.5)
 18. package.json scripts 추가 (harness:check 포함; e2e 옵트인 시 test:e2e + @playwright/test devDep — § 5.5)
 19. E2E 스캐폴드 모듈 (e2e 옵트인 시에만 — § 5.17): playwright.config.ts + e2e/ 디렉토리(+ e2e/README.md 작성 가이드) + `.gitignore` 아티팩트 무시 add-only 머지
 19-b. pre-push 게이트 (e2e.prePush 옵트인 시에만 — § 5.18): .githooks/pre-push 생성/주입 (git config 미실행)
@@ -850,6 +851,13 @@ git-workflow.md:
 - manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 템플릿 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음(feature_list.json·.harness-friction.jsonl과 동일)
 - **always-on**: 프로필 플래그 없이 무조건 생성한다 (마찰 싱크와 동일). cursor는 Phase 1에 생성하지 않는다 (증류 소비자 미존재)
 
+### 5.12.5 docs/INTENT_BACKLOG.md 생성 규칙
+
+- 이 스킬의 `templates/INTENT_BACKLOG.md`를 그대로 복사하여 **빈 백로그**로 생성한다 (플레이스홀더 없음).
+- `intent-distill` 스킬이 `.harness-intent.jsonl` ↔ `@feature` E2E 커버리지를 대조해 이 문서를 머지-싱크한다(미커버 갭 추가 / 커버됨 제거 / 사용자 주석·waiver 보존).
+- manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 런타임 축적, 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음(TECH_DEBT.md와 동일 취급).
+- intent-distill 미실행 시 빈 채로 남는다(무해). E2E 미옵트인 프로젝트에선 distill이 "판정 보류"라 백로그가 비어 있다.
+
 ### 5.13 .harness-manifest.json 생성 규칙
 
 Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harness-manifest.json`을 생성한다. 이 파일은 하네스의 버전과 생성 이력을 추적하는 **단일 참조 파일**이다.
@@ -944,7 +952,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 | `harness.structuralTestEnforcement` | structural-test가 기계 검사 규칙을 실제로 강제하는지: `"enforced"` 또는 `"unenforced"` (§ 5.4 `{{Q2_ENFORCEMENT}}`와 동일값). 미강제면 harness:check이 MVH로 강등. 감사·업그레이드용 파생 기록 — 런타임 SSoT는 생성 스크립트 헤더 마커 |
 | `harness.semanticApprovalAt` | Phase 4 "아키텍처 정확성 확인" 게이트에서 사용자가 생성된 규칙의 의미 정확성을 승인한 시각 (ISO 8601). 미확인이면 `null`. 구조 검증이 보장 못 하는 의미 정확성의 사람 확인 기록 |
 | `profile` | 입력 프로필 중 **재치환에 필요한 부분집합** (아래 생성 규칙 1의 필드 목록). 업그레이드 시 재스캔 없이 managed 파일 재생성·custom 외과 수정에 사용 |
-| `files.{path}.category` | `managed` / `custom` / `data` (§ 10.1 참조). data 파일(`feature_list.json`·`.harness-friction.jsonl`·`.harness-feedback-cursor`·`.harness-intent.jsonl`)은 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음 |
+| `files.{path}.category` | `managed` / `custom` / `data` (§ 10.1 참조). data 파일(`feature_list.json`·`.harness-friction.jsonl`·`.harness-feedback-cursor`·`.harness-intent.jsonl`·`docs/INTENT_BACKLOG.md`)은 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음 |
 | `files.{path}.templateHash` | 생성 시점 파일 내용의 SHA-256 해시. 사용자 수정 여부 판별 |
 | `files.{path}.generatedAt` | 해당 파일의 마지막 생성/갱신 시각 |
 
@@ -1540,6 +1548,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 22-c | `.harness-feedback-cursor` | data | 보고 위치 북마크(프로젝트 루트). 런타임 데이터, 해시 드리프트 검사 제외 — feature_list.json·.harness-friction.jsonl과 동일 취급 |
 | 22-d | `docs/INTENT_LEDGER.md` | managed | 정적 참조 문서(의도 스키마/유형 참조표). 템플릿 기반, 사용자 콘텐츠 없음 |
 | 22-e | `.harness-intent.jsonl` | data | 제품 의도 진실 원본(프로젝트 루트). 런타임 데이터 축적, 해시 드리프트 검사 제외 — .harness-friction.jsonl과 동일 취급(always-on) |
+| 22-f | `docs/INTENT_BACKLOG.md` | data | 의도 커버리지 백로그(intent-distill 동기화). 런타임 축적, 해시 드리프트 제외, 사용자 주석·waiver 보존 — TECH_DEBT.md와 동일 취급 |
 | 23 | `package.json` (scripts) | custom | 스킬은 특정 키만 추가, 사용자가 수정했을 수 있음 |
 | 24 | `scripts/harness-check.sh` | managed | 템플릿 기반 자가진단 스크립트 |
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
