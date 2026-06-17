@@ -311,6 +311,7 @@ TDD 사이클이 성공적으로 완료되면:
    - TDD STATE 블록 저장
    - 마찰 이벤트 기록(session-incomplete) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
      (사이클 미완료로 종료될 때의 안전망 기록 — 종료 시점에 반드시 1줄 append)
+4.2 의도 적재 — 이 세션의 `claude-progress.txt` `요구:` 줄 + 오작동 발화를 의도 줄로 증류해 `.harness-intent.jsonl`에 append (§ 의도 로그). 의도 발화 없으면 0줄(정상)
 4.5 피드백 보고 트리거 — cursor 이후 미보고 마찰을 평가해 충족 시 한 줄 제안 (§ 피드백 보고 트리거)
 5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 (§ 자동 커밋 정책 모드: off=제안 / confirm=승인 후 / auto=자동):
    - TDD 사이클 완료: feat 커밋
@@ -419,3 +420,43 @@ echo '{"ts":"2026-06-16T12:34:56Z","session":"<SESSION_ID>","event":"implementer
 - `detail`은 에러 메시지의 핵심 한 줄 또는 원인 요약을 위 소독 규칙으로 가공한 결과 (≤50자)
 - 한 이벤트 = `>>`로 정확히 한 줄만 append (여러 줄 금지 — 관용 파서가 줄 단위로 읽는다)
 - 보고 상태는 `.harness-feedback-cursor`(별도 파일, append-only jsonl 미변경)가 추적한다 — harness-feedback이 보고/무시 시 처리한 물리 줄 수까지 전진시키고, 세션 종료 트리거(§ 피드백 보고 트리거)가 그 이후만 평가한다.
+
+---
+
+## 의도 로그
+
+세션 종료 시(§ 세션 종료 Step 4.2) 이 세션의 제품 의도·오작동 발화를 `.harness-intent.jsonl`(프로젝트 루트, append-only)에 **소독된 JSON 한 줄씩 append**한다. 입력은 `claude-progress.txt`의 `요구:` 줄 + 사용자의 오작동 설명이다(파생이지 중복작성 아님). 누적된 원장은 추후 PRD·E2E 근거로 증류한다(Phase 2 — 미배선).
+
+**기록 방법** — 한 줄을 그대로 append한다(`>>`):
+```
+echo '{"ts":"2026-06-17T04:30:00Z","session":"<SESSION_ID>","kind":"intended","surface":"progress","feature":"F007","statement":"<소독된 의도 한 줄>","encoded":{"prd":false,"e2e":false,"test":false}}' >> .harness-intent.jsonl
+```
+
+**필드** (한 줄 = 1 의도):
+| 필드 | 값 |
+|------|------|
+| `ts` | 적재 시각, ISO8601 UTC |
+| `session` | § 세션 시작 Step 1.5의 SESSION_ID (마찰 로그와 **동일 값**) |
+| `kind` | `intended`(원하는 동작) \| `unintended`(오작동 관찰) |
+| `surface` | 영역 태그 (소문자-kebab, 예: `progress`) — 증류 grouping용 |
+| `feature` | 관련 feature ID, 없으면 `""` |
+| `statement` | 소독된 의도 한 줄 (아래 소독 규칙, ≤200자) |
+| `encoded` | `{"prd":false,"e2e":false,"test":false}` — **항상 all-false**(Phase 2 증류가 갱신) |
+
+**statement 소독 규칙** (append 전 오케스트레이터가 적용 — § 마찰 로그 detail 규칙과 동일, 길이만 다름):
+1. 큰따옴표 `"` → 작은따옴표 `'`
+2. 줄바꿈(LF)·캐리지리턴(CR)을 공백으로 치환
+3. 백슬래시 `\` 제거
+4. 200자 초과면 200자로 절단
+
+**friction 채널과의 경계**:
+- 프로세스 마찰(Implementer 재시도·Reviewer NEEDS_FIX·E2E FAIL·롤백)은 `§ 마찰 로그`로.
+- 제품 의도/오작동 관찰(제품이 무엇을 해야 하는지)은 `§ 의도 로그`로.
+- 한 사건이 둘 다 유발하면 각자 기록한다(직교 — 다른 싱크). 제품 버그는 프로세스 마찰 0으로 통과 가능하다.
+
+**규칙**:
+- `.harness-intent.jsonl`이 없으면 append를 건너뛴다 (에러 아님 — 비-하네스 환경 대비)
+- 같은 statement는 같은 세션(동일 SESSION_ID)에서 1회만 기록한다
+- `encoded`는 Phase 1에서 항상 `{"prd":false,"e2e":false,"test":false}`로 기록한다
+- 한 의도 = `>>`로 정확히 한 줄만 append (여러 줄 금지 — 관용 파서가 줄 단위로 읽는다)
+- 제품 의도 발화가 없는 세션은 0줄(정상 — graceful)
