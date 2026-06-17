@@ -8,8 +8,8 @@
 # 요구: git, sh, node. 사용법: bash test/prepush-fixtures.sh
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-HOOK_TMPL="$ROOT/templates/githooks/pre-push"
-HC="$ROOT/templates/harness-check.sh"
+HOOK_TMPL="$ROOT/skills/harness-scaffold/templates/githooks/pre-push"
+HC="$ROOT/skills/harness-scaffold/templates/harness-check.sh"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 FAILS=0

@@ -2,7 +2,7 @@
 
 > 하네스에 외부 보조 스킬/도구를 **옵트인으로 연계**하는 일반 규약.
 > 소비자: `SKILL.md`(Step 1.6 감지, § 4.2 질문, § 5 스키마), `harness-scaffold/SKILL.md`(§ 5.16 렌더링)
-> 선례 2종: superpowers(외부 플러그인·다중 스킬 화이트리스트), multi-model-consult(자체 컴패니언·단일 연계)
+> 선례 2종: superpowers(외부 플러그인·다중 스킬 화이트리스트), multi-model-consult(번들 스킬·단일 연계)
 > 정본 우선순위: 이 문서가 통합 *메커니즘*의 정본, 각 통합의 *내용*은 `<name>-mapping.md`가 정본
 
 ---
@@ -26,15 +26,15 @@
 "integrations": {                  // 선택 필드 — 생략 시 연계 없음
   "<name>": {
     "enabled": true,               // 공통: 옵트인 여부
-    "source": "plugin | skill-dir | companion | cli",  // 공통: 감지 출처
+    "source": "plugin | skill-dir | bundled | cli",  // 공통: 감지 출처
     "detectedVersion": "5.1.0",    // 공통(선택): 정보용. 추출 불가 시 null
-    "installPath": "~/.claude/...",// 공통(선택): 실존 검증용. 해당 없으면 null
+    "installPath": "~/.claude/...",// 공통(선택): 실존 검증용. bundled/해당 없으면 null
     "linkedSkills": ["..."]        // 통합별(선택): 다중 스킬 화이트리스트 (superpowers 전용)
   }
 }
 ```
 
-- `source` 값: `plugin`(마켓플레이스 플러그인) / `skill-dir`(수동 스킬 디렉토리) / `companion`(하네스 자체 컴패니언 스킬) / `cli`(CLI 도구 존재)
+- `source` 값: `plugin`(마켓플레이스 플러그인) / `skill-dir`(수동 스킬 디렉토리) / `bundled`(하네스 플러그인에 번들된 스킬 — `installPath` null, 항상 존재) / `cli`(CLI 도구 존재)
 - 통합별 필드는 해당 통합에만 존재 — 공통 4필드(enabled/source/detectedVersion/installPath)는 모든 통합이 공유
 - 매니페스트 profile에 보존 (업그레이드 재감지·제거의 원천)
 
@@ -62,7 +62,7 @@
 
 `integrations.<name>.enabled == true`인 각 통합에 대해:
 
-1. **실존 검증**: `installPath`(또는 감지 경로)가 실재하는지 확인. 다중 스킬이면 각 `linkedSkills` 항목의 디렉토리 존재 확인 → 없는 항목 드롭 + 보고 경고. 경로 자체가 없으면(제거됨) 해당 통합 전체 스킵 + 안내
+1. **실존 검증**: `installPath`(또는 감지 경로)가 실재하는지 확인. 다중 스킬이면 각 `linkedSkills` 항목의 디렉토리 존재 확인 → 없는 항목 드롭 + 보고 경고. 경로 자체가 없으면(제거됨) 해당 통합 전체 스킵 + 안내. **예외 — `source: "bundled"`**: 스킬이 플러그인에 항상 존재하므로 경로 검증은 trivially-통과(건너뜀), 대신 통합별 추가 조건(예: 자문 CLI 가용성)만 본다.
 2. **제외 필터**: 매핑 정본의 "연계/선택" 목록에 없는 항목은 `linkedSkills`에 있어도 렌더링하지 않음 (코어 충돌 차단)
 3. **AGENTS.md 렌더링**: 생존 항목으로 "## 보조 스킬" 섹션을 구성 (§ 5.1 위치 — 문서 맵 앞). **여러 통합이 옵트인되면 단일 섹션에 합산**한다:
 
@@ -86,9 +86,9 @@
 | name | source | 연계 정본 | 성격 |
 |------|--------|----------|------|
 | `superpowers` | plugin / skill-dir | `superpowers-mapping.md` | 외부 플러그인 — 14종 중 연계 3·선택 1·제외 10 (화이트리스트) |
-| `multiModelConsult` | companion + cli | `multi-model-consult-mapping.md` | 자체 컴패니언 스킬 — 단일 연계 (codex/gemini CLI 1개 이상 필요) |
+| `multiModelConsult` | bundled + cli | `multi-model-consult-mapping.md` | 하네스 플러그인 번들 스킬 — 단일 연계 (codex/gemini CLI 1개 이상 필요) |
 
-> 두 통합의 감지 모델은 다르지만(플러그인 vs 컴패니언+CLI) 같은 규약(옵트인→매핑→§ 5.16 렌더링)으로 표현된다. 이것이 규약 일반화의 검증 기준이다.
+> 두 통합의 감지 모델은 다르지만(외부 플러그인 vs 번들 스킬+CLI) 같은 규약(옵트인→매핑→§ 5.16 렌더링)으로 표현된다. 이것이 규약 일반화의 검증 기준이다.
 
 ---
 

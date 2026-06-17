@@ -50,11 +50,12 @@ echo "=== END STATE ==="
 가용한 provider마다 호출한다 — **독립 호출이므로 한 메시지에서 병렬 Bash로 실행한다**:
 
 ```bash
-node ~/.claude/skills/multi-model-consult/scripts/run-advisor.js codex "<codex 프롬프트>"
-node ~/.claude/skills/multi-model-consult/scripts/run-advisor.js gemini "<gemini 프롬프트>"
+node "${CLAUDE_PLUGIN_ROOT}/skills/multi-model-consult/scripts/run-advisor.js" codex "<codex 프롬프트>"
+node "${CLAUDE_PLUGIN_ROOT}/skills/multi-model-consult/scripts/run-advisor.js" gemini "<gemini 프롬프트>"
 ```
 
-- 긴 프롬프트(따옴표 충돌 우려)는 stdin으로: `node run-advisor.js codex - << 'EOF' ... EOF`
+- `${CLAUDE_PLUGIN_ROOT}`는 플러그인 설치 경로다. 이 스킬은 플러그인으로 배포되며, 하네스가 스킬 로드 시점에 이 변수를 절대경로로 치환한다(이 SKILL.md 본문에 쓸 때만 작동 — 모델이 직접 조합한 셸에는 주입되지 않음). 호출에 앞서 변수가 실제 경로로 치환됐는지 확인하고, 비어 있으면 사용자에게 스킬이 플러그인으로 설치됐는지 확인을 요청한다.
+- 긴 프롬프트(따옴표 충돌 우려)는 stdin으로: `node "${CLAUDE_PLUGIN_ROOT}/skills/multi-model-consult/scripts/run-advisor.js" codex - << 'EOF' ... EOF`
 - 각 호출의 stdout 마지막 줄 `ARTIFACT: <경로>`에서 아티팩트 경로를 얻는다
 - exit 1(CLI 실패)이어도 아티팩트는 저장됨 — stderr 기록을 읽고 사용자에게 사유(인증 오류 등)를 안내한 뒤, 남은 응답으로 진행한다
 - exit 2(미설치)는 § 1에서 이미 걸러졌지만, 발생하면 해당 provider를 빼고 진행한다

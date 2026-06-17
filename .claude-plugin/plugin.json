@@ -1,0 +1,8 @@
+{
+  "name": "harness-setup",
+  "version": "1.23.0",
+  "description": "에이전트 작업 환경(하네스)을 프로젝트에 셋업·스캐폴딩·정리·피드백하고 멀티모델 자문을 제공하는 스킬 번들 (harness-setup, harness-scaffold, harness-cleanup, harness-feedback, multi-model-consult).",
+  "author": { "name": "daehyunk1m" },
+  "license": "MIT",
+  "homepage": "https://github.com/daehyunk1m/harness-setup-initializer"
+}

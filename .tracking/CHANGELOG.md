@@ -5,6 +5,28 @@
 
 ---
 
+## [1.23.0] — 2026-06-17 (Claude Code 플러그인 전환)
+
+### 추가 (Added)
+- **`.claude-plugin/plugin.json` + `marketplace.json`**: harness-setup을 정식 Claude Code 플러그인 + 셀프 호스팅 마켓플레이스로 배포. 단일 repo가 마켓플레이스이자 플러그인(`source: "./"`). 설치: `/plugin marketplace add daehyunk1m/harness-setup-initializer` → `/plugin install harness-setup@harness-setup-initializer`. 5개 스킬(harness-setup·harness-scaffold·harness-cleanup·harness-feedback·multi-model-consult)이 번들로 로딩된다.
+- **검증 Spike**: throwaway 플러그인으로 런타임 동작 5종 실측 — ① `${CLAUDE_PLUGIN_ROOT}`는 SKILL.md **본문에서만** 선치환(모델이 조합한 셸엔 부재) ② 하네스가 "Base directory" 제공 → co-located 파일 자연어 상대 해석 ③ 내부 상대 심링크가 캐시 복사 후 생존 + 형제 스킬 reach ④ 짧은 이름 `Skill()` 체이닝 작동 ⑤ `source:"./"` 단일 repo 마켓플레이스 + 중첩 skills 발견. (메모리: claude-code-plugin-runtime-behavior)
+
+### 변경 (Changed)
+- **디렉토리 재구성**: 모든 스킬을 `skills/<name>/`로 이동(`git mv` 이력 보존). 루트 `SKILL.md`→`skills/harness-setup/`, `presets/`·`references/`→`skills/harness-setup/`, `templates/`→`skills/harness-scaffold/`, `companion-skills/*`→`skills/*`.
+- **references SSoT 심링크**: `skills/harness-scaffold/references → ../harness-setup/references` (중복 복제 대신 심링크 — Spike에서 캐시 생존 확인). 드리프트·바이트검사 불필요.
+- **install.sh → 마이그레이션 스크립트**: 심링크 설치 로직 제거. 구 심볼릭 링크를 `test -L` 가드로만 정리(실제 디렉토리 미삭제 — 데이터 보호) + 플러그인 설치 안내 출력. 클린 컷오버 — `git pull`로는 더 이상 스킬이 갱신되지 않는다.
+- **multiModelConsult 결합 분리**: ① run-advisor.js 호출 경로 `~/.claude/skills/...`→`${CLAUDE_PLUGIN_ROOT}/skills/multi-model-consult/scripts/run-advisor.js`(본문 선치환) ② §1.6 감지에서 심링크 체크 제거, 자문 CLI 가용성만 확인(번들이라 스킬 존재 보장) ③ 프로필 `integrations.multiModelConsult.source`: `companion`→`bundled`, `installPath`: 경로→`null` ④ harness-scaffold §5.16 실존 검증을 번들 전제(trivially-통과)로 수정 — `installPath:null`이어도 옵트인 시 렌더(codex 자문 지적 해소) ⑤ `_protocol.md` source enum에 `bundled` 추가.
+- **test 러너 경로 재포인트**: `test/{run,e2e,mcp,prepush}-fixtures.sh`의 `$ROOT/templates`·`$ROOT/SKILL.md`·`$ROOT/harness-scaffold/SKILL.md`를 `skills/` 레이아웃으로. 골든 픽스처 5종 전부 통과.
+- 문서: README(설치/사용/디렉토리 트리/버전 1.23.0), SKILL.md 설치노트, CLAUDE.md(파일 맵·테스트 절·버전 범프 동시 업데이트 목록).
+
+### 비고
+- **멀티모델 자문 반영**: 초안의 듀얼 배포(install.sh+플러그인 병행)·references 중복(A1)·`:-` 폴백을 codex(정확성)·gemini(단순화) 자문이 각각 결함(폴백 경로 이중 `skills/` 버그·git-pull 호환 갭·중복 안티패턴)으로 지적 → **클린 컷오버 + references 심링크 + Spike 선검증**으로 전환해 해소. codex가 찾은 `${CLAUDE_PLUGIN_ROOT:-...}/skills/...` 버그는 클린 컷오버로 폴백 자체가 소멸.
+- **MINOR**: 생성 하네스·프로필 필드·플레이스홀더·파일 카테고리 불변. 배포/발견 메커니즘은 Public API 아님(versioning-policy §1). 프로필 `integrations.multiModelConsult`의 source/installPath 값 변경(선택 필드)이 MINOR 근거.
+- **마이그레이션**: 기존 클론 사용자는 `./install.sh` 1회로 구 심링크 정리 + 플러그인 안내. 개발 클론은 `~/.claude/skills/` 밖 권장(플러그인 설치본과 중복 발견 회피). 신규 플레이스홀더 0.
+- **검증**: 골든 픽스처 5종(run·e2e·mcp·prepush·feedback-cursor) 통과. 실제 repo 플러그인 E2E는 별도 진행.
+
+---
+
 ## [1.22.0] — 2026-06-17 (피드백 보고 트리거 — 이슈 #14)
 
 ### 추가 (Added)

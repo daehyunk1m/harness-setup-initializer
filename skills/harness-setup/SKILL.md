@@ -44,11 +44,12 @@ echo "=== END STATE ==="
 
 이 스킬은 Phase 1(분석)만 담당한다. 파일 생성은 `/harness-scaffold`가 수행한다.
 
-> **설치 방법**: 리포지토리를 클론한 후 `install.sh`를 실행한다.
-> ```bash
-> git clone <repo> ~/.claude/skills/harness-setup && ~/.claude/skills/harness-setup/install.sh
+> **설치 방법**: Claude Code 플러그인으로 설치한다.
 > ```
-> `install.sh`가 `~/.claude/skills/harness-scaffold` 심볼릭 링크를 자동 생성하여 두 스킬이 함께 로딩된다.
+> /plugin marketplace add daehyunk1m/harness-setup-initializer
+> /plugin install harness-setup@harness-setup-initializer
+> ```
+> 5개 스킬(harness-setup·harness-scaffold·harness-cleanup·harness-feedback·multi-model-consult)이 함께 번들로 로딩된다.
 
 ### 자동 체이닝
 
@@ -199,14 +200,13 @@ ls -d ~/.claude/skills/superpowers* 2>/dev/null | head -1
 - 플러그인으로 발견: `source: "plugin"`, installed_plugins.json 해당 항목에서 `version`·`installPath` 추출
 - 스킬 디렉토리로 발견: `source: "skill-dir"`, `version: null`, `installPath`는 해당 경로
 
-**multiModelConsult** (자체 컴패니언 스킬 — 매핑 정본: `references/integrations/multi-model-consult-mapping.md`):
+**multiModelConsult** (하네스 플러그인 번들 스킬 — 매핑 정본: `references/integrations/multi-model-consult-mapping.md`):
 ```bash
-# 글로벌 스킬 심링크 + 자문 CLI 최소 1개
-ls -d ~/.claude/skills/multi-model-consult 2>/dev/null
+# 번들 스킬이라 항상 존재 → 자문 CLI 가용성만 본다 (최소 1개)
 command -v codex >/dev/null 2>&1 && echo "codex"
 command -v gemini >/dev/null 2>&1 && echo "gemini"
 ```
-- 스킬 심링크 존재 + (codex 또는 gemini 1개 이상) → 발견: `source: "companion"`, `installPath: ~/.claude/skills/multi-model-consult`, `version: null`
+- (codex 또는 gemini 1개 이상) → 발견: `source: "bundled"`, `installPath: null`, `version: null` (번들이라 스킬 존재는 보장)
 - CLI가 0개면 **감지 실패로 처리** (자문 불가하므로 연계 무의미)
 
 ---
@@ -632,9 +632,9 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
     },
     "multiModelConsult": {
       "enabled": true,
-      "source": "companion",
+      "source": "bundled",
       "detectedVersion": null,
-      "installPath": "~/.claude/skills/multi-model-consult"
+      "installPath": null
     }
   },
   "extras": {
@@ -666,7 +666,7 @@ Skill 도구 호출이 실패하면 다음을 출력한다:
 | `sharedDirs` (선택) | Step 2 스캔 + 문답 | **domain-based 전용** — 도메인 간 공유 모듈 디렉토리 목록. structural-test-domain의 `{{SHARED_DIRS}}` 원천. 생략 시 기본 `["shared"]` |
 | `eslintAssist` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 ESLint 수정 없음. `configFormat`은 `"flat"`(eslint.config.*) 또는 `"legacy"`(.eslintrc.*). 프리셋 비대상 (감지+문답 전용) |
 | `e2e` (선택) | Step 1.4 감지 + Step 4 옵트인 | 생략 시 E2E 모듈 미생성. **프론트엔드 프로젝트에서만 제안** (testFramework.e2e가 playwright이거나 UI 프레임워크 감지). `playwrightVersion`은 핀 버전 — harness-scaffold § 5.5가 devDependencies에 직접 사용. **프론트엔드 프리셋은 권장 기본(`{ "enabled": true }`)을 제공할 수 있으나** § 4.2 옵트인 확인은 유지된다(거부/무응답=생략, 옵트인 계약 불변). `playwrightVersion`/`prePush`/`mcp`는 프리셋이 시드하지 않는다(§ 4.2가 채우거나 독립 2차 옵트인). prePush(선택 하위 필드, 생략=false)는 git 저장소 + 별도 옵트인 시에만 기록 — pre-push 게이트 생성 결정(harness-scaffold § 5.18). `mcp`(선택 객체 `enabled`/`version`)는 브라우저 MCP 진단 배선 — `e2e.enabled`와 독립(스펙 없이 단독 가능), 신규 파일 없이 debugger.md `{{MCP_DEBUG_PROTOCOL}}` 치환만(harness-scaffold § 5.19). |
-| `integrations` (선택) | Step 1.6 감지 + Step 4 옵트인 | 생략 시 외부 연계 없음. `integrations.<name>` 구조 — 공통 필드 `enabled`/`source`(plugin·skill-dir·companion·cli)/`detectedVersion`(정보용)/`installPath`(실존 검증용) + 통합별 필드(superpowers의 `linkedSkills` 등). 현재 지원: `superpowers`(외부 플러그인), `multiModelConsult`(컴패니언+CLI). 규약: `references/integrations/_protocol.md`. 프리셋 비대상 |
+| `integrations` (선택) | Step 1.6 감지 + Step 4 옵트인 | 생략 시 외부 연계 없음. `integrations.<name>` 구조 — 공통 필드 `enabled`/`source`(plugin·skill-dir·bundled·cli)/`detectedVersion`(정보용)/`installPath`(실존 검증용, bundled는 null) + 통합별 필드(superpowers의 `linkedSkills` 등). 현재 지원: `superpowers`(외부 플러그인), `multiModelConsult`(번들+CLI). 규약: `references/integrations/_protocol.md`. 프리셋 비대상 |
 | `extras` | Step 4 문답에서 확인된 경우만 | 해당 키가 없으면 섹션 생략 |
 | `existingFiles` | Step 1.5 스캔 | 이미 존재하는 하네스 파일 목록 |
 | `skipFiles` | Step 5 사용자 선택 | 생성을 건너뛸 파일 목록 |

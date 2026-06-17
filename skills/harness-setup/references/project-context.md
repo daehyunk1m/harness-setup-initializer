@@ -71,8 +71,8 @@
 
 ### 작업 환경
 
-- **개발**: `cd ~/.claude/skills/harness-setup && claude`
-- **테스트**: `cd ~/projects/haja && claude --add-dir ~/.claude/skills/harness-setup` (단일 등록으로 두 스킬 자동 디스커버리)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~ 플러그인 배포)
+- **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 5개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
 ---
@@ -324,6 +324,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.23.0 (Claude Code 플러그인 전환)
+- **1.23.0** (2026-06-17) — 배포 방식을 "git clone + install.sh 심볼릭 링크"에서 정식 **Claude Code 플러그인 + 셀프 호스팅 마켓플레이스**로 전환. **구조**: `.claude-plugin/{plugin.json,marketplace.json}` 신설(단일 repo = 마켓플레이스 = 플러그인, `source:"./"`), 5개 스킬을 `skills/<name>/`로 `git mv` 재구성(루트 SKILL.md→skills/harness-setup/, presets·references→skills/harness-setup/, templates→skills/harness-scaffold/, companion-skills/*→skills/*). references는 harness-setup·harness-scaffold 양쪽 런타임 의존이라 **SSoT 심링크**(`skills/harness-scaffold/references → ../harness-setup/references`)로 공유(중복 복제 회피 — 발견: 구 harness-scaffold/도 이미 templates·references를 루트로 심링크하고 있었음, 옛 설계도 심링크 사용). **클린 컷오버**: install.sh를 마이그레이션 스크립트로 전환 — 구 심링크를 `test -L` 가드로만 정리(실제 디렉토리 미삭제) + 플러그인 안내 출력(듀얼 배포 폐기). **multiModelConsult 결합 분리**: run-advisor.js 호출을 `${CLAUDE_PLUGIN_ROOT}/skills/...`(본문 선치환)로, §1.6 감지를 CLI-only(번들이라 스킬 존재 보장)로, 프로필 source `companion`→`bundled`·installPath→null, §5.16 실존검증을 번들 전제로. **설계 검증(Spike)**: 구현 전 throwaway 플러그인으로 런타임 5종 실측 — ① `${CLAUDE_PLUGIN_ROOT}`는 SKILL.md 본문에서만 선치환(모델이 조합한 셸엔 부재) ② 하네스가 Base directory 제공 → co-located 자연어 상대 해석 ③ 내부 상대 심링크 캐시 생존 + 형제 스킬 reach ④ 짧은 이름 `Skill()` 체이닝 작동 ⑤ `source:"./"` 마켓플레이스 + 중첩 skills 발견. Spike 결과가 references 전략(중복→심링크)·변수 사용을 **결정**(추측 설계 금지 원칙). **멀티모델 자문 반영**: 초안의 듀얼 배포·references 중복(A1)·`:-` 폴백을 codex(폴백 경로 이중 `skills/` 버그·git-pull 호환 갭)·gemini(중복 안티패턴·클린 컷오버 권고)가 지적 → 클린 컷오버 + 심링크 + Spike 선검증으로 전환해 셋 다 해소. **MINOR**(배포/발견은 Public API 아님 §1, 프로필 integrations 선택 필드 값 변경). 골든 픽스처 5종 통과. 메모리: claude-code-plugin-runtime-behavior. 플랜: ~/.claude/plans/harness-setup-bright-turtle.md
 
 ### 1.22.0 (피드백 보고 트리거 — 이슈 #14)
 - **1.22.0** (2026-06-17) — 마찰 **기록**은 1.18.0(jsonl append)으로 자동화됐으나 **보고**(harness-feedback 분석→이슈) 호출 트리거가 session-routine·운영 사이클 어디에도 없어 dead-letter(파일럿에서 마찰 4건 적체 후 수동 요청 시점에야 #13 보고)이던 문제(이슈 #14)를 마감. **해결(5부)**: ① 신규 `data` 파일 `.harness-feedback-cursor`(1줄 JSON `{processedLines, lastReportedAt}`, 보고 위치 북마크·단일 상태원, `processedLines`=처리한 물리 줄 수=`grep -c ''`) ② session-routine § 세션 종료 트리거 — cursor 이후 미보고 마찰을 보고 기준(`critical≥1 OR 동일 event≥2 OR high≥2`, `infra-track-entry`·`session-incomplete` 제외)으로 평가해 충족 시 **한 줄 제안만**(무-훅·gh 무호출·자동 실행 없음, 보고 시 cursor 전진 → nagware 방지) ③ harness-feedback이 cursor 이후만 분석하고 보고/무시 시 cursor를 EOF로 전진(§6 3분기 y/d/n) + fingerprint `<!-- harness-friction:fp=event:{event} -->` 백스톱 dedup·race 재조회 ④ 월간 운영 사이클 보조 net(harness-cleanup M4) ⑤ graceful degradation(cursor 부재=`processedLines:0` 전체 미보고). **설계 결정(멀티모델 자문)**: 미보고 판별을 stateless gh-dedup으로 두려던 초안에서 codex 결함 지적 + gemini 대안 자문이 stateless의 3약점(제목 매칭 취약성·닫힌 Issue 재분석 루프·교차세션 drip)을 드러냄 → **무상태→cursor 북마크 상태 결정**으로 전환해 셋 다 해소. 트리거 기준을 harness-feedback의 보고 기준과 **동일**하게 정렬해 제안↔보고 정합(mismatch 제거 — 제안=반드시 보고 가능). 누적 윈도우라 단일 세션 dedup 제약을 넘어 교차세션·다feature로 기준 달성 가능. **마이그레이션 불필요**(cursor 부재 graceful, 기존 하네스는 첫 보고 시 자동 생성, 업그레이드 직후 첫 세션 종료에 누적 백로그가 "미보고 N건"으로 노출되는 건 의도). 신규 플레이스홀더 0. **검증**: 골든 픽스처 `test/feedback-cursor-fixtures.sh` 12 케이스(T1~T12) + 태스크별 2단계 subagent 리뷰(라이브 하네스 실주행 미수행). MINOR, 하위 호환. 이슈 #14 종결. 설계 정본: docs/superpowers/specs/2026-06-17-feedback-report-trigger-design.md, 계획: docs/superpowers/plans/2026-06-17-feedback-report-trigger.md
