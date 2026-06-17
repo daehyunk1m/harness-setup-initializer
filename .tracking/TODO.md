@@ -838,7 +838,7 @@
 
 ## Intent Ledger Phase 2 백로그 (이슈 #15 후속)
 
-> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2: intent↔PRD 커버리지 derive·미검증 명세·빈섹션 감지·8-상태 taxonomy·doc-freshness 글로빙·binding index — 미착수. 설계 진입점: `docs/superpowers/specs/2026-06-17-phase-2b-1-prd-substrate-design.md` §11.
+> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2(1.27.0): intent→PRD forward derive·2차원 백로그·blocked≠missing·one-way 마이그레이션 — **완료**. Phase 2b-3: 정적 harness-check 검증(빈섹션 경고·교차 derive·마커 검증·8-상태 taxonomy·doc-freshness 글로빙) — 미착수. 설계 진입점: `docs/superpowers/specs/2026-06-17-phase-2b-2-prd-coverage-derive-design.md` §12.
 
 ### TODO-103: intent-distill 스킬 (Phase 2a)
 - **상태**: [x] 완료 (Session 50, 2026-06-17, 1.25.0)
@@ -849,17 +849,21 @@
 - **내용**: `docs/product-specs/`를 빈 디렉토리에서 → 구조화·링크가능 PRD substrate로 전환. managed 템플릿 2종(`templates/product-specs/{README,_template}.md`) + scaffold §5.12.6 + §10.1 22-g/22-h + §6.2 검증 + 카운트 22→24 + §7 PRD 능력 줄(정직 문구) + coding-standards 관례+소프트 트리거 + §11 매핑 + M-1.25.0-to-1.26.0 [new] 소급 마이그레이션 + harness-check ① substrate 검사 + 골든 픽스처(16 케이스). 멀티모델 자문 2회(H1~H7). 설계 정본: `docs/superpowers/specs/2026-06-17-phase-2b-1-prd-substrate-design.md`.
 
 ### TODO-104: 의도↔PRD 커버리지 derive (Phase 2b-2)
-- **상태**: [ ] 미착수
-- **내용**: intent 스트림과 `docs/product-specs/` PRD 사이의 커버리지 갭 derive(5-상태 미러). "PRD에 있는데 의도 근거 없음" = 미검증 명세 방향. intent-distill PRD 방향 확장. `INTENT_BACKLOG.md` PRD 통합. 선결: PRD substrate(1.26.0) 완료됨 — substrate 위에 derive 배선. 설계 진입점: spec §11.
+- **상태**: [x] 완료 (2026-06-18, 1.27.0)
+- **내용**: intent-distill에 forward PRD 커버리지 derive 추가. §3 차원별 독립 게이팅(4조합 매트릭스, blocked≠missing). §4.1 PRD derive(whole-line @feature, kind↔섹션, 보수적 5-상태+blocked, 빈 섹션 가드). §5 2차원 머지 + one-way 마이그레이션(E2E-only→2차원, 우선순위/비고·미지 컬럼·waiver 보존, idempotent). §6 2차원 리포트(비대칭 하이라이트). INTENT_BACKLOG 2차원 헤더 템플릿. §7 capability·B1 동기화. 골든 픽스처. **역방향 제외(멀티모델 자문: 노이즈 폭탄, 2b-4 후보)**.
 
 ### TODO-105: E2E 백로그 연계 (Phase 2b-2)
-- **상태**: [ ] 미착수
-- **내용**: `encoded.e2e` 및 `encoded.test` 필드 갱신 로직. unintended intent 중 E2E로 커버되지 않은 항목을 feature_list에 자동 등록하는 파이프라인 설계.
+- **상태**: [ ] 보류 — 2b-2 스코프에서 제외(forward-only 결정, spec §2 비목표)
+- **내용**: `encoded.e2e` 및 `encoded.test` 필드 갱신 로직. unintended intent 중 E2E로 커버되지 않은 항목을 feature_list에 자동 등록하는 파이프라인 설계. → 2a E2E derive가 이미 커버, 별도 가치 입증 필요.
 
-### TODO-106: harness-check 빈섹션/마커 검증 (Phase 2b-2)
+### TODO-106: harness-check 빈섹션/마커 검증 (Phase 2b-3)
 - **상태**: [ ] 미착수
-- **내용**: 빈 섹션 감지(`<!-- harness:section=edge-cases -->` 이후 실질 내용 없음 → anti-blank 가이드 기계 검사), feature↔PRD 교차 derive(PRD 없는 feature 경고), 마커 검증 경고(파일명-마커 불일치·중복 마커·orphan/invalid-feature 마커), 8-상태 taxonomy. NOTE: 2b-1에서는 동작 변경 0 전제로 substrate 검사만 넣었음 — derive/검증 추가는 2b-2 전용.
+- **내용**: 빈 섹션 경고(`<!-- harness:section=edge-cases -->` 이후 실질 내용 없음 → anti-blank 가이드 기계 검사), feature↔PRD 교차 derive(PRD 없는 feature 경고), 마커 검증 경고(파일명-마커 불일치·중복 마커·orphan/invalid-feature 마커), 8-상태 taxonomy. **설계 진입점**: `docs/superpowers/specs/2026-06-17-phase-2b-2-prd-coverage-derive-design.md` §12(비-스코프 → 2b-3 입장).
 
-### TODO-107: doc-freshness 글로빙 + binding index (Phase 2b-2)
+### TODO-107: doc-freshness 글로빙 + binding index (Phase 2b-3/잔여)
 - **상태**: [ ] 미착수
-- **내용**: doc-freshness 글로빙(`product-specs/**` 추가 — 현재 누락). binding index 파일(중복 PRD canonical override — feature_list 필드 오염 대신 별도 파일). Architect PRE-RED PRD 작성 강제 게이트(현재 소프트 트리거만). 설계 진입점: spec §11.
+- **내용**: doc-freshness 글로빙(`product-specs/**` 추가 — 현재 누락). binding index 파일(중복 PRD canonical override — feature_list 필드 오염 대신 별도 파일). Architect PRE-RED PRD 작성 강제 게이트(현재 소프트 트리거만). **설계 진입점**: spec §12.
+
+### TODO-108: 역방향 "미검증 명세" derive (Phase 2b-4 후보)
+- **상태**: [ ] 이연 — 가치 입증 후 착수
+- **내용**: PRD에 있으나 의도 근거 없는 claim을 후보로 추출(저신뢰 리포트, codex 보수안). codex·gemini 강한 합의: 역방향은 90%+ 오탐, forward-only로 가치 먼저 입증. **진입 조건**: 2b-2 forward derive 운영 데이터로 역방향 수요 확인 후.

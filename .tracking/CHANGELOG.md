@@ -5,6 +5,23 @@
 
 ---
 
+## [1.27.0] — 2026-06-18 (Intent→PRD Coverage Derive — 이슈 #15 Phase 2b-2)
+
+### 추가 (Added)
+- **intent-distill §3 차원별 독립 게이팅**: e2e/specs + docs/product-specs를 각자 차원으로 독립 게이팅. 4조합 매트릭스(PRD有E2E有/PRD有E2E無/PRD無E2E有/PRD無E2E無). `blocked:no-prd-substrate`(substrate 無, 판정 불가) ≠ `missing`(substrate 有, 미커버) — 거짓 제품 결론 차단.
+- **intent-distill §4.1 PRD 커버리지 derive(forward)**: 각 의도에 대해 whole-line `@feature:{feature}` 바인딩으로 PRD 탐색, kind↔섹션 기대 매핑(intended→behavior/acceptance, unintended→edge-cases/open-questions), 보수적 5-상태(covered/partial/missing/ambiguous/invalid). 빈 섹션·템플릿 주석 = `covered` 절대 금지(false-covered 방지). 불확실 = `ambiguous` 기본.
+- **intent-distill §2+§5 2차원 백로그 머지 + one-way 마이그레이션**: 기존 E2E-only 백로그(`state` 단컬럼)를 처음 만날 때 `state→e2e_state` 승격 + `prd_state` 신규 derive. 사용자 `priority/비고`·미지 컬럼·`## waiver` 보존. 멱등(같은 입력=같은 백로그).
+- **intent-distill §6 2차원 리포트**: 차원별 카운트(PRD/E2E 각 covered/partial/missing/ambiguous/blocked) + 비대칭 하이라이트(specced-untested: prd≥covered & e2e=missing / tested-unspecced: e2e≥covered & prd=missing) + 보류(substrate 부재) 구분.
+- **INTENT_BACKLOG 2차원 헤더 템플릿**: `prd_state`+`e2e_state`+`evidence` 컬럼 추가, derived/user 분리 주석(`priority/비고` 단일 편집 영역). 기존 target은 다음 derive가 §5로 마이그레이션.
+- **§7 capability·harness-cleanup B1·§5.12.5 동기화**: harness-scaffold §7 능력 카탈로그 "의도 증류" 줄을 "@feature PRD·E2E와 대조해 2차원 커버리지 동기화"로 갱신. stale "derive는 후속" 문구 제거. harness-cleanup B1(INTENT_BACKLOG 검토)에 "PRD 차원도 검토 — specced-untested→E2E 작성, tested-unspecced→PRD 작성" 편입.
+- **골든 픽스처** `test/intent-prd-coverage-fixtures.sh`: grep 바인딩·섹션 파싱·마이그레이션·매트릭스 등 결정적 부분 검증.
+
+### 수정 (Changed)
+- **역방향 "미검증 명세" 제외(forward-only)**: codex·gemini 강한 합의 — PRD는 의도보다 풍부가 정상, 역방향은 90%+ 오탐. 가치 입증 시 별도 증분(2b-4 후보).
+- 스킬 번들 카운트 불변(신규 스킬 없음). `encoded`·원장 스키마·프로필 필드·플레이스홀더 모두 0(계약 불변). MINOR, 하위 호환.
+
+---
+
 ## [1.26.0] — 2026-06-17 (PRD Substrate — 이슈 #15 Phase 2b-1)
 
 ### 추가 (Added)
