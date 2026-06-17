@@ -11,7 +11,7 @@ no(){ echo "  ❌ $1"; FAIL=$((FAIL+1)); }
 echo "T1: _template.md 구조"
 T="$TPL_DIR/_template.md"
 { [ -f "$T" ] && ok "_template.md 존재"; } || no "_template.md 없음"
-{ grep -q "@feature:" "$T" 2>/dev/null && ok "@feature 마커 라인"; } || no "@feature 마커 없음"
+{ grep -Fxq "@feature:F000" "$T" 2>/dev/null && ok "@feature:F000 마커 (whole-line)"; } || no "@feature:F000 whole-line 마커 없음"
 for a in intent behavior edge-cases acceptance open-questions; do
   { grep -q "harness:section=$a" "$T" 2>/dev/null && ok "섹션 앵커 $a"; } || no "섹션 앵커 $a 없음"
 done
