@@ -34,6 +34,12 @@
 - 명령 값은 AGENTS.md의 "명령어" 섹션이 source of truth이다
 - **jsdom 한계**: L2 유닛(jsdom)은 레이아웃 엔진이 없어 오버플로·정렬·스크롤·텍스트 넘침·반응형 같은 **시각/레이아웃 회귀**를 검증하지 못한다(클래스/속성 존재만 확인). 이 회귀 클래스는 L4 E2E(실 브라우저)로만 잡을 수 있으므로, feature가 시각/레이아웃 회귀 위험을 가지면 **상호작용 여부와 무관하게** E2E 작성 대상이다(test-engineer.md "E2E 작성 규칙").
 
+## PRD 명세 (제품 요구사항)
+
+- feature의 제품 요구사항은 `docs/product-specs/{featureID}-{slug}.md`에 산문으로 작성하고, 파일에 whole-line `@feature:{featureID}` 1줄을 넣어 feature와 바인딩한다(양식: `docs/product-specs/_template.md`, 상세: `docs/product-specs/README.md`).
+- 특히 **Edge Cases & Out-of-Scope**(제외 규칙)를 빈칸으로 두지 않는다 — 명세 안 된 제외 규칙이 가장 흔한 버그 원천이다.
+- **권고(게이트 아님)**: 새 `@feature` 작업을 시작할 때 `_template.md`를 복사해 PRD를 먼저 작성할 것을 권장한다. 이는 TDD 상태 게이트가 아니며 검증 주장도 아니다 — 작성 여부가 완료를 막지 않는다. 의도↔PRD 커버리지 점검은 후속 단계에서 배선된다.
+
 ## E2E @critical 태그
 
 `@critical`은 E2E 스펙에 부여하는 태그로, **절대 깨지면 안 되는 핵심 사용자 흐름**(로그인, 결제, 데이터 손실 위험 동작 등)을 표시한다.
