@@ -20,7 +20,7 @@ echo ""
 # ① 필수 파일/디렉토리 존재
 echo "── ① 필수 파일 ──"
 for f in AGENTS.md ARCHITECTURE.md CLAUDE.md claude-progress.txt \
-         feature_list.json .harness-friction.jsonl init.sh scripts/structural-test.ts scripts/doc-freshness.ts; do
+         feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh scripts/structural-test.ts scripts/doc-freshness.ts; do
   if [ -f "$f" ]; then
     echo "✅ $f"
   else

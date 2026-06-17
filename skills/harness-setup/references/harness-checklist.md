@@ -31,10 +31,11 @@
 - [ ] `claude-progress.txt` — 세션 간 진행 기록
 - [ ] `feature_list.json` — 기능 목록 + passes 상태
 - [ ] `.harness-friction.jsonl` — 마찰 자동 기록 싱크 (append-only JSONL, manifest category `data`)
+- [ ] `.harness-intent.jsonl` — 제품 의도 적재 싱크 (append-only JSONL, manifest category `data`, always-on)
 - [ ] `init.sh` — 환경 초기화 스크립트
 - [ ] `docs/` — 하위 문서 디렉토리 (exec-plans, QUALITY_SCORE, TECH_DEBT)
 
-**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl init.sh docs/`
+**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/`
 
 ### 1.2 AGENTS.md 품질 규칙
 
@@ -216,7 +217,7 @@ harness-setup 스킬의 현재 스캐폴딩 범위는 **표준 하네스**까지
 
 ```bash
 # 1. 필수 파일
-ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl init.sh
+ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/
 
 # 2. AGENTS.md 100줄 제한
 wc -l AGENTS.md
