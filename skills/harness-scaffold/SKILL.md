@@ -1931,6 +1931,8 @@ Phase 2에서 파일을 생성할 때, 다음 참조를 읽어 구현의 기본 
 | docs/TECH_DEBT.md | `templates/TECH_DEBT.md` | — | CREATED_DATE 치환 |
 | docs/HARNESS_FRICTION.md | `templates/HARNESS_FRICTION.md` | — | 그대로 복사 (플레이스홀더 없음) |
 | docs/INTENT_LEDGER.md | `templates/INTENT_LEDGER.md` | — | 그대로 복사 (플레이스홀더 없음) |
+| docs/product-specs/README.md | `templates/product-specs/README.md` | — | 그대로 복사 (플레이스홀더 없음) |
+| docs/product-specs/_template.md | `templates/product-specs/_template.md` | — | 그대로 복사 (플레이스홀더 없음) |
 | scripts/harness-check.sh | `templates/harness-check.sh` | `references/harness-checklist.md` § 8 | § 5.14 치환 규칙 적용 |
 | AGENTS.md | `references/harness-guide.md` P2 섹션 | 형식 참고 (내용은 프로필 기반으로 작성) |
 

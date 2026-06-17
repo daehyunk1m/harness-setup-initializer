@@ -106,7 +106,7 @@
 - **§5.13 manifest**: `docs/product-specs/README.md`·`_template.md`를 category `managed`로 등록. 작성된 `{id}-{slug}.md`는 미등록(비추적). 프로필 스냅샷 변경 없음.
 - **§6 Phase 3 검증**: 필수 파일 확인 라인에 두 파일 추가.
 - **§7 능력 게이팅(H6 정직 문구)**: always-on 능력 라인 무조건 표시. 문구는 **"PRD 작성 관례·템플릿 제공"** — 의도↔PRD 추적 **derive는 2b-2**라고 명시(과장 금지). 예: "PRD 명세 → `docs/product-specs/{id}-{slug}.md`에 `@feature:{id}`로 작성(관례·템플릿; 커버리지 derive는 후속)".
-- **§10.2 U3 / §12.6.1 매핑**: 신규 managed 파일 2개를 파일-템플릿 매핑에 추가. 업그레이드 시 §12.6 자동 감지는 **기존 manifest 파일 업데이트 전용**이므로, 신규 파일은 §4.5 마이그레이션 `[new]` 경로로 추가된다.
+- **§11 참고자료 표 (§12.6.1 제외)**: docs/*.md managed 정적 파일은 §12.6.1 자동 감지 매핑에서 **제외**한다(INTENT_LEDGER.md·HARNESS_FRICTION.md 관례 — 정적 복사 docs는 마이그레이션으로 관리). 두 파일은 harness-scaffold §11 참고자료 표에 "그대로 복사(플레이스홀더 없음)"로 등재한다. 초기 설치·기존 하네스 소급·향후 템플릿 변경은 모두 마이그레이션(§4.5 [new], 이후 변경은 후속 마이그레이션)으로 관리한다.
 
 ### 4.4 `templates/rules/coding-standards.md` 변경 (managed 템플릿, 관례 선언 — H5/D6)
 
