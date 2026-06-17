@@ -32,13 +32,25 @@ if [ -f docs/INTENT_BACKLOG.md ]; then cat docs/INTENT_BACKLOG.md; else echo "BA
 
 부재 시 빈 백로그(열린 백로그 0행, waiver 0행)로 시작한다. `## 열린 백로그` 표(키=ts)와 `## waiver` 표(키=ts)를 파싱하고, 사용자 `priority/비고` 열·waiver 항목을 **보존 대상**으로 기억한다.
 
-## 3. E2E 계층 확인
+## 3. substrate 확인 (차원별 독립)
+
+PRD·E2E 두 차원을 **독립**으로 확인한다. 한 차원이 없으면 그 차원만 보류(`blocked:*`)하고 다른 차원은 정상 derive한다.
 
 ```!
 if [ -d e2e/specs ] && ls e2e/specs/*.e2e.ts >/dev/null 2>&1; then echo "E2E_PRESENT"; else echo "E2E_ABSENT"; fi
+if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then echo "PRD_PRESENT"; else echo "PRD_ABSENT"; fi
 ```
 
-`E2E_ABSENT`이면: "이 프로젝트는 E2E 계층이 없어 커버리지 판정을 보류합니다(E2E 도입 후 재실행). 적재된 의도 {N}건은 'E2E 도입 후 판정' 상태입니다." 출력 후 **종료**한다 — 모든 의도를 missing으로 오판하지 않는다.
+**게이팅 매트릭스** (substrate 부재 ≠ 미커버 — 절대 혼동 금지):
+
+| PRD | E2E | 동작 |
+|-----|-----|------|
+| PRESENT | PRESENT | 두 차원 derive |
+| PRESENT | ABSENT | PRD만 derive, 모든 의도 `e2e_state=blocked:no-e2e-substrate` |
+| ABSENT | PRESENT | E2E만 derive, 모든 의도 `prd_state=blocked:no-prd-substrate` |
+| ABSENT | ABSENT | "두 substrate(E2E·PRD)가 없어 커버리지 판정을 보류합니다. 적재된 의도 {N}건은 substrate 도입 후 판정됩니다." 출력 후 **종료** |
+
+`docs/product-specs/`에 `README.md`/`_template.md`만 있고 바인딩 PRD가 없어도 PRD_PRESENT다(개별 feature의 PRD 부재는 §4에서 `missing`으로 판정 — substrate 부재와 구분).
 
 ## 4. 커버리지 파생 (feature-범위, 증거 필수)
 
