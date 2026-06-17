@@ -5,6 +5,26 @@
 
 ---
 
+## [1.22.0] — 2026-06-17 (피드백 보고 트리거 — 이슈 #14)
+
+### 추가 (Added)
+- **신규 `data` 파일 `.harness-feedback-cursor` (보고 위치 북마크)**: 1줄 JSON `{"processedLines": N, "lastReportedAt": "<ISO|null>"}` — `processedLines`는 이미 보고/검토한 `.harness-friction.jsonl`의 물리 줄 수(`grep -c ''` = 이벤트 수, append-only이므로 안전). 보고 상태의 **단일 상태원**이다. harness-scaffold §5.12.2가 빈 초기값(`processedLines:0`)으로 생성하고 manifest에 **category `data`로 등록**(§10.1 #22-c — 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음, feature_list.json·`.harness-friction.jsonl`과 동일 취급). 생성 순서 17-c 추가.
+- **templates/rules/session-routine.md § 세션 종료 피드백 보고 트리거**: 세션 종료 시 cursor **이후** 미보고 마찰을 보고 기준(`critical≥1 OR 동일 event≥2 OR high≥2`, `infra-track-entry`·`session-incomplete` 제외)으로 평가해 충족 시 **한 줄 제안만** 출력한다 — 자동 실행·gh 호출 없음(무-훅·승인 없이 실행 금지 원칙, 1.18.0 옵션 i 자세 유지). 보고하면 cursor가 전진하므로 다음 세션엔 재제안되지 않는다(nagware 방지). jsonl 부재 시 스킵, cursor 부재 시 전체를 미보고로 평가. 누적 윈도우라 단일 세션 dedup 제약을 넘어 교차세션·다feature로 기준 달성 가능.
+- **harness-feedback cursor 추적 + fingerprint dedup + 3분기 확인** (companion-skills/harness-feedback/SKILL.md): §1.1 cursor 이후(`processedLines` 이후)만 분석 → 닫힌 Issue 재분석 루프 차단. §5 Issue body에 fingerprint 주석 `<!-- harness-friction:fp=event:{event} -->`, §5.1 열린 friction Issue fingerprint 대조 백스톱(cursor 분실·동시 실행 대비, 하드 스킵 아님 — 사용자 판단). §6 확인을 3분기로 확장(`y`=생성+cursor 전진 / `d`=무시·보고 불필요로 cursor만 전진 / `n`=취소·cursor 미전진). §7 `gh issue create` 직전 fingerprint race 재조회 + §7.1 cursor를 현재 물리 줄 수로 전진.
+- **운영 사이클 월간 보조 net** (companion-skills/harness-cleanup/SKILL.md §5 M4): 세션 종료 트리거가 주 그물망, 월간은 belt-and-suspenders. cursor 이후 미보고 마찰이 남아 있으면 harness-feedback 실행을 제안(cursor 기반이라 재실행이 중복 Issue를 만들지 않음).
+
+### 변경 (Changed)
+- companion-skills/harness-feedback/SKILL.md § 제약: "동일 패턴 Issue 존재 미확인(중복 수동 관리)" 행을 cursor 기반 재분석 차단 + fingerprint 백스톱 힌트로 교체.
+- 프로필 스키마 version 1.21.0→1.22.0(SKILL.md·harness-scaffold/SKILL.md 계약 동기). references/versioning-policy.md: 1.22.0 행.
+
+### 비고
+- **근본 원인**: 마찰 **기록**은 자동화(1.18.0 jsonl append)됐으나 **보고**(harness-feedback 분석→이슈) 호출 트리거가 session-routine·운영 사이클 어디에도 없어 사용자 명시 호출 시에만 동작 → jsonl이 쌓여도 dead-letter(파일럿에서 마찰 4건 적체 후 수동 요청 시점에야 #13 보고).
+- **멀티모델 자문 반영**(codex 결함 지적 + gemini 대안): 미보고 판별을 stateless gh-dedup으로 두려던 초안에서, 자문이 stateless의 3약점(① 제목 매칭 취약성 ② 닫힌 Issue 재분석 루프 ③ 교차세션 drip)을 지적 → **cursor 북마크 무상태→상태 결정**으로 전환해 셋 다 해소. 트리거 기준을 harness-feedback의 보고 기준과 **동일**하게 정렬(제안=반드시 보고 가능, mismatch 없음).
+- **마이그레이션 불필요**: cursor 부재 → graceful `processedLines:0`(전체 미보고). 기존 하네스는 첫 보고 시 자동 생성, 업그레이드 직후 첫 세션 종료엔 누적 백로그가 "미보고 N건"으로 노출된다(의도 — 이슈 #14의 목적). 신규 플레이스홀더 0.
+- **검증**: 골든 픽스처 `test/feedback-cursor-fixtures.sh` 12 케이스(T1~T12 — 트리거 평가·post-cursor 추출·cursor 전진·fingerprint 수집, 감사 마커 제외·깨진 줄 스킵·물리 줄 수 포함 포함) 통과. 태스크별 2단계 subagent 리뷰. MINOR(새 data 파일 + managed 템플릿 행동 추가, 하위 호환). 이슈 #14 종결. **라이브 하네스 실주행은 미수행**(픽스처 + 리뷰 검증). 설계 정본: docs/superpowers/specs/2026-06-17-feedback-report-trigger-design.md, 계획: docs/superpowers/plans/2026-06-17-feedback-report-trigger.md.
+
+---
+
 ## [1.21.0] — 2026-06-17 (E2E 아티팩트 .gitignore 머지 — 이슈 #13)
 
 ### 추가 (Added)
