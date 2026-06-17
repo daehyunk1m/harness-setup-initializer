@@ -1432,6 +1432,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 마찰 자동 기록 → TDD 마찰 이벤트(implementer-retry 등)가 발생 시 `.harness-friction.jsonl`에 자동 기록 (상세: .claude/rules/session-routine.md § 마찰 로그) — always-on
 - 의도 적재 → 세션 종료 시 제품 의도(intended/unintended)가 `.harness-intent.jsonl`에 적재 (상세: .claude/rules/session-routine.md § 의도 로그) — always-on
 - 의도 증류 → "의도 정리"로 `.harness-intent.jsonl`을 @feature E2E와 대조해 `docs/INTENT_BACKLOG.md` 커버리지 백로그 동기화 (상세: intent-distill 스킬 — 플러그인 번들)
+- PRD 명세 → 새 feature 작업 시 `docs/product-specs/{id}-{slug}.md`에 `@feature:{id}`로 작성 (양식: docs/product-specs/_template.md · 상세: docs/product-specs/README.md) — always-on, 작성 관례·템플릿 제공(커버리지 derive는 후속)
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/README.md · playwright.config.ts) — e2e 옵트인 시에만 표시
@@ -1463,7 +1464,7 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - **보조 스킬 줄**: § 5.16 실존 검증을 통과한 생존 `linkedSkills`가 1개 이상일 때만 렌더 (AGENTS.md "## 보조 스킬" 섹션과 **동일 생존 집합**). 생존 스킬 0개면 생략한다.
 - **TDD 사이클 줄**: 항상 렌더하되 파이프라인 단계를 열거하지 않고 session-routine.md를 가리킨다. Security Reviewer는 7개 에이전트의 하나로 **항상 생성**되지만 `tdd.securityCategories`에 매칭되는 feature가 있을 때만 호출되므로(session-routine Phase 4.5 SECURITY 호출 조건 — 빈 배열이면 매칭 feature가 없어 실호출되지 않음), 미호출 가능한 단계를 상시 능력으로 광고하지 않는다.
 - **하네스 정리 · 피드백 분석 · 의도 증류 줄**: 하네스 플러그인에 번들된 스킬(harness-cleanup·harness-feedback·intent-distill)이므로 플러그인 설치 시 항상 호출 가능하다.
-- **검증 게이트 · 자가진단 · 품질·부채 추적 · 마찰 자동 기록 · 의도 적재 줄**: 항상 생성되는 산출물이므로 무조건 렌더.
+- **검증 게이트 · 자가진단 · 품질·부채 추적 · 마찰 자동 기록 · 의도 적재 · PRD 명세 줄**: 항상 생성되는 산출물이므로 무조건 렌더. PRD 명세 줄은 substrate(관례·템플릿)가 always-on 생성되므로 표시하되, **문구는 "작성 관례·템플릿 제공"에 한정**한다 — 의도↔PRD 커버리지 derive는 후속(2b-2)이라 "추적 가능"으로 광고하지 않는다(미와이어 능력 광고 불가).
 - **브라우저 E2E 줄**: `e2e.enabled === true`이고 § 5.17 산출물(`playwright.config.ts`)이 생성된 경우에만 렌더 — 산출물 생성을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 자체를 생략한다 (미와이어 능력 광고 불가).
 - **브라우저 MCP 줄**: `e2e.mcp.enabled === true`일 때만 렌더 — debugger.md MCP 블록 치환을 결정한 바로 그 신호를 재사용하는 순수 투영. 미옵트인 시 줄 생략(미와이어 능력 광고 불가).
 - **pre-push 게이트 줄**: `e2e.prePush === true`이고 § 5.18 산출물(`.githooks/pre-push`)이 생성/주입된 경우에만 렌더 — 산출물 생성 신호를 재사용하는 순수 투영. 미옵트인·폴백 시 줄 자체를 생략한다 (미와이어/미활성 능력 광고 불가).
