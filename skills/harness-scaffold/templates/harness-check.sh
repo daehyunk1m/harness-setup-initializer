@@ -40,7 +40,7 @@ else
   echo "❌ docs/product-specs/ substrate 없음 (README·_template)"; STRUCT_FAIL=1
 fi
 # 작성된 PRD({id}-{slug}.md) 부재는 실패가 아니라 보류 — 새 프로젝트는 PRD 0개가 정상
-if ls docs/product-specs/[!_]*.md >/dev/null 2>&1; then
+if [ "$(ls docs/product-specs/*.md 2>/dev/null | grep -cvE '/(README|_template)\.md$')" -gt 0 ]; then
   echo "✅ 작성된 PRD 존재"
 else
   echo "⏸️ 작성된 PRD 없음 — 보류(온디맨드 작성, 실패 아님)"
