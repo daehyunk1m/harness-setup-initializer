@@ -127,7 +127,7 @@ if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then
 
 **evidence 컬럼**(통합): 두 차원 증거를 한 셀에 — 예 `prd: F007-progress.md#edge-cases (someday 제외 명시) · e2e: F007-progress.e2e.ts::"excludes someday"`.
 
-**구-포맷 마이그레이션**(첫 2b-2 실행, §2에서 감지): 기존 E2E-only 행을 **one-way 승격**:
+**구-포맷 마이그레이션**(§2에서 구-포맷 감지 시에만 적용 — 마이그레이션 후엔 헤더가 2차원이라 다음 실행부터 일반 머지): 기존 E2E-only 행을 **one-way 승격**:
 1. `state` → `e2e_state`(값 그대로).
 2. 구 `evidence` → 통합 `evidence`의 e2e 부분으로 이동.
 3. `prd_state` 신규 → 이번 실행에서 §4.1 derive(PRD substrate 없으면 `blocked:no-prd-substrate`).
