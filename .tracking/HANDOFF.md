@@ -172,7 +172,7 @@
 **열린 이슈: 0건** (#15 Phase 2b-2 종결 — forward PRD derive 완성(차원별 게이팅·5-상태+blocked·빈섹션 가드·2차원 머지·one-way 마이그레이션·2차원 리포트·B1 편입·골든 픽스처). 역방향 "미검증 명세"는 2b-4 후보로 이연. Phase 2b-3(정적 harness-check 검증: 빈섹션 경고·feature↔PRD 교차 derive·마커 검증·8-상태 taxonomy·doc-freshness 글로빙) 미착수.)
 
 ### ▶ 다음 작업: Phase 2b-3 — 정적 harness-check 검증
-**설계 진입점**: `docs/superpowers/specs/2026-06-17-phase-2b-2-prd-coverage-derive-design.md` §12 "명시적 비-스코프" — 이 섹션이 2b-3 스코프를 정의한다.
+**설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-handoff.md` — 스코프·상속 결정·미결정·진입점·앵커. 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작. (스코프 원본: Phase 2b-2 spec §12 "명시적 비-스코프".)
 - **2b-3 스코프** (spec §12에서 이월):
   - harness-check **빈 섹션 경고**(anti-blank 가이드 기계 검사 — `<!-- harness:section=edge-cases -->` 이후 실질 내용 없음)
   - harness-check **feature↔PRD 교차 derive**(PRD 없는 feature 경고)
