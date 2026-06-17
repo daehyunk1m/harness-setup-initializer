@@ -227,6 +227,7 @@ MAJOR 범프 시 추가:
 | 1.19.0 릴리스 | harness-check 의존성 미설치 사전 감지(TODO-100): node_modules 부재 시 ④⑤를 "의존성 미설치로 보류"(exit 0)로 분기 — MVH 오라벨링 완화. 자동 설치 금지 보존. 신규 필드·플레이스홀더 0. managed 자동 감지 전파·마이그레이션 불필요. | MINOR | managed 템플릿 행동 개선(판정 분기 추가) — 기존 하네스 호환 |
 | 1.20.0 릴리스 | 인프라/설정 트랙(이슈 #6, TODO-85): category `infra`/`config` 작업에 유닛 RED→GREEN을 통합 검증으로 대체하는 트랙 + 남용 방지 게이트(사전 선언·부정 테스트·Reviewer 독립 감사·보안 표면 트리거·감사 추적). managed 템플릿(session-routine/coding-standards/agents) 행동 추가. 신규 필드·플레이스홀더 0. 자동 감지 전파·마이그레이션 불필요. | MINOR | 새 워크플로 트랙(에이전트 행동 규칙 추가) — 기존 하네스 호환 |
 | 1.21.0 릴리스 | E2E 아티팩트 .gitignore 머지(이슈 #13): §5.17 E2E 옵트인 시 `/test-results/`·`/playwright-report/`를 `.gitignore`에 멱등 add-only 마커 블록으로 주입. managed 파일 아닌 inline 머지(ESLint·package.json과 동급, manifest 미기록). U3 step 6-b 소급. 신규 필드·플레이스홀더·파일 0. 마이그레이션 불필요. | MINOR | 새 스캐폴드 규칙(생성 하네스 산출물 추가) — 기존 하네스 호환 |
+| 1.22.0 릴리스 | 피드백 보고 트리거(이슈 #14): 신규 data 파일 `.harness-feedback-cursor`(보고 위치 북마크) + session-routine 세션 종료 트리거 + harness-feedback cursor 추적·fingerprint dedup·3분기 확인 + 월간 보조 net. cursor 부재 graceful(마이그레이션 불필요). 신규 플레이스홀더 0. | MINOR | 새 data 파일 + managed 템플릿 행동 추가 — 기존 하네스 호환 |
 
 → Session 14-17을 하나의 릴리스로 묶으면: **MINOR** (가장 높은 수준)
 → 만약 1.0.0에서 시작했다면: **1.1.0**
