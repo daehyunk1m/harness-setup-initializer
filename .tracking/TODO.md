@@ -838,24 +838,28 @@
 
 ## Intent Ledger Phase 2 백로그 (이슈 #15 후속)
 
-> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b: PRD substrate·바인딩·미검증 명세 — 미착수. spec §12 참조.
+> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2: intent↔PRD 커버리지 derive·미검증 명세·빈섹션 감지·8-상태 taxonomy·doc-freshness 글로빙·binding index — 미착수. 설계 진입점: `docs/superpowers/specs/2026-06-17-phase-2b-1-prd-substrate-design.md` §11.
 
 ### TODO-103: intent-distill 스킬 (Phase 2a)
 - **상태**: [x] 완료 (Session 50, 2026-06-17, 1.25.0)
 - **내용**: `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 실구조에서 파생. `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존). 세션종료 경량 nudge + 격주 B1 리뷰 편입. 멀티모델 자문 반영(이산 gh 이슈 기각·별도 lean 스킬·상태파일 제거).
 
-### TODO-104: PRD diff 연계 (Phase 2b)
-- **상태**: [ ] 미착수
-- **내용**: intent 스트림과 `docs/product-specs/`(현재 빈 디렉토리) PRD 사이의 갭 식별. feature_list.id → PRD 링크 필드 설계. `encoded.prd` 필드 실제 갱신(Phase 1에서 all-false, Phase 2a에서 비권위 스냅샷으로 명시됨). PRD substrate(prd_section_ref) 설계 선결.
+### TODO-103b: PRD substrate (Phase 2b-1)
+- **상태**: [x] 완료 (Session 51, 2026-06-17, 1.26.0)
+- **내용**: `docs/product-specs/`를 빈 디렉토리에서 → 구조화·링크가능 PRD substrate로 전환. managed 템플릿 2종(`templates/product-specs/{README,_template}.md`) + scaffold §5.12.6 + §10.1 22-g/22-h + §6.2 검증 + 카운트 22→24 + §7 PRD 능력 줄(정직 문구) + coding-standards 관례+소프트 트리거 + §11 매핑 + M-1.25.0-to-1.26.0 [new] 소급 마이그레이션 + harness-check ① substrate 검사 + 골든 픽스처(16 케이스). 멀티모델 자문 2회(H1~H7). 설계 정본: `docs/superpowers/specs/2026-06-17-phase-2b-1-prd-substrate-design.md`.
 
-### TODO-105: E2E 백로그 연계 (Phase 2b)
+### TODO-104: 의도↔PRD 커버리지 derive (Phase 2b-2)
+- **상태**: [ ] 미착수
+- **내용**: intent 스트림과 `docs/product-specs/` PRD 사이의 커버리지 갭 derive(5-상태 미러). "PRD에 있는데 의도 근거 없음" = 미검증 명세 방향. intent-distill PRD 방향 확장. `INTENT_BACKLOG.md` PRD 통합. 선결: PRD substrate(1.26.0) 완료됨 — substrate 위에 derive 배선. 설계 진입점: spec §11.
+
+### TODO-105: E2E 백로그 연계 (Phase 2b-2)
 - **상태**: [ ] 미착수
 - **내용**: `encoded.e2e` 및 `encoded.test` 필드 갱신 로직. unintended intent 중 E2E로 커버되지 않은 항목을 feature_list에 자동 등록하는 파이프라인 설계.
 
-### TODO-106: encoded 갱신 로직 (Phase 2b)
+### TODO-106: harness-check 빈섹션/마커 검증 (Phase 2b-2)
 - **상태**: [ ] 미착수
-- **내용**: Phase 1에서 `encoded: { prd: false, e2e: false, test: false }`로 고정된 필드를 실제 코드베이스 상태(PRD 존재 여부·E2E 스펙 존재 여부·테스트 존재 여부)와 연결해 동적으로 갱신하는 메커니즘. NOTE: Phase 2a에서 encoded는 비권위 capture-time 스냅샷으로 확정됨 — distill은 derived-live 커버리지를 별도로 파생하므로 encoded 자체를 갱신하지 않는다. 이 TODO는 encoded를 실시간으로 반영하려는 별도 메커니즘이므로 Phase 2b 범위.
+- **내용**: 빈 섹션 감지(`<!-- harness:section=edge-cases -->` 이후 실질 내용 없음 → anti-blank 가이드 기계 검사), feature↔PRD 교차 derive(PRD 없는 feature 경고), 마커 검증 경고(파일명-마커 불일치·중복 마커·orphan/invalid-feature 마커), 8-상태 taxonomy. NOTE: 2b-1에서는 동작 변경 0 전제로 substrate 검사만 넣었음 — derive/검증 추가는 2b-2 전용.
 
-### TODO-107: intent↔PRD 바인딩 + PRD 출력단 갭 (Phase 2b)
+### TODO-107: doc-freshness 글로빙 + binding index (Phase 2b-2)
 - **상태**: [ ] 미착수
-- **내용**: `docs/product-specs/`가 현재 빈 디렉토리(`feature_list.id → PRD 링크 필드` 미존재). intent 원장과 PRD를 연결하는 바인딩 레이어 설계(prd_section_ref 양방향 바인딩·미검증 명세). spec §12 참조. 선결과제: TODO-104 PRD diff 기반.
+- **내용**: doc-freshness 글로빙(`product-specs/**` 추가 — 현재 누락). binding index 파일(중복 PRD canonical override — feature_list 필드 오염 대신 별도 파일). Architect PRE-RED PRD 작성 강제 게이트(현재 소프트 트리거만). 설계 진입점: spec §11.

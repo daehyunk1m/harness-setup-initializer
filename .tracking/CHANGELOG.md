@@ -5,6 +5,26 @@
 
 ---
 
+## [1.26.0] — 2026-06-17 (PRD Substrate — 이슈 #15 Phase 2b-1)
+
+### 추가 (Added)
+- **PRD substrate 템플릿 2종** (`skills/harness-scaffold/templates/product-specs/{README,_template}.md`, managed, 정적 복사·플레이스홀더 0): `_template.md`는 per-feature PRD 양식(섹션 앵커 5종 `<!-- harness:section=… -->` + anti-blank Edge Cases 가이드 + whole-line `@feature:{id}` 바인딩 마커); `README.md`는 디렉토리 관례·네이밍·마커 규칙·feature_list 진입점·운영 노트(INTENT_BACKLOG missing/partial → PRD Edge Cases 반영 — H7) 문서.
+- **scaffold §5.12.6 생성 규칙**: `docs/product-specs/`를 빈 디렉토리에서 → README+_template 정적 복사 생성으로 교체. per-feature stub pre-seed 없음. INTENT_LEDGER.md(§5.12.3) 패턴 미러.
+- **manifest §10.1 22-g/22-h**: 두 파일을 category `managed`로 등록. 작성된 `{id}-{slug}.md`는 비추적(작성 E2E 스펙 동급).
+- **§6.2 Phase 3 검증**: 필수 파일 확인 라인에 두 파일 추가. 생성 파일 카운트 22→24.
+- **§7 능력 카탈로그 PRD 줄**: always-on 무조건 표시. 정직 문구("PRD 관례·템플릿 제공" — 커버리지 derive는 2b-2 명시, 과장 금지. H6).
+- **coding-standards PRD 관례+소프트 트리거**: E2E `@feature` 관례 형제 위치에 PRD 관례 선언. 새 `@feature` 작업 시 `_template.md` 복사 후 PRD 먼저 작성 권장(소프트, 게이트 아님 — PRE-RED 강제는 2b-2).
+- **§11 참고자료 매핑**: 두 파일을 §11 표에 "그대로 복사(플레이스홀더 없음)"로 등재. §12.6.1 자동 감지 매핑 제외(INTENT_LEDGER.md·HARNESS_FRICTION.md 관례 — 정적 docs는 마이그레이션으로 관리).
+- **M-1.25.0-to-1.26.0 `[new]` 소급 마이그레이션**: always-on이므로 기존 하네스에 소급 설치(idempotent — skip-if-exists, 사용자 파일 덮어쓰기 금지). §10.3 마이그레이션 레지스트리 등록.
+- **harness-check ① substrate 구조 검사**: README+_template 부재 = 구조 실패(exit 1, 타 managed 파일과 동일). 작성 PRD(`{id}-{slug}.md`) 부재 = 보류/정보(E2E "판정 보류" 미러). harness-checklist.md §8 동기화.
+- **골든 픽스처** `test/prd-substrate-fixtures.sh`: T1(_template 구조 9케이스)·T2(README 구조 4케이스)·T3(whole-line @feature grep 규칙 3케이스) — 16 케이스 전부 통과.
+- **멀티모델 자문 2회 반영(H1~H7)**: codex·gemini 자문(1차 접근법·2차 확정 설계 리뷰) — per-feature 분리, `-Fx` whole-line, 섹션 앵커, anti-blank 가이드, always-on 소급 필수 확정. 아티팩트: `.claude/artifacts/consult/`.
+
+### 수정 (Changed)
+- 스킬 번들 카운트 불변 (신규 스킬 없음). feature_list 스키마·프로필 필드·플레이스홀더 모두 0(계약 불변). MINOR, 하위 호환.
+
+---
+
 ## [1.25.0] — 2026-06-17
 
 ### Added

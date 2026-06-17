@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-13 (1.8.0 — 자동 커밋 confirm 모드)
+> 마지막 업데이트: 2026-06-17 (1.26.0 — PRD substrate, 이슈 #15 Phase 2b-1)
 
 ---
 
@@ -71,7 +71,7 @@
 
 ### 작업 환경
 
-- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.25.0)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.26.0)
 - **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 6개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
@@ -129,6 +129,7 @@
 | 이슈 #12 증분 3 MCP 진단 (1.15.0) | 배치 = e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 "코어 충돌 영역 제외"와 충돌). 산출물 = 공유 `.mcp.json` 비커밋(Claude Code 승인 nagware·머지 지옥·관심사 분리 회피) → debugger.md 지침 + 개발자 로컬 `claude mcp add`. 분리 옵트인 `e2e.mcp`(`enabled`/`version`, `e2e.enabled`와 독립). 공식 `@playwright/mcp` exact 핀 `0.0.76`. `{{MCP_DEBUG_PROTOCOL}}`(30→31) | 멀티모델 자문(codex·gemini)이 비커밋 B안 권고 — 공유 .mcp.json 미생성. gemini의 "ad-hoc npx" 오류는 MCP 등록 메커니즘 오해라 합성자가 교정. 설계 정본: `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md` |
 | 의도 원장 (1.24.0, 이슈 #15) | 의도 원장은 friction 자매 채널 — 세션 종료 배치 적재, always-on, encoded 선반영(Phase 1 all-false), unintended↔friction 직교. 증류는 Phase 2. | 프로필 변경 0, 신규 플레이스홀더 0. friction이 "실제로 마찰을 겪었는가"를 기록하면, intent는 "무엇을 의도했는가"를 기록 — 두 채널이 교차해야 패턴이 의미를 가진다. Phase 1은 수집 인프라만. 증류(distill·PRD diff)·인코딩 갱신·바인딩은 Phase 2 비-스코프. |
 | intent-distill 스킬 모델 (1.25.0, 이슈 #15 Phase 2a) | intent-distill은 영속 백로그(`docs/INTENT_BACKLOG.md`) 모델 + derived 커버리지(실구조에서 파생, 증거 필수) + 별도 lean 스킬(통합 기각) — 멀티모델 자문 반영. `encoded`는 비권위 capture-time 스냅샷(distill 미갱신 — derived-live). | 이산 gh 이슈(per-intent) → 노이즈·라이프사이클 복잡도. INTENT_BACKLOG.md 영속 머지-싱크(idempotent, 사용자 주석·waiver 보존)가 추적 단위로 더 적합. 상태파일 제거 — 백로그가 SSoT. |
+| PRD substrate 설계 (1.26.0, 이슈 #15 Phase 2b-1) | per-feature 파일(`docs/product-specs/{id}-{slug}.md`) + whole-line `@feature:{id}` 마커(`grep -Fx`) + 정적 managed 템플릿 2종(README+_template) + 소프트 트리거(게이트 아님) + `[new]` 소급 마이그레이션(always-on). intent-distill PRD derive·미검증 명세·빈섹션 감지·binding index는 Phase 2b-2(fast-follow). | codex·gemini 자문 2회 반영(H1~H7): per-feature 분리(단일 문서=컨텍스트 낭비·머지 충돌), `-Fx` whole-line(커스텀 ID 메타문자 방어·인라인 오탐 차단), 정적 섹션 앵커(`<!-- harness:section=… -->`, 2b-2 derive 안정화), anti-blank 가이드(빈칸 침묵 실패 방지), always-on → 소급 마이그레이션 필수(e2e/README 옵트인 선례와 대비). feature_list 스키마·프로필 필드·플레이스홀더 모두 0(계약 불변). |
 
 ---
 
@@ -326,6 +327,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.26.0 (PRD Substrate — 이슈 #15 Phase 2b-1)
+- **1.26.0** (2026-06-17) — PRD substrate (이슈 #15 Phase 2b-1). `docs/product-specs/`를 빈 디렉토리에서 구조화·링크가능 PRD substrate로 전환. 신규 managed 템플릿 2종(`templates/product-specs/{README,_template}.md`) — 정적 복사·플레이스홀더 0. scaffold §5.12.6 생성 규칙(빈 디렉토리 → README+_template, per-feature stub 없음), §10.1 manifest 22-g/22-h(managed), §6.2 검증 추가, 생성 파일 카운트 22→24. §7 능력 카탈로그 PRD 줄(always-on, 정직 문구 — derive는 2b-2). coding-standards PRD 관례+소프트 트리거(게이트 아님). §11 참고자료 매핑(INTENT_LEDGER 패턴 — §12.6.1 제외). M-1.25.0-to-1.26.0 `[new]` 소급 마이그레이션(always-on, idempotent skip-if-exists). harness-check ① substrate 구조 검사 + 작성 PRD 보류. 골든 픽스처 `test/prd-substrate-fixtures.sh`(T1~T3, 16 케이스). 멀티모델 자문 2회(codex·gemini) 반영 — H1~H7 설계 확정. Phase 2b-2(intent↔PRD 커버리지 derive·미검증 명세·빈섹션 감지·doc-freshness 글로빙·binding index) 미착수. MINOR, 하위 호환.
 
 ### 1.25.0 (Intent Distill Phase 2a — 이슈 #15)
 - **1.25.0** (2026-06-17) — Intent Distill Phase 2a(이슈 #15). `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 실구조에서 파생하고 `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존). `intent-distill` 컴패니언 스킬 추가 — 세션종료 경량 nudge(세션-로컬) + 격주 B1 리뷰 편입. gh 이슈는 항목별 옵트인. 멀티모델 자문(codex/gemini) 반영: 영속 백로그 모델(이산 gh 이슈 기각), 별도 lean 스킬(통합 기각), 상태파일 제거. `encoded` 필드는 비권위 capture-time 스냅샷으로 명시 교정(INTENT_LEDGER.md·session-routine·Phase 1 spec). Phase 4 능력 카탈로그 "의도 증류" 추가. plugin.json 스킬 목록에 intent-distill 등록. MINOR, 하위 호환.
