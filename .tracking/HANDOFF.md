@@ -166,8 +166,13 @@
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
   - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.25.0** (Intent Distill Phase 2a — 이슈 #15)
+**현재 버전: 1.25.0** (Intent Distill Phase 2a — 이슈 #15) — **main 머지 완료** (Phase 1 PR #17 / Phase 2a PR #18, 태그 `v1.24.0`·`v1.25.0`)
 **열린 이슈: 0건** (#15 Phase 2a 종결 — intent-distill 스킬 완성(5-상태 커버리지 증류·INTENT_BACKLOG.md 영속 백로그·세션종료 nudge·격주 B1 리뷰·멀티모델 자문 반영). Phase 2b(PRD substrate·prd_section_ref·양방향 바인딩·미검증 명세) 미착수.)
+
+### ▶ 다음 작업: Phase 2b — Traceability Substrate
+**핸드오프**: `docs/superpowers/specs/2026-06-17-phase-2b-handoff.md` (스코프·상속 결정·미결정·진입점·앵커). 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작.
+- 핵심: PRD 출력단 갭 해소(빈 `docs/product-specs/`, `feature_list.id→PRD` 링크 필드 부재) + 의도↔feature↔@feature↔PRD 양방향 바인딩 + "미검증 명세" 방향.
+- 별개 cleanup(비차단): `harness-setup/SKILL.md`·`CLAUDE.md` "19개 파일" → 실제 22개 (기존 드리프트, docs-hygiene).
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조
