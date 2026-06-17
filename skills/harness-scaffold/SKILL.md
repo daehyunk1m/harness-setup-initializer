@@ -33,7 +33,7 @@ fi
 이 스킬은 `/harness-setup`이 생성한 **프로젝트 프로필**(`.harness-profile.json`)을 읽어 하네스 파일을 생성한다.
 
 - § 0에서 프로필이 프롬프트에 이미 주입되었으므로, 별도로 파일을 읽을 필요 없이 위 데이터를 사용한다
-- 프로필 데이터를 기반으로 22개 파일을 의존 순서대로 생성한다 (+ package.json scripts 수정, 옵트인 시 ESLint 설정 수정·외부 통합 연계 렌더링)
+- 프로필 데이터를 기반으로 24개 파일을 의존 순서대로 생성한다 (+ package.json scripts 수정, 옵트인 시 ESLint 설정 수정·외부 통합 연계 렌더링)
 - 생성 후 15항목 검증 체크리스트를 자동 실행한다
 - 최종 결과를 사용자에게 보고한다
 
@@ -1225,7 +1225,7 @@ mkdir -p scripts/ docs/ agents/ .claude/rules/
 ls -la CLAUDE.md AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json init.sh
 
 # 6.2 docs/ 구조 확인 (HARNESS_FRICTION.md·INTENT_LEDGER.md 포함) + 마찰·의도 싱크 확인
-ls -la docs/ docs/HARNESS_FRICTION.md docs/INTENT_LEDGER.md .harness-friction.jsonl .harness-intent.jsonl
+ls -la docs/ docs/HARNESS_FRICTION.md docs/INTENT_LEDGER.md .harness-friction.jsonl .harness-intent.jsonl docs/product-specs/README.md docs/product-specs/_template.md
 
 # 6.3 scripts/ 확인
 ls -la scripts/structural-test.ts scripts/doc-freshness.ts scripts/harness-check.sh
@@ -1560,6 +1560,8 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 | 22-d | `docs/INTENT_LEDGER.md` | managed | 정적 참조 문서(의도 스키마/유형 참조표). 템플릿 기반, 사용자 콘텐츠 없음 |
 | 22-e | `.harness-intent.jsonl` | data | 제품 의도 진실 원본(프로젝트 루트). 런타임 데이터 축적, 해시 드리프트 검사 제외 — .harness-friction.jsonl과 동일 취급(always-on) |
 | 22-f | `docs/INTENT_BACKLOG.md` | data | 의도 커버리지 백로그(intent-distill 동기화). 런타임 축적, 해시 드리프트 제외, 사용자 주석·waiver 보존 — TECH_DEBT.md와 동일 취급 |
+| 22-g | `docs/product-specs/README.md` | managed | PRD 디렉토리 관례 정적 문서(관례·마커 규칙·진입점). 템플릿 기반, 사용자 콘텐츠 없음 |
+| 22-h | `docs/product-specs/_template.md` | managed | PRD 양식 정적 템플릿(섹션 앵커·anti-blank 가이드). 템플릿 기반. 작성된 `{id}-{slug}.md`는 사용자 소유 비기록(작성 E2E 스펙 동급) |
 | 23 | `package.json` (scripts) | custom | 스킬은 특정 키만 추가, 사용자가 수정했을 수 있음 |
 | 24 | `scripts/harness-check.sh` | managed | 템플릿 기반 자가진단 스크립트 |
 | 25 | ESLint 설정 파일 (`eslint.config.*` / `.eslintrc.*`) | custom | 옵트인 시 마커 블록만 추가. manifest files에 기록하지 않음 (package.json과 동급) |
