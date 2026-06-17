@@ -5,6 +5,18 @@
 
 ---
 
+## [1.28.0] — 2026-06-18
+
+### 추가 (Added)
+- **harness-check ⑩ PRD 마커 위생** (이슈 #15 Phase 2b-3 Increment 1): 작성된 PRD 파일의 결정적 마커 위반 5종(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding)을 `grep`+`node -e`로 검출. 전부 **exit 0 경고-전용**, substrate/작성 PRD 부재는 보류. `prd_marker_hygiene` 함수를 추출 마커로 감싸 골든 픽스처(`test/prd-marker-hygiene-fixtures.sh`, T1~T12)가 템플릿에서 추출·source(단일 소스, 로직 복사 없음).
+- harness-checklist §1.1/§8 + harness-scaffold §5.14 ⑩ 동기화.
+
+### 설계 (Design)
+- 멀티모델 자문(codex·gemini): exit 0 경고-전용, 8-상태 라벨 축소(시맨틱 `ambiguous-marker`·`stub-only` 기각), awk-free(내용 파싱은 Inc2), doc-freshness 글로빙 기각, 교차검사 Inc2 이연. 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md`.
+- 신규 플레이스홀더·프로필 필드 0, managed 자동 감지 전파, 마이그레이션 불필요. MINOR.
+
+---
+
 ## [1.27.0] — 2026-06-18 (Intent→PRD Coverage Derive — 이슈 #15 Phase 2b-2)
 
 ### 추가 (Added)

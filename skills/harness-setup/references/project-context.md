@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-18 (1.27.0 — Intent→PRD Coverage Derive, 이슈 #15 Phase 2b-2)
+> 마지막 업데이트: 2026-06-18 (1.28.0 — PRD 마커 정적 위생 검사, 이슈 #15 Phase 2b-3 Increment 1)
 
 ---
 
@@ -71,7 +71,7 @@
 
 ### 작업 환경
 
-- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.27.0)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.28.0)
 - **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 6개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
@@ -131,6 +131,7 @@
 | intent-distill 스킬 모델 (1.25.0, 이슈 #15 Phase 2a) | intent-distill은 영속 백로그(`docs/INTENT_BACKLOG.md`) 모델 + derived 커버리지(실구조에서 파생, 증거 필수) + 별도 lean 스킬(통합 기각) — 멀티모델 자문 반영. `encoded`는 비권위 capture-time 스냅샷(distill 미갱신 — derived-live). | 이산 gh 이슈(per-intent) → 노이즈·라이프사이클 복잡도. INTENT_BACKLOG.md 영속 머지-싱크(idempotent, 사용자 주석·waiver 보존)가 추적 단위로 더 적합. 상태파일 제거 — 백로그가 SSoT. |
 | PRD substrate 설계 (1.26.0, 이슈 #15 Phase 2b-1) | per-feature 파일(`docs/product-specs/{id}-{slug}.md`) + whole-line `@feature:{id}` 마커(`grep -Fx`) + 정적 managed 템플릿 2종(README+_template) + 소프트 트리거(게이트 아님) + `[new]` 소급 마이그레이션(always-on). intent-distill PRD derive·미검증 명세·빈섹션 감지·binding index는 Phase 2b-2(fast-follow). | codex·gemini 자문 2회 반영(H1~H7): per-feature 분리(단일 문서=컨텍스트 낭비·머지 충돌), `-Fx` whole-line(커스텀 ID 메타문자 방어·인라인 오탐 차단), 정적 섹션 앵커(`<!-- harness:section=… -->`, 2b-2 derive 안정화), anti-blank 가이드(빈칸 침묵 실패 방지), always-on → 소급 마이그레이션 필수(e2e/README 옵트인 선례와 대비). feature_list 스키마·프로필 필드·플레이스홀더 모두 0(계약 불변). |
 | Intent→PRD Coverage Derive (1.27.0, 이슈 #15 Phase 2b-2) | **forward PRD derive**(5-상태 covered/partial/missing/ambiguous/invalid + `blocked:no-prd-substrate`·`blocked:no-e2e-substrate`, 차원별 독립 게이팅, 4조합 매트릭스). **보수적 판정**: 불확실=ambiguous 기본, 빈 섹션·템플릿 주석 covered 절대 금지(false-covered 방지). **백로그 2차원 확장**: `prd_state`+`e2e_state` 컬럼, derived/user 분리(`priority/비고` 단일 편집 영역), one-way 마이그레이션(E2E-only→2차원, 미지 컬럼·waiver 보존, idempotent). **2차원 리포트**: 차원별 카운트 + 비대칭 하이라이트(specced-untested/tested-unspecced) + 보류 구분. **역방향 "미검증 명세" 제외**(forward-only, 2b-4 후보). 정적 harness-check 검증(빈섹션 경고·교차 derive·마커 검증·8-상태 taxonomy)→2b-3. | codex·gemini 강한 합의: `missing`(substrate 有, 미커버) ≠ `blocked`(substrate 無, 판정 불가) — 동일 표면 금지(거짓 제품 결론 차단, D2). PRD 산문은 E2E 타이틀보다 약한 증거 → covered 문턱 상향(D3). 역방향은 노이즈 폭탄(90%+ 오탐, D9) — forward-only로 가치 입증 후 별도 증분. 스킬 분리(D1) 기각: I/O 마찰·컨텍스트 비용. INTENT_BACKLOG는 data 파일이라 scaffold 레지스트리 불필요(D7). 골든 픽스처 `test/intent-prd-coverage-fixtures.sh`(결정적 부분 검증). |
+| 2b-3 Increment 1 경계 (마커 위생만) | feature↔PRD 교차 검사는 "PRD 없음 정상(온디맨드)"(product-specs README)과 충돌해 새 프로젝트에서 경고 폭탄 → Inc2 이연. 빈 섹션 검사는 `prd_section_body` awk 필요 → Inc2(거기서 공유 헬퍼 결정). doc-freshness 글로빙은 mtime 노이즈로 기각(멀티모델 자문 합의). Increment 1을 awk-free 순수 grep으로 한정해 awk 3중화 부채를 회피. | — |
 
 ---
 
@@ -328,6 +329,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.28.0 (PRD 마커 정적 위생 검사 — 이슈 #15 Phase 2b-3 Increment 1)
+- **1.28.0** (2026-06-18): Phase 2b-3 Increment 1 — PRD 마커 정적 위생 검사. harness-check ⑩(경고 전용·exit 0) — 작성된 PRD의 마커 위반 5종(unbound-prd/multiple-markers/invalid-feature/file-marker-mismatch/duplicate-binding)을 grep+node -e로 검출. substrate/PRD 부재 보류. 골든 픽스처가 템플릿에서 `prd_marker_hygiene` 함수를 추출·source(단일 소스). 멀티모델 자문 반영: exit 0 경고-전용, 8-상태 라벨 축소(ambiguous-marker·stub-only 시맨틱 기각), awk-free(내용 파싱·교차검사·doc-freshness 글로빙은 Inc2/기각). 신규 플레이스홀더·프로필 필드 0, 마이그레이션 불필요. MINOR.
 
 ### 1.27.0 (Intent→PRD Coverage Derive — 이슈 #15 Phase 2b-2)
 - **1.27.0** (2026-06-18) — Intent→PRD Coverage Derive (이슈 #15 Phase 2b-2). intent-distill에 **forward PRD 커버리지 derive**를 추가해 Phase 2b-1 substrate를 live하게 만든다. §3 차원별 독립 게이팅(e2e/specs·docs/product-specs 각자 차원 게이트, 4조합 매트릭스, `blocked:no-prd-substrate`≠`missing`). §4.1 PRD derive(whole-line `@feature` 바인딩, kind↔섹션 기대 매핑, 보수적 5-상태+blocked, 빈 섹션 가드 — covered 절대 금지). §2+§5 2차원 백로그 머지 + one-way 마이그레이션(E2E-only→2차원, 우선순위/비고·미지 컬럼·waiver 보존, idempotent). §6 2차원 리포트(차원별 카운트 + 비대칭 하이라이트 + 보류 구분). INTENT_BACKLOG 2차원 헤더 템플릿 갱신. §7 capability·harness-cleanup B1·§5.12.5 동기화. 골든 픽스처 `test/intent-prd-coverage-fixtures.sh`. **역방향 "미검증 명세" 제외**(멀티모델 자문 codex·gemini 강한 합의 — 노이즈 폭탄, 2b-4 후보). **2b-3(정적 harness-check 검증)**: 빈섹션 경고·feature↔PRD 교차 derive·마커 검증·8-상태 taxonomy·doc-freshness 글로빙 → 다음 증분. 신규 플레이스홀더 0. MINOR, 하위 호환.

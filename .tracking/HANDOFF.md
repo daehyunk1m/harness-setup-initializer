@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-06-10 (갱신 2026-06-18 — 1.27.0 Intent→PRD Coverage Derive, 이슈 #15 Phase 2b-2 종결)
+> 작성일: 2026-06-10 (갱신 2026-06-18 — 1.28.0 PRD 마커 정적 위생 검사, 이슈 #15 Phase 2b-3 Increment 1 종결)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
@@ -145,6 +145,7 @@
   - **멀티모델 적대적 검증**(codex 결함/gemini 운영): 게이트를 LLM 기억 → 명시적 판정+TDD STATE+`@feature:` grep 키로 결정화, VERIFY 범위 축소(feature 스펙만), 증분 2 → 2a/2b 분할. 도그푸딩 6회차
   - 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, **신규 파일·git config·플레이스홀더 0(29 불변)**, 마이그레이션 불필요. 골든 픽스처 회귀 통과
 
+- **Session 53 (06-18)**: 1.28.0 — PRD 마커 정적 위생 검사 (이슈 #15 Phase 2b-3 Increment 1 종결). harness-check ⑩ 추가 — 작성된 PRD 파일의 마커 위반 5종(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding) grep+node -e 검출, exit 0 경고-전용, substrate/PRD 부재 보류. `prd_marker_hygiene` 함수를 추출 마커로 감싸 골든 픽스처(`test/prd-marker-hygiene-fixtures.sh`, T1~T12)가 템플릿에서 source(단일 소스). checklist §1.1/§8 + scaffold §5.14 ⑩ SSoT 동기화. **멀티모델 자문 반영**: exit 0 경고-전용 확정, 8-상태 라벨 축소(ambiguous-marker·stub-only 시맨틱 기각), awk-free(내용 파싱·교차검사·doc-freshness 글로빙은 Inc2/기각). 신규 플레이스홀더·프로필 필드 0, 마이그레이션 불필요. **Inc2(빈 섹션·교차·awk 공유 헬퍼 결정) 미착수**. MINOR. 설계 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md`.
 - **Session 52 (06-18)**: 1.27.0 — Intent→PRD Coverage Derive (이슈 #15 Phase 2b-2 종결). intent-distill에 forward PRD 커버리지 derive 추가. §3 차원별 독립 게이팅(4조합 매트릭스, blocked≠missing). §4.1 PRD derive(whole-line @feature, kind↔섹션, 보수적 5-상태, 빈 섹션 가드). §2+§5 2차원 백로그 머지 + one-way 마이그레이션(E2E-only→2차원, 미지 컬럼·waiver 보존, idempotent). §6 2차원 리포트(비대칭 하이라이트·보류 구분). INTENT_BACKLOG 2차원 헤더 템플릿. §7 capability·B1·§5.12.5 동기화. 골든 픽스처 `test/intent-prd-coverage-fixtures.sh`. **역방향 "미검증 명세" 제외(멀티모델 자문: 노이즈 폭탄, 2b-4 후보)**. **2b-3(정적 harness-check 검증)** 미착수. MINOR, 하위 호환.
 - **Session 51 (06-17)**: 1.26.0 — PRD substrate (이슈 #15 Phase 2b-1 종결). `docs/product-specs/`를 빈 디렉토리에서 → 구조화·링크가능 PRD substrate로 전환. managed 템플릿 2종(`templates/product-specs/{README,_template}.md`) + scaffold §5.12.6 생성 규칙 + §10.1 22-g/22-h + §6.2 검증 + 카운트 22→24 + §7 PRD 능력 줄(정직 문구) + coding-standards 관례+소프트 트리거 + §11 매핑(INTENT_LEDGER 패턴) + M-1.25.0-to-1.26.0 [new] 소급 마이그레이션 + harness-check ① substrate 검사 + 골든 픽스처 `test/prd-substrate-fixtures.sh`(16 케이스). 멀티모델 자문 2회(H1~H7). **Phase 2b-2(intent↔PRD derive·미검증 명세·빈섹션 감지·doc-freshness 글로빙·binding index) 미착수 — fast-follow.**
 - **Session 50 (06-17)**: 1.25.0 — Intent Distill Phase 2a (이슈 #15 Phase 2a 종결). `intent-distill` 컴패니언 스킬 — `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 실구조에서 파생. `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존). 세션종료 경량 nudge + 격주 B1 리뷰 편입. 멀티모델 자문 반영(이산 gh 이슈 기각·별도 lean 스킬·상태파일 제거). `encoded` 비권위 명시 교정. plugin.json 스킬 목록에 intent-distill 등록. **Phase 2b(PRD substrate·prd_section_ref·양방향 바인딩·미검증 명세) 미착수**. MINOR, 하위 호환.
@@ -168,21 +169,20 @@
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
   - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.27.0** (Intent→PRD Coverage Derive — 이슈 #15 Phase 2b-2, 2026-06-18) — **feature/phase-2b-2-prd-coverage 브랜치**
-**열린 이슈: 0건** (#15 Phase 2b-2 종결 — forward PRD derive 완성(차원별 게이팅·5-상태+blocked·빈섹션 가드·2차원 머지·one-way 마이그레이션·2차원 리포트·B1 편입·골든 픽스처). 역방향 "미검증 명세"는 2b-4 후보로 이연. Phase 2b-3(정적 harness-check 검증: 빈섹션 경고·feature↔PRD 교차 derive·마커 검증·8-상태 taxonomy·doc-freshness 글로빙) 미착수.)
+**현재 버전: 1.28.0** (PRD 마커 정적 위생 검사 — 이슈 #15 Phase 2b-3 Increment 1, 2026-06-18) — **feature/phase-2b-3-prd-hygiene 브랜치**
+**열린 이슈: 0건** (#15 Phase 2b-3 Increment 1 종결 — harness-check ⑩ PRD 마커 위생 5종 검사(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding), exit 0 경고-전용, 골든 픽스처 T1~T12, SSoT 동기화(checklist §1.1/§8·scaffold §5.14). Increment 2(빈 섹션 경고·feature↔PRD 교차·공유 awk 헬퍼 결정) 미착수.)
 
-### ▶ 다음 작업: Phase 2b-3 — 정적 harness-check 검증
-**설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-handoff.md` — 스코프·상속 결정·미결정·진입점·앵커. 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작. (스코프 원본: Phase 2b-2 spec §12 "명시적 비-스코프".)
-- **2b-3 스코프** (spec §12에서 이월):
-  - harness-check **빈 섹션 경고**(anti-blank 가이드 기계 검사 — `<!-- harness:section=edge-cases -->` 이후 실질 내용 없음)
-  - harness-check **feature↔PRD 교차 derive**(PRD 없는 feature 경고)
-  - harness-check **마커 검증 경고**(파일명-마커 불일치·중복 마커·orphan/invalid-feature 마커)
-  - **8-상태 taxonomy** 정립 (harness-check 판정 확장)
-  - doc-freshness 글로빙(`product-specs/**`)
+### ▶ 다음 작업: Phase 2b-3 Increment 2 — 빈 섹션 경고 + feature↔PRD 교차 검사
+**설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md` §9 — Inc2 스코프·공유 헬퍼 결정·진입점. 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작.
+- **Inc2 스코프** (§9에서 확정):
+  - harness-check **빈 섹션 경고**(anti-blank 가이드 기계 검사 — `<!-- harness:section=edge-cases -->` 이후 실질 내용 없음, `prd_section_body` awk 필요)
+  - harness-check **feature↔PRD 교차 derive**(PRD 없는 feature 경고 — "온디맨드" 원칙과 충돌 주의)
+  - **공유 awk 헬퍼 결정** — awk 3중화 부채 회피(빈섹션 + 교차 + 기타 파싱이 동시 도입되므로 헬퍼 추출 여부 결정 필요)
 - **잔여 이연 항목** (별도 증분):
   - **역방향 "미검증 명세"** (PRD claim 후보 + 저신뢰 리포트, codex 보수안) → 2b-4 후보. 가치 입증 시 착수.
   - binding index 파일(중복 PRD canonical override)
   - Architect PRE-RED **강제** PRD 작성(게이트 — 현재는 소프트 트리거만)
+  - doc-freshness 글로빙(`product-specs/**`) — mtime 노이즈로 Inc1에서 기각, Inc2 재검토 대상
 - 별개 cleanup(비차단, docs-hygiene): `harness-setup/SKILL.md`·`CLAUDE.md` "19개 파일" → 실제 24개 드리프트 정정.
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
@@ -242,7 +242,7 @@
 | P4 기능 리스트 | ✅ 완료 | passes 판정 기준 구체화 |
 | P5 Initializer Agent | ✅ 스킵 | 스킬 자체가 초기화 역할 — 별도 프롬프트 불필요 |
 | P6 Coding Agent 루틴 | ✅ 완료 | TDD subagent 파이프라인 (7 agents) + .claude/rules/ 분리. 1.20.0: 인프라/설정 트랙(category infra/config → 유닛 RED→GREEN을 통합 검증 대체, 남용 방지 게이트·Reviewer 독립 감사·보안 표면 트리거, 이슈 #6) |
-| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가. 1.11.0: E2E L4 스캐폴드(옵트인) — Playwright 구조 생성, 스위트 통과는 앱별 부팅 의존. 1.12.0: E2E TDD 배선(VERIFY Phase 4.7 + @critical + debugger 재현, 증분 2a). 1.13.0: VERIFY(E2E) 러너 정합(`{{E2E_COMMAND}}`) — 유닛 러너 거짓 PASS 차단(haja 파일럿). 1.14.0: pre-push 게이트(@critical cross-feature 강제, 옵트인·수동 활성화). 1.15.0: MCP 탐색 진단 배선(옵트인, 증분 3) — 공유 .mcp.json 없이 debugger 지침+로컬 등록. 1.16.0: E2E 작성 트리거에 시각/레이아웃 회귀 위험 포함 — jsdom-blind 회귀 가드(TODO-99 승격). 1.17.0: E2E 모듈 마감(증분 4) — §12.6.1 매핑 정렬·프리셋 권장 기본·U1 base-E2E 재감지(cascade)·사람 개발자 작성 가이드(e2e/README.md managed). **신규셋업 경로 실전 검증(Session 43, TODO-53): react-vite 2회 실주행(Opus급·Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" — 결정적 게이트 model-robust, 셋업 의미게이트·eslintAssist·E2E pre-seed 라이브 검증**. 1.21.0: E2E 아티팩트 `.gitignore` 멱등 add-only 머지(이슈 #13 — 스모크 후 untracked 마찰, U3 step 6-b 소급). 1.22.0: 피드백 보고 트리거(이슈 #14) — cursor 북마크(`.harness-feedback-cursor`, data) 기반 세션 종료 무-훅 제안으로 마찰 보고 dead-letter 마감 + harness-feedback cursor 추적·fingerprint dedup·3분기 확인 + 월간 보조 net(트리거↔보고 기준 정합, 마이그레이션 불필요). 1.26.0: PRD substrate — 검증 루프 강화(harness-check ① substrate 구조 검사, §6.2 검증 추가, 골든 픽스처 16 케이스) + coding-standards 소프트 트리거(Edge Cases 명세 촉진 — F007류 버그 예방 장치). 1.27.0: intent↔PRD 커버리지 forward derive — 차원별 게이팅(4조합 매트릭스, blocked≠missing), 5-상태+blocked, 빈 섹션 가드, 2차원 머지·one-way 마이그레이션·2차원 리포트. 역방향·빈섹션 경고·교차 derive·마커 검증은 2b-3/2b-4 이연. |
+| P7 검증 피드백 루프 | ✅ 완료 | 재스캔/재생성 플로우 추가. 1.11.0: E2E L4 스캐폴드(옵트인) — Playwright 구조 생성, 스위트 통과는 앱별 부팅 의존. 1.12.0: E2E TDD 배선(VERIFY Phase 4.7 + @critical + debugger 재현, 증분 2a). 1.13.0: VERIFY(E2E) 러너 정합(`{{E2E_COMMAND}}`) — 유닛 러너 거짓 PASS 차단(haja 파일럿). 1.14.0: pre-push 게이트(@critical cross-feature 강제, 옵트인·수동 활성화). 1.15.0: MCP 탐색 진단 배선(옵트인, 증분 3) — 공유 .mcp.json 없이 debugger 지침+로컬 등록. 1.16.0: E2E 작성 트리거에 시각/레이아웃 회귀 위험 포함 — jsdom-blind 회귀 가드(TODO-99 승격). 1.17.0: E2E 모듈 마감(증분 4) — §12.6.1 매핑 정렬·프리셋 권장 기본·U1 base-E2E 재감지(cascade)·사람 개발자 작성 가이드(e2e/README.md managed). **신규셋업 경로 실전 검증(Session 43, TODO-53): react-vite 2회 실주행(Opus급·Sonnet 4.6 1M high) 둘 다 "표준 하네스 가동" — 결정적 게이트 model-robust, 셋업 의미게이트·eslintAssist·E2E pre-seed 라이브 검증**. 1.21.0: E2E 아티팩트 `.gitignore` 멱등 add-only 머지(이슈 #13 — 스모크 후 untracked 마찰, U3 step 6-b 소급). 1.22.0: 피드백 보고 트리거(이슈 #14) — cursor 북마크(`.harness-feedback-cursor`, data) 기반 세션 종료 무-훅 제안으로 마찰 보고 dead-letter 마감 + harness-feedback cursor 추적·fingerprint dedup·3분기 확인 + 월간 보조 net(트리거↔보고 기준 정합, 마이그레이션 불필요). 1.26.0: PRD substrate — 검증 루프 강화(harness-check ① substrate 구조 검사, §6.2 검증 추가, 골든 픽스처 16 케이스) + coding-standards 소프트 트리거(Edge Cases 명세 촉진 — F007류 버그 예방 장치). 1.27.0: intent↔PRD 커버리지 forward derive — 차원별 게이팅(4조합 매트릭스, blocked≠missing), 5-상태+blocked, 빈 섹션 가드, 2차원 머지·one-way 마이그레이션·2차원 리포트. 역방향·빈섹션 경고·교차 derive·마커 검증은 2b-3/2b-4 이연. **1.28.0: harness-check ⑩ PRD 마커 위생 5종(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding), exit 0 경고-전용, 골든 픽스처 T1~T12(단일 소스 source). 빈 섹션·교차 검사는 Inc2 이연.** |
 | P8 아키텍처 자동 검사 | ✅ 완료 | 버전 체크, 동점 해소, 누락 레이어 경고 |
 | P9 품질/부채 관리 | ✅ 완료 | docFreshnessDays 파라미터화. 1.1.0: 자동 검사 승격 대기 큐 + 승격 루프 (체크리스트 §3.3) |
 | P10 엔트로피 관리 | ✅ 컴패니언 커버 | doc-freshness.ts 감지 + 운영 사이클 문서화 + harness:check 자가진단 + **harness-cleanup 스킬(1.4.0)이 주간/격주/월간 루틴 실행** (--add-dir opt-in) |
