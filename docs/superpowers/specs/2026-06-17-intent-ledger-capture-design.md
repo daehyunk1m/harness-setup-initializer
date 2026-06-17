@@ -164,7 +164,7 @@
 
 - **session-routine 적재 규칙**(픽스처/리뷰): `요구:` 줄 N개 → N줄 적재 / 의도 없는 세션 → 0줄 / statement 200자 절단 / 소독(따옴표·개행) / 동일 SESSION_ID 공유 / 세션 내 중복 1회 / `.harness-intent.jsonl` 부재 시 스킵.
 - **scaffold 생성**: 빈 싱크 생성(빈 줄 없음) / INTENT_LEDGER.md 정적 복사 / manifest에 `data`·`managed` 등록 / 프로필 스냅샷 불변 / §6 검증 라인 통과.
-- **능력 게이팅**: §7 능력 라인이 *수집만* 광고(증류 문구 부재) 검증.
+- **능력 게이팅**: §7 능력 라인이 수집(적재) + 증류(intent-distill)를 광고 검증.
 - **계약 회귀**: SKILL.md §5 ≡ harness-scaffold §4 프로필 스키마 동일성 / 신규 플레이스홀더 0 / 골든 픽스처(`test/run-fixtures.sh`) 무영향(structural-test 템플릿 미변경).
 - **업그레이드**: 기존 하네스(intent 없음) 업그레이드 → 가산 배선, 프로필 불변 확인.
 
@@ -175,7 +175,7 @@
 - [ ] `encoded`는 Phase 1에서 항상 all-false다.
 - [ ] friction 채널과 분리 운영된다(`unintended` ↔ friction 이벤트 혼선 없음, 경계 규칙 문서화).
 - [ ] scaffold가 빈 싱크 + `INTENT_LEDGER.md`를 생성하고 manifest에 등록한다(프로필 스냅샷 불변).
-- [ ] §7 능력 안내가 *수집만* 광고한다(증류·승격은 비광고).
+- [ ] §7 능력 안내가 수집(적재) + 증류(intent-distill)를 광고한다.
 - [ ] 업그레이드 시 기존 하네스에 가산 배선된다(프로필 변경 없음).
 - [ ] 신규 `{{...}}` 0, 두 SKILL.md 프로필 스키마 동일성 계약 유지.
 
