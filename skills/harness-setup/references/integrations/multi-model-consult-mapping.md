@@ -9,15 +9,14 @@
 ## 1. 감지 (SKILL.md Step 1.6)
 
 ```bash
-# 1순위: 글로벌 스킬 심링크 (install.sh가 생성)
-ls -d ~/.claude/skills/multi-model-consult 2>/dev/null
-# 자문 CLI — 최소 1개 있어야 연계 가치가 있다
+# multi-model-consult는 harness-setup 플러그인에 번들 → 스킬 자체는 항상 존재.
+# 감지는 자문 CLI 가용성만 본다 (최소 1개 있어야 연계 가치가 있다).
 command -v codex >/dev/null 2>&1 && echo "codex"
 command -v gemini >/dev/null 2>&1 && echo "gemini"
 ```
 
-- 스킬 심링크 존재 + (codex 또는 gemini 중 1개 이상) → 감지 성공
-- `source: "companion"`, `installPath: ~/.claude/skills/multi-model-consult`, `detectedVersion: null` (컴패니언이라 버전 추출 안 함)
+- (codex 또는 gemini 중 1개 이상) → 감지 성공. 스킬 존재는 번들이라 보장되므로 별도 확인하지 않는다.
+- `source: "bundled"`, `installPath: null`, `detectedVersion: null` (번들 스킬이라 외부 설치 경로·버전 없음)
 - CLI가 0개면 자문이 불가하므로 **감지 실패로 처리** (질문 생략) — 스킬만 있고 CLI 없으면 연계 무의미
 - `linkedSkills` 필드 없음 (단일 스킬 통합)
 
@@ -45,5 +44,5 @@ command -v gemini >/dev/null 2>&1 && echo "gemini"
 
 ## 5. 갱신 절차
 
-- codex/gemini CLI의 인자 체계가 바뀌면 `companion-skills/multi-model-consult/scripts/run-advisor.js`의 buildArgs를 갱신 (이 매핑이 아니라 스킬 본체)
-- 감지 경로(install.sh 심링크 위치)가 바뀌면 § 1 갱신
+- codex/gemini CLI의 인자 체계가 바뀌면 `skills/multi-model-consult/scripts/run-advisor.js`의 buildArgs를 갱신 (이 매핑이 아니라 스킬 본체)
+- 감지 기준(자문 CLI 가용성)이 바뀌면 § 1 갱신

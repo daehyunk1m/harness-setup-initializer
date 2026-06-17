@@ -9,9 +9,9 @@
 # 요구: grep. 사용법: bash test/mcp-fixtures.sh
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DBG="$ROOT/templates/agents/debugger.md"
-SCAFFOLD="$ROOT/harness-scaffold/SKILL.md"
-SETUP="$ROOT/SKILL.md"
+DBG="$ROOT/skills/harness-scaffold/templates/agents/debugger.md"
+SCAFFOLD="$ROOT/skills/harness-scaffold/SKILL.md"
+SETUP="$ROOT/skills/harness-setup/SKILL.md"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 FAILS=0
 echo "═══ MCP 진단 배선 픽스처 ═══"

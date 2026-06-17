@@ -1,6 +1,6 @@
 # harness-setup
 
-> 현재 버전: **1.20.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
+> 현재 버전: **1.23.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
 
 Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 자동으로 셋업하는 Claude Code 스킬.
 
@@ -225,7 +225,7 @@ stateDiagram-v2
 
 ## 컴패니언 스킬
 
-`install.sh`가 아래 스킬을 `~/.claude/skills/`에 글로벌 링크하여 자연어로 바로 호출할 수 있다.
+harness-setup 플러그인에 아래 스킬이 번들로 포함되어, 플러그인 설치 시 자연어로 바로 호출할 수 있다.
 
 | 스킬 | 트리거 | 역할 |
 |------|--------|------|
@@ -242,7 +242,7 @@ stateDiagram-v2
 | 통합 | 감지 | 연계 영역 (코어 충돌 영역은 제외) |
 |------|------|----------------------------------|
 | **superpowers** | 플러그인/스킬 | brainstorming(설계 결정), systematic-debugging(버그 추적), writing-plans(계획 문서) |
-| **multiModelConsult** | 컴패니언 + CLI | 복잡한 설계 결정·트레이드오프의 교차 자문 |
+| **multiModelConsult** | 번들 + CLI | 복잡한 설계 결정·트레이드오프의 교차 자문 |
 
 > TDD·코드 리뷰·검증·git 워크플로는 항상 하네스 자체 워크플로가 source of truth다.
 
@@ -250,97 +250,76 @@ stateDiagram-v2
 
 ## 설치
 
-```bash
-# GitHub에서 클론
-git clone https://github.com/daehyunk1m/harness-setup-initializer.git \
-  ~/.claude/skills/harness-setup
+Claude Code 플러그인으로 설치한다 (세션에서 입력):
 
-# 업데이트
-cd ~/.claude/skills/harness-setup && git pull
 ```
+/plugin marketplace add daehyunk1m/harness-setup-initializer
+/plugin install harness-setup@harness-setup-initializer
+/reload-plugins
+```
+
+5개 스킬(harness-setup·harness-scaffold·harness-cleanup·harness-feedback·multi-model-consult)이 함께 번들로 로딩된다.
 
 ## 사용
 
-```bash
-cd ~/projects/my-project
+프로젝트에서 자연어 또는 슬래시 커맨드로 트리거한다:
 
-# 방법 1: 자연어 트리거
-claude
+```
 > 하네스 셋업해줘
-
-# 방법 2: 슬래시 커맨드
-claude
 > /harness-setup
-
-# 방법 3: 스킬 디렉토리 직접 지정 (개발/테스트)
-claude --add-dir ~/.claude/skills/harness-setup
-> 하네스 셋업해줘
 ```
 
-> 설치 후 `install.sh`를 실행하면 `harness-scaffold`와 모든 컴패니언 스킬(cleanup·feedback·multi-model-consult)이 `~/.claude/skills/`에 심볼릭 링크되어 함께 로딩된다 (멱등 — 재실행 안전).
-> ```bash
-> git clone <repo> ~/.claude/skills/harness-setup && ~/.claude/skills/harness-setup/install.sh
-> ```
+> **레거시(git clone + install.sh)에서 이전**: 1.23.0부터 배포가 플러그인으로 전환됐다. 기존 클론에서 `./install.sh`를 한 번 실행하면 구 심볼릭 링크를 정리하고 플러그인 설치를 안내한다. `git pull`로는 더 이상 스킬이 갱신되지 않으며, 개발 클론은 `~/.claude/skills/` 밖에 두는 것을 권장한다.
 
 ---
 
 ## 디렉토리 구조
 
 ```
-harness-setup/
-├── SKILL.md                          # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
-├── README.md                         # 이 파일
-├── harness-scaffold/
-│   └── SKILL.md                      # 스캐폴딩 스킬 (Phase 2~4, 심볼릭 링크로 디스커버리)
-├── install.sh                        # 심볼릭 링크 생성 스크립트 (scaffold + 컴패니언 전부)
-├── presets/                          # 스택별 프리셋 (4종)
-│   ├── react-next.json               # React + Next.js (App Router, layer-based)
-│   ├── react-router-fsd.json         # React Router v7 + FSD
-│   ├── react-vite.json               # React + Vite SPA (layer-based)
-│   └── express-api.json              # Express + TypeScript API (layer-based)
-├── templates/
-│   ├── agents/                       # TDD subagent 정의 템플릿 (7개)
-│   ├── rules/                        # .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow)
-│   ├── e2e/                          # E2E 스캐폴드 템플릿 (playwright.config·tsconfig·README, 프론트엔드 옵트인)
-│   ├── structural-test-layer.ts      # 레이어 기반 아키텍처 검증 템플릿
-│   ├── structural-test-fsd.ts        # FSD 아키텍처 검증 템플릿
-│   ├── structural-test-domain.ts     # 도메인 기반 아키텍처 검증 템플릿
-│   ├── harness-check.sh              # 하네스 자가진단 템플릿
-│   ├── init.sh                       # 환경 초기화 스크립트 템플릿
-│   ├── doc-freshness.ts              # 문서 최신성 검사 스크립트 템플릿
-│   ├── QUALITY_SCORE.md              # 품질 점수표 템플릿
-│   ├── TECH_DEBT.md                  # 기술 부채 문서 템플릿
-│   └── HARNESS_FRICTION.md           # 정적 참조 문서 템플릿 (이벤트 유형/심각도 참조표; 실제 이벤트는 .harness-friction.jsonl 기록)
-├── companion-skills/                 # 컴패니언 스킬 (install.sh 글로벌 링크)
-│   ├── harness-cleanup/              # 엔트로피 정리 — 운영 사이클 실행
-│   ├── harness-feedback/             # 마찰 로그 분석 → GitHub Issue
-│   └── multi-model-consult/          # 멀티모델 합성 자문 (codex/gemini + Claude)
-├── references/
-│   ├── harness-guide.md              # 하네스 엔지니어링 이론 (P1~P10)
-│   ├── harness-checklist.md          # 하네스 구성 체크리스트 (생성 하네스 판정 기준)
-│   ├── versioning-policy.md          # semver 버전 관리 정책
-│   ├── upgrade-system-design.md      # 업그레이드 시스템 설계
-│   ├── integrations/                 # 외부 통합 규약 + 매핑 정본
-│   │   ├── _protocol.md
-│   │   ├── superpowers-mapping.md
-│   │   └── multi-model-consult-mapping.md
-│   └── project-context.md            # 설계 결정 기록 + 버전 히스토리
-├── .claude/                          # 이 리포 자체의 개발 환경 (커맨드/규칙/설정)
+harness-setup/                          # 마켓플레이스 = 플러그인 루트 (source "./")
+├── .claude-plugin/
+│   ├── plugin.json                     # 플러그인 매니페스트
+│   └── marketplace.json                # 셀프 호스팅 마켓플레이스 카탈로그
+├── README.md                           # 이 파일
+├── LICENSE                             # MIT
+├── install.sh                          # 레거시→플러그인 마이그레이션 스크립트 (구 심링크 정리 + 안내)
+├── skills/
+│   ├── harness-setup/
+│   │   ├── SKILL.md                    # 분석 스킬 (Phase 1 + Stop hook 오케스트레이션)
+│   │   ├── presets/                    # 스택별 프리셋 (react-next·react-router-fsd·react-vite·express-api)
+│   │   └── references/                 # 설계 문서 + 통합 규약 (SSoT)
+│   │       ├── harness-guide.md        # 하네스 엔지니어링 이론 (P1~P10)
+│   │       ├── harness-checklist.md    # 하네스 구성 체크리스트 (판정 기준)
+│   │       ├── versioning-policy.md    # semver 버전 정책
+│   │       ├── upgrade-system-design.md
+│   │       ├── integrations/           # _protocol.md + superpowers·multi-model-consult 매핑
+│   │       └── project-context.md      # 설계 결정 + 버전 히스토리
+│   ├── harness-scaffold/
+│   │   ├── SKILL.md                    # 스캐폴딩 스킬 (Phase 2~4)
+│   │   ├── templates/                  # 생성 템플릿 (agents·rules·e2e·structural-test·scripts·docs)
+│   │   └── references → ../harness-setup/references   # 심링크 (SSoT — 중복 없음)
+│   ├── harness-cleanup/SKILL.md        # 엔트로피 정리 — 운영 사이클 실행
+│   ├── harness-feedback/SKILL.md       # 마찰 로그 분석 → GitHub Issue
+│   └── multi-model-consult/
+│       ├── SKILL.md                    # 멀티모델 합성 자문 (codex/gemini + Claude)
+│       └── scripts/run-advisor.js
+├── test/                               # 스킬 자체 골든 픽스처 (run·e2e·mcp·prepush·feedback-cursor)
+├── .claude/                            # 이 리포 자체의 개발 환경 (커맨드/규칙/설정)
 └── .tracking/
-    ├── CHANGELOG.md                  # 변경 이력
-    ├── TODO.md                       # 작업 추적
-    └── HANDOFF.md                    # 세션 간 컨텍스트 전달
+    ├── CHANGELOG.md                    # 변경 이력
+    ├── TODO.md                         # 작업 추적
+    └── HANDOFF.md                      # 세션 간 컨텍스트 전달
 ```
 
 ### 파일별 역할
 
 | 파일 | 용도 | 누가 읽는가 |
 |------|------|------------|
-| `SKILL.md` | Phase 1 동작 사양 + Stop hook 오케스트레이션 | Claude Code (스킬 실행 시) |
-| `harness-scaffold/SKILL.md` | Phase 2~4 동작 사양 (파일 생성 + 검증) | Claude Code (자동 체이닝 시) |
-| `presets/*.json` | 스택별 기본 프로필 | SKILL.md Phase 1 Step 3 |
-| `templates/*` | 파일 생성의 기반 템플릿 | harness-scaffold/SKILL.md Phase 2 |
-| `references/*.md` | 설계 배경, 이론적 근거 | 개발자 (참고용) |
+| `skills/harness-setup/SKILL.md` | Phase 1 동작 사양 + Stop hook 오케스트레이션 | Claude Code (스킬 실행 시) |
+| `skills/harness-scaffold/SKILL.md` | Phase 2~4 동작 사양 (파일 생성 + 검증) | Claude Code (자동 체이닝 시) |
+| `skills/harness-setup/presets/*.json` | 스택별 기본 프로필 | SKILL.md Phase 1 Step 3 |
+| `skills/harness-scaffold/templates/*` | 파일 생성의 기반 템플릿 | harness-scaffold/SKILL.md Phase 2 |
+| `skills/harness-setup/references/*.md` | 설계 배경, 이론적 근거 (harness-scaffold는 심링크로 공유) | 개발자 + scaffold 런타임 |
 | `.tracking/*` | 개선 작업 이력 | 개발자 (유지보수 시) |
 
 ---

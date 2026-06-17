@@ -1,0 +1,11 @@
+{
+  "name": "harness-setup-initializer",
+  "owner": { "name": "daehyunk1m" },
+  "plugins": [
+    {
+      "name": "harness-setup",
+      "source": "./",
+      "description": "하네스 셋업/스캐폴딩/정리/피드백 + 멀티모델 자문 (5 스킬 번들)."
+    }
+  ]
+}

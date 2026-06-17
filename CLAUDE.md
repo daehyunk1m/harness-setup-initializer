@@ -6,34 +6,36 @@
 
 1. `.tracking/HANDOFF.md` 읽기 — 현재 상태, 남은 작업, 설계 결정
 2. `.tracking/TODO.md` 훑기 — 미완료 항목 확인
-3. `references/project-context.md` § 핵심 원칙 확인
+3. `skills/harness-setup/references/project-context.md` § 핵심 원칙 확인
 
 ## 파일 맵
 
 | 파일 | 역할 | 수정 빈도 |
 |------|------|----------|
-| `SKILL.md` | **분석 스킬** — Phase 1 (스캔 + Q&A + 프로필 저장) + Stop hook 오케스트레이션 | 높음 |
-| `harness-scaffold/SKILL.md` | **스캐폴딩 스킬** — Phase 2~4 (파일 생성 + 검증 + 보고) | 높음 |
-| `presets/*.json` | 스택별 프리셋 | 가끔 |
-| `templates/agents/*.md` | TDD subagent 정의 템플릿 | 가끔 |
-| `templates/rules/*.md` | .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow) | 가끔 |
-| `templates/structural-test-*.ts` | 아키텍처 검증 템플릿 | 낮음 |
-| `templates/init.sh` | 환경 초기화 스크립트 템플릿 | 낮음 |
-| `templates/doc-freshness.ts` | 문서 최신성 검사 스크립트 템플릿 | 낮음 |
-| `templates/harness-check.sh` | 하네스 자가진단 스크립트 템플릿 (체크리스트 §8 구현) | 낮음 |
-| `templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
-| `templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
-| `templates/HARNESS_FRICTION.md` | 정적 참조 문서 템플릿 (이벤트 유형/심각도 참조표). 실제 이벤트는 `.harness-friction.jsonl` 싱크에 기록 | 낮음 |
+| `skills/harness-setup/SKILL.md` | **분석 스킬** — Phase 1 (스캔 + Q&A + 프로필 저장) + Stop hook 오케스트레이션 | 높음 |
+| `skills/harness-scaffold/SKILL.md` | **스캐폴딩 스킬** — Phase 2~4 (파일 생성 + 검증 + 보고) | 높음 |
+| `.claude-plugin/plugin.json` · `marketplace.json` | 플러그인 매니페스트 + 셀프 호스팅 마켓플레이스 카탈로그 | 가끔 |
+| `skills/harness-setup/presets/*.json` | 스택별 프리셋 | 가끔 |
+| `skills/harness-scaffold/templates/agents/*.md` | TDD subagent 정의 템플릿 | 가끔 |
+| `skills/harness-scaffold/templates/rules/*.md` | .claude/rules/ 템플릿 (session-routine, coding-standards, git-workflow) | 가끔 |
+| `skills/harness-scaffold/templates/structural-test-*.ts` | 아키텍처 검증 템플릿 | 낮음 |
+| `skills/harness-scaffold/templates/init.sh` | 환경 초기화 스크립트 템플릿 | 낮음 |
+| `skills/harness-scaffold/templates/doc-freshness.ts` | 문서 최신성 검사 스크립트 템플릿 | 낮음 |
+| `skills/harness-scaffold/templates/harness-check.sh` | 하네스 자가진단 스크립트 템플릿 (체크리스트 §8 구현) | 낮음 |
+| `skills/harness-scaffold/templates/QUALITY_SCORE.md` | 품질 점수표 템플릿 | 낮음 |
+| `skills/harness-scaffold/templates/TECH_DEBT.md` | 기술 부채 문서 템플릿 | 낮음 |
+| `skills/harness-scaffold/templates/HARNESS_FRICTION.md` | 정적 참조 문서 템플릿 (이벤트 유형/심각도 참조표). 실제 이벤트는 `.harness-friction.jsonl` 싱크에 기록 | 낮음 |
 | `test/` | **스킬 자체 검증** — structural-test 골든 픽스처 + 러너(`run-fixtures.sh`). 템플릿이 허용/금지 import를 정확히 구분하는지 검증. 생성 프로젝트와 무관 | 낮음 |
-| `companion-skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
-| `companion-skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
-| `companion-skills/multi-model-consult/` | 멀티모델 합성 자문 스킬 (구현됨 — codex/gemini 자문 + Claude 합성. **하네스 비의존 범용 도구**, install.sh 심링크로 글로벌 로딩) | 가끔 |
-| `references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
-| `references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
-| `references/integrations/_protocol.md` | 외부 통합 규약 (integrations.<name> 메커니즘 정본 — 통합 추가 4단계 절차) | 낮음 |
-| `references/integrations/*-mapping.md` | 통합별 연계 매핑 정본 (superpowers, multi-model-consult — 분기 리뷰) | 가끔 |
-| `references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
-| `references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
+| `skills/harness-feedback/` | 피드백 분석→Issue 스킬 (구현됨 — 마찰 로그 파싱→패턴 분석→gh issue) | 가끔 |
+| `skills/harness-cleanup/` | 엔트로피 정리 스킬 (구현됨 — 운영 사이클 주간/격주/월간 실행 주체) | 가끔 |
+| `skills/multi-model-consult/` | 멀티모델 합성 자문 스킬 (구현됨 — codex/gemini 자문 + Claude 합성. **하네스 비의존 범용 도구**, 플러그인 번들) | 가끔 |
+| `skills/harness-setup/references/harness-guide.md` | 이론적 기반 (Anthropic + OpenAI) — 수정 거의 안 함 | 낮음 |
+| `skills/harness-setup/references/harness-checklist.md` | 하네스 구성 체크리스트 — 생성 하네스의 판정 기준 (Phase 3 검증, 단계 판정, harness-check.sh의 SSoT) | 낮음 |
+| `skills/harness-setup/references/integrations/_protocol.md` | 외부 통합 규약 (integrations.<name> 메커니즘 정본 — 통합 추가 4단계 절차) | 낮음 |
+| `skills/harness-setup/references/integrations/*-mapping.md` | 통합별 연계 매핑 정본 (superpowers, multi-model-consult — 분기 리뷰) | 가끔 |
+| `skills/harness-setup/references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
+| `skills/harness-setup/references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
+| (참고) `skills/harness-scaffold/references` | → `../harness-setup/references` 심링크 (SSoT 단일본, scaffold 런타임이 읽음 — 중복 금지) | — |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |
 | `.tracking/CHANGELOG.md` | 상세 변경 이력 | 작업 후 |
 | `.tracking/TODO.md` | 개선 항목 추적 | 작업 후 |
@@ -77,17 +79,18 @@
 
 ### 버전 관리 (semver)
 - [Semantic Versioning 2.0.0](https://semver.org/) 준수
-- 상세 정책: `references/versioning-policy.md`
+- 상세 정책: `skills/harness-setup/references/versioning-policy.md`
 - MAJOR: 기존 하네스 호환 불가 (프로필 필드 제거, 플레이스홀더 제거, 파일 카테고리 변경)
 - MINOR: 새 기능 추가 (새 규칙, 새 필드, 새 프리셋, 새 에이전트)
 - PATCH: 버그 수정, 오타, 내부 개선
-- 버전 범프 시 동시 업데이트: `project-context.md`, `CHANGELOG.md`, 프로필/매니페스트 스키마의 version 필드, `git tag`
+- 버전 범프 시 동시 업데이트: `project-context.md`, `CHANGELOG.md`, 프로필/매니페스트 스키마의 version 필드, `.claude-plugin/plugin.json`의 version, README.md 버전 줄, `git tag`
 
 ## 테스트
 
 ```bash
 # 실전 테스트 (실제 프로젝트에서 2단계 스킬 실행)
-# 스킬은 ~/.claude/skills/에 글로벌 설치 + harness-scaffold 심볼릭 링크 — --add-dir 불필요
+# 스킬은 플러그인으로 설치: /plugin install harness-setup@harness-setup-initializer → 5스킬 번들 로딩
+# (개발 중 로컬 반영: /plugin marketplace add <이 repo 경로> 후 install + /reload-plugins)
 cd ~/Desktop/side-project/haja-web-fe && claude
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
 # 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 19개 파일 생성 확인 (생성 순서 20단계)

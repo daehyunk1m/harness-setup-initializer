@@ -11,7 +11,7 @@
 
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-TEMPLATES="$ROOT/templates"
+TEMPLATES="$ROOT/skills/harness-scaffold/templates"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 FAILS=0
