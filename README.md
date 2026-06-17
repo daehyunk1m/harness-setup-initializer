@@ -1,6 +1,6 @@
 # harness-setup
 
-> 현재 버전: **1.24.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
+> 현재 버전: **1.25.0** · 상세 이력: [`.tracking/CHANGELOG.md`](.tracking/CHANGELOG.md)
 
 Node.js/TypeScript 프로젝트에 **에이전트 작업 환경(하네스)**을 자동으로 셋업하는 Claude Code 스킬.
 

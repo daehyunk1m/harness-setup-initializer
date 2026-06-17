@@ -71,7 +71,7 @@
 
 ### 작업 환경
 
-- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.24.0)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.25.0)
 - **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 5개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
@@ -128,6 +128,7 @@
 | 이슈 #12 증분 2b 게이트 (1.14.0) | 활성화 수동(D1 — git config 비실행, "승인 없이 git 실행 금지" 정합), 게이팅 `validate`→`@critical`(D2), 옵트인 `e2e.prePush`(D3), eslint override 드롭(D4 — e2e/는 srcRoot 밖이라 assist 규칙 미도달, 승격 조건만 보존), 신규 플레이스홀더 0(D5). 공존성 4-환경 분기(그린필드/기존 hooksPath·Husky/기본 hooks/폴백) + 적응형 마커 주입. harness-check ⑨ 경고 전용(판정 분리) | 설계 정본: `docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md` |
 | 이슈 #12 증분 3 MCP 진단 (1.15.0) | 배치 = e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 "코어 충돌 영역 제외"와 충돌). 산출물 = 공유 `.mcp.json` 비커밋(Claude Code 승인 nagware·머지 지옥·관심사 분리 회피) → debugger.md 지침 + 개발자 로컬 `claude mcp add`. 분리 옵트인 `e2e.mcp`(`enabled`/`version`, `e2e.enabled`와 독립). 공식 `@playwright/mcp` exact 핀 `0.0.76`. `{{MCP_DEBUG_PROTOCOL}}`(30→31) | 멀티모델 자문(codex·gemini)이 비커밋 B안 권고 — 공유 .mcp.json 미생성. gemini의 "ad-hoc npx" 오류는 MCP 등록 메커니즘 오해라 합성자가 교정. 설계 정본: `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md` |
 | 의도 원장 (1.24.0, 이슈 #15) | 의도 원장은 friction 자매 채널 — 세션 종료 배치 적재, always-on, encoded 선반영(Phase 1 all-false), unintended↔friction 직교. 증류는 Phase 2. | 프로필 변경 0, 신규 플레이스홀더 0. friction이 "실제로 마찰을 겪었는가"를 기록하면, intent는 "무엇을 의도했는가"를 기록 — 두 채널이 교차해야 패턴이 의미를 가진다. Phase 1은 수집 인프라만. 증류(distill·PRD diff)·인코딩 갱신·바인딩은 Phase 2 비-스코프. |
+| intent-distill 스킬 모델 (1.25.0, 이슈 #15 Phase 2a) | intent-distill은 영속 백로그(`docs/INTENT_BACKLOG.md`) 모델 + derived 커버리지(실구조에서 파생, 증거 필수) + 별도 lean 스킬(통합 기각) — 멀티모델 자문 반영. `encoded`는 비권위 capture-time 스냅샷(distill 미갱신 — derived-live). | 이산 gh 이슈(per-intent) → 노이즈·라이프사이클 복잡도. INTENT_BACKLOG.md 영속 머지-싱크(idempotent, 사용자 주석·waiver 보존)가 추적 단위로 더 적합. 상태파일 제거 — 백로그가 SSoT. |
 
 ---
 
@@ -325,6 +326,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.25.0 (Intent Distill Phase 2a — 이슈 #15)
+- **1.25.0** (2026-06-17) — Intent Distill Phase 2a(이슈 #15). `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 실구조에서 파생하고 `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존). `intent-distill` 컴패니언 스킬 추가 — 세션종료 경량 nudge(세션-로컬) + 격주 B1 리뷰 편입. gh 이슈는 항목별 옵트인. 멀티모델 자문(codex/gemini) 반영: 영속 백로그 모델(이산 gh 이슈 기각), 별도 lean 스킬(통합 기각), 상태파일 제거. `encoded` 필드는 비권위 capture-time 스냅샷으로 명시 교정(INTENT_LEDGER.md·session-routine·Phase 1 spec). Phase 4 능력 카탈로그 "의도 증류" 추가. plugin.json 스킬 목록에 intent-distill 등록. MINOR, 하위 호환.
 
 ### 1.24.0 (Intent Ledger Phase 1 — 이슈 #15)
 - **1.24.0** (2026-06-17) — Intent Ledger Phase 1 수집 인프라(이슈 #15). friction 자매 채널. 세션 종료 시 제품 의도(intended/unintended)를 `.harness-intent.jsonl`(append-only, git 추적, manifest `data`, always-on)에 배치 적재. 스키마 `{ts, session, kind, surface, feature, statement(≤200), encoded:{prd,e2e,test}}`. `encoded`는 Phase 1 항상 all-false. SESSION_ID는 friction과 공유. `templates/INTENT_LEDGER.md` 정적 참조 문서(스키마·kind·surface·friction 경계) 추가. session-routine `§ 의도 로그` + 세션 종료 Step 4.2 적재 규칙. scaffold 생성순서 17-d/17-e, §5.12.3/5.12.4, manifest §5.13·§10.1, doc-freshness 제외, §6.2 검증. Phase 4 능력 카탈로그 의도 적재 줄(수집만 — 증류·승격은 미배선). harness-check.sh·harness-checklist.md 싱크 검증. 프로필 변경 0, 신규 플레이스홀더 0. 증류·추적·PRD 바인딩은 Phase 2 비-스코프. MINOR, 하위 호환.

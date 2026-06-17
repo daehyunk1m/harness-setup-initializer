@@ -836,26 +836,26 @@
 
 ---
 
-## Intent Ledger Phase 2 백로그 (이슈 #15 후속 — 미착수)
+## Intent Ledger Phase 2 백로그 (이슈 #15 후속)
 
-> Phase 1(1.24.0)은 수집 인프라만. Phase 2는 증류·분석·연결 레이어. spec §12 참조.
+> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b: PRD substrate·바인딩·미검증 명세 — 미착수. spec §12 참조.
 
-### TODO-103: intent-distill 스킬 (Phase 2)
+### TODO-103: intent-distill 스킬 (Phase 2a)
+- **상태**: [x] 완료 (Session 50, 2026-06-17, 1.25.0)
+- **내용**: `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 실구조에서 파생. `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존). 세션종료 경량 nudge + 격주 B1 리뷰 편입. 멀티모델 자문 반영(이산 gh 이슈 기각·별도 lean 스킬·상태파일 제거).
+
+### TODO-104: PRD diff 연계 (Phase 2b)
 - **상태**: [ ] 미착수
-- **내용**: `.harness-intent.jsonl`에서 패턴을 증류해 의미있는 시그널을 뽑아내는 스킬. intended/unintended 비율 분석, 반복 패턴 식별, friction과 교차 분석(intent-friction 매트릭스). spec §12 참조.
+- **내용**: intent 스트림과 `docs/product-specs/`(현재 빈 디렉토리) PRD 사이의 갭 식별. feature_list.id → PRD 링크 필드 설계. `encoded.prd` 필드 실제 갱신(Phase 1에서 all-false, Phase 2a에서 비권위 스냅샷으로 명시됨). PRD substrate(prd_section_ref) 설계 선결.
 
-### TODO-104: PRD diff 연계 (Phase 2)
-- **상태**: [ ] 미착수
-- **내용**: intent 스트림과 `docs/product-specs/`(현재 빈 디렉토리) PRD 사이의 갭 식별. feature_list.id → PRD 링크 필드 설계. `encoded.prd` 필드 실제 갱신(Phase 1에서 all-false로 초기화됨).
-
-### TODO-105: E2E 백로그 연계 (Phase 2)
+### TODO-105: E2E 백로그 연계 (Phase 2b)
 - **상태**: [ ] 미착수
 - **내용**: `encoded.e2e` 및 `encoded.test` 필드 갱신 로직. unintended intent 중 E2E로 커버되지 않은 항목을 feature_list에 자동 등록하는 파이프라인 설계.
 
-### TODO-106: encoded 갱신 로직 (Phase 2)
+### TODO-106: encoded 갱신 로직 (Phase 2b)
 - **상태**: [ ] 미착수
-- **내용**: Phase 1에서 `encoded: { prd: false, e2e: false, test: false }`로 고정된 필드를 실제 코드베이스 상태(PRD 존재 여부·E2E 스펙 존재 여부·테스트 존재 여부)와 연결해 동적으로 갱신하는 메커니즘.
+- **내용**: Phase 1에서 `encoded: { prd: false, e2e: false, test: false }`로 고정된 필드를 실제 코드베이스 상태(PRD 존재 여부·E2E 스펙 존재 여부·테스트 존재 여부)와 연결해 동적으로 갱신하는 메커니즘. NOTE: Phase 2a에서 encoded는 비권위 capture-time 스냅샷으로 확정됨 — distill은 derived-live 커버리지를 별도로 파생하므로 encoded 자체를 갱신하지 않는다. 이 TODO는 encoded를 실시간으로 반영하려는 별도 메커니즘이므로 Phase 2b 범위.
 
-### TODO-107: intent↔PRD 바인딩 + PRD 출력단 갭 (Phase 2)
+### TODO-107: intent↔PRD 바인딩 + PRD 출력단 갭 (Phase 2b)
 - **상태**: [ ] 미착수
-- **내용**: `docs/product-specs/`가 현재 빈 디렉토리(`feature_list.id → PRD 링크 필드` 미존재). intent 원장과 PRD를 연결하는 바인딩 레이어 설계. spec §12 참조. 선결과제: TODO-104 PRD diff 기반.
+- **내용**: `docs/product-specs/`가 현재 빈 디렉토리(`feature_list.id → PRD 링크 필드` 미존재). intent 원장과 PRD를 연결하는 바인딩 레이어 설계(prd_section_ref 양방향 바인딩·미검증 명세). spec §12 참조. 선결과제: TODO-104 PRD diff 기반.

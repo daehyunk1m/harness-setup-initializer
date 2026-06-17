@@ -5,6 +5,19 @@
 
 ---
 
+## [1.25.0] — 2026-06-17
+
+### Added
+- **Intent Distill — Phase 2a (이슈 #15)**: 제품 의도 원장의 E2E 커버리지 증류. `intent-distill` 컴패니언 스킬 — `.harness-intent.jsonl`을 `@feature` E2E와 대조해 5-상태(covered/partial/missing/ambiguous/invalid-feature) 커버리지를 **실구조에서 파생**(증거 필수)하고 `docs/INTENT_BACKLOG.md` 영속 백로그에 머지-싱크(idempotent, 사용자 주석·waiver 보존).
+  - 세션종료 경량 nudge(세션-로컬) + 격주 B1 리뷰 편입. gh 이슈는 항목별 옵트인(현재 repo).
+  - 멀티모델 자문(codex/gemini) 반영: 영속 백로그 모델(이산 gh 이슈 기각), 별도 lean 스킬(통합 기각), 상태파일 제거.
+
+### Changed
+- `encoded` 필드는 비권위 capture-time 스냅샷으로 명시(intent-distill 미갱신 — derived-live). INTENT_LEDGER.md·session-routine·Phase 1 spec 문구 교정.
+- Phase 4 능력 카탈로그에 "의도 증류" 추가, "의도 적재" 줄에서 "증류 미배선" 제거.
+
+---
+
 ## [1.24.0] — 2026-06-17
 
 ### 추가 (Added)
