@@ -32,6 +32,8 @@ if [ -f docs/INTENT_BACKLOG.md ]; then cat docs/INTENT_BACKLOG.md; else echo "BA
 
 부재 시 빈 백로그(열린 백로그 0행, waiver 0행)로 시작한다. `## 열린 백로그` 표(키=ts)와 `## waiver` 표(키=ts)를 파싱하고, 사용자 `priority/비고` 열·waiver 항목을 **보존 대상**으로 기억한다.
 
+**구-포맷 감지**: 헤더에 `prd_state`/`e2e_state`가 없고 단일 `state`/`evidence` 컬럼이면 2a(E2E-only) 백로그다 → §5 마이그레이션으로 승격한다. 헤더에 **모르는 추가 컬럼**이 있으면(사용자가 표를 확장) 그 컬럼과 값을 key=ts로 **그대로 보존**한다.
+
 ## 3. substrate 확인 (차원별 독립)
 
 PRD·E2E 두 차원을 **독립**으로 확인한다. 한 차원이 없으면 그 차원만 보류(`blocked:*`)하고 다른 차원은 정상 derive한다.
@@ -113,14 +115,26 @@ if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then
 
 (최적화: 백로그에 `covered` 증거로 이미 기록됐고 그 스펙 파일이 안 바뀐 의도는 재판정 스킵 가능.)
 
-## 5. 백로그 머지 (idempotent)
+## 5. 백로그 머지 (2차원, idempotent)
 
-키 = 의도 `ts`. 각 의도:
-- `covered` → 열린 백로그에 있으면 **제거**(해소).
-- `missing` / `partial` / `ambiguous` / `invalid-feature` → 열린 백로그에 **없으면 추가**, 있으면 `state`/`evidence` **갱신**.
-- **waiver 섹션에 키가 있으면 스킵**(재추가 안 함).
+키 = 의도 `ts`. 각 의도에 대해 `prd_state`·`e2e_state`를 모두 기록한다.
 
-기존 행의 사용자 `priority/비고` 열은 키 매칭으로 **보존**(덮어쓰기 아닌 머지). waiver 섹션은 distill이 수정하지 않는다. → 같은 입력 = 같은 백로그(재실행 동일).
+**행 유지 규칙**:
+- **둘 다 `covered`**(또는 waiver) → 열린 백로그에서 **제거**(완전 추적).
+- 한 차원이라도 actionable 갭(`missing`/`partial`/`ambiguous`/`invalid-feature`) → 행 **유지/추가**, 두 상태 컬럼 + 통합 `evidence` 갱신.
+- 두 차원이 `blocked:*`만(substrate 부재) → "판정 불가" 행으로 유지(보류 — 갭으로 단정 안 함).
+- **waiver 섹션에 키가 있으면 스킵**(재추가 안 함). 사용자가 `priority/비고`에 "PRD 불필요"/"E2E 불필요"를 적었으면 해당 차원 갭은 노이즈로 취급(행은 유지하되 재-제안 안 함).
+
+**evidence 컬럼**(통합): 두 차원 증거를 한 셀에 — 예 `prd: F007-progress.md#edge-cases (someday 제외 명시) · e2e: F007-progress.e2e.ts::"excludes someday"`.
+
+**구-포맷 마이그레이션**(첫 2b-2 실행, §2에서 감지): 기존 E2E-only 행을 **one-way 승격**:
+1. `state` → `e2e_state`(값 그대로).
+2. 구 `evidence` → 통합 `evidence`의 e2e 부분으로 이동.
+3. `prd_state` 신규 → 이번 실행에서 §4.1 derive(PRD substrate 없으면 `blocked:no-prd-substrate`).
+4. `priority/비고` → key=ts 보존. **헤더에 없던 사용자 추가 컬럼은 끝에 그대로 보존.**
+5. waiver 표 미수정.
+
+derived 컬럼(prd_state·e2e_state·evidence)만 재작성하고 사용자 컬럼은 불변 → 같은 입력 = 같은 백로그(idempotent). 증거 요지는 핵심 명사·조건 인용으로 표현해 실행 간 diff를 최소화한다.
 
 statement를 표 셀에 넣을 때 **§7 이스케이프**를 적용한다.
 
