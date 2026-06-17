@@ -1857,6 +1857,27 @@ M-3.3-to-4.0 → M-4.0-to-4.1 → M-4.1-to-5.0
 2. [profile] integrations.multiModelConsult: U1 재감지에서 새로 감지되면 연계 추가를 제안한다 (옵트인 — 자동 추가 아님). 동의 시 보조 스킬 섹션에 항목 합산
    - 기본값: 미연계 (생략) — 자동 추가하지 않음
 
+#### M-1.25.0-to-1.26.0: PRD substrate 소급 설치
+
+**조건**: harness.version == "1.25.0"
+**결과**: harness.version → "1.26.0"
+
+> PRD substrate는 **always-on**이라(옵트인 아님) 기존 하네스에도 소급 설치한다. e2e/README(옵트인이라 소급 안 함)와 대비 — always-on 기능을 소급 안 하면 "1.26.0인데 substrate 없음" 계약 불일치가 생긴다.
+
+**변경 목록**:
+
+1. [new] docs/product-specs/README.md: PRD 디렉토리 관례 문서
+   - 카테고리: managed
+   - 템플릿: templates/product-specs/README.md (플레이스홀더 없음, 정적 복사)
+   - **멱등·보존**: 파일이 이미 있으면 덮어쓰지 않고 skip + 보고(사용자 작성 보존)
+
+2. [new] docs/product-specs/_template.md: PRD 양식 템플릿
+   - 카테고리: managed
+   - 템플릿: templates/product-specs/_template.md (플레이스홀더 없음, 정적 복사)
+   - **멱등·보존**: 파일이 이미 있으면 덮어쓰지 않고 skip + 보고
+
+> 두 파일은 [new]라 §12.6 자동 감지가 아니라 이 마이그레이션으로 생성된다(자동 감지는 기존 manifest 파일 업데이트 전용). 생성 후 manifest files에 category `managed`로 등록한다(§10.1 22-g·22-h). coding-standards.md의 PRD 관례 섹션 추가는 managed 템플릿 변경이라 §12.6 자동 감지로 전파(별도 항목 불필요).
+
 > 새 버전을 추가할 때 마이그레이션이 필요한지 판단 기준: ① custom 파일 외과 수정 ② [new]/[remove] 파일 ③ [profile] 기본값 있는 새 필드 ④ [data] 스키마 변경 — 이 중 하나라도 해당하면 등록한다. managed 템플릿 변경·컴패니언 스킬·인프라 수정은 등록하지 않는다.
 >
 > **1.7.1**(이슈 정리·install.sh 인프라)과 **1.8.0**(autoCommit)도 위 기준상 마이그레이션이 없다 — autoCommit은 git-workflow.md(managed)에 `{{AUTO_COMMIT_MODE}}` 추가이므로 § 12.6 자동 감지로 전파되고(기존 하네스는 mode=off 섹션이 덧붙음, 무해), 프로필 필드는 생략=off라 기존 프로필에 추가 불필요.
