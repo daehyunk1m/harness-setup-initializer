@@ -34,8 +34,11 @@
 - [ ] `.harness-intent.jsonl` — 제품 의도 적재 싱크 (append-only JSONL, manifest category `data`, always-on)
 - [ ] `init.sh` — 환경 초기화 스크립트
 - [ ] `docs/` — 하위 문서 디렉토리 (exec-plans, QUALITY_SCORE, TECH_DEBT)
+- [ ] `docs/product-specs/README.md` — PRD 디렉토리 안내 (managed substrate, 부재=구조 실패)
+- [ ] `docs/product-specs/_template.md` — PRD 작성 템플릿 (managed substrate, 부재=구조 실패)
+  > 작성된 PRD(`docs/product-specs/{id}-{slug}.md`) 부재는 **보류** — 새 프로젝트는 PRD 0개가 정상 (E2E "판정 보류"·Q2 미강제와 평행, 실패 아님)
 
-**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/`
+**검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/ docs/product-specs/README.md docs/product-specs/_template.md`
 
 ### 1.2 AGENTS.md 품질 규칙
 
@@ -217,7 +220,8 @@ harness-setup 스킬의 현재 스캐폴딩 범위는 **표준 하네스**까지
 
 ```bash
 # 1. 필수 파일
-ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/
+ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/ docs/product-specs/README.md docs/product-specs/_template.md
+# ↑ docs/product-specs/ substrate(README·_template) 부재=구조 실패; 작성 PRD({id}-{slug}.md) 부재=보류(실패 아님)
 
 # 2. AGENTS.md 100줄 제한
 wc -l AGENTS.md
