@@ -21,6 +21,17 @@ fi
 위 출력이 `FRICTION_LOG_NOT_FOUND`이면:
 "`.harness-friction.jsonl`이 없습니다. 하네스가 셋업된 프로젝트에서 실행하세요." 출력 후 **즉시 종료**한다.
 
+### 1.1 보고 위치 cursor
+
+`.harness-feedback-cursor`(있으면)를 읽어 **이미 처리한 물리 줄 수(`processedLines`) 이후**만 분석 대상으로 삼는다. cursor가 없으면 전체를 분석한다(첫 실행). 이렇게 하면 이미 보고/무시한 마찰을 재분석하지 않아 닫힌 Issue 재보고 루프가 차단된다.
+
+```bash
+PROCESSED=0
+[ -f .harness-feedback-cursor ] && PROCESSED=$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(".harness-feedback-cursor","utf8")).processedLines||0)}catch{console.log(0)}')
+echo "PROCESSED_LINES: $PROCESSED"
+tail -n +$((PROCESSED + 1)) .harness-friction.jsonl   # cursor 이후 물리 줄만 (분석 입력)
+```
+
 ---
 
 ## 2. 환경 정보 수집
@@ -40,7 +51,7 @@ echo "=== END ENV ==="
 
 ## 3. 이벤트 파싱
 
-§ 1에서 읽은 `.harness-friction.jsonl`을 **줄 단위**로 파싱한다. 각 줄은 하나의 JSON 객체이며, 다음 필드를 가진다:
+**cursor 이후(§1.1) 이벤트만** 파싱한다. § 1에서 읽은 `.harness-friction.jsonl`을 **줄 단위**로 파싱한다. 각 줄은 하나의 JSON 객체이며, 다음 필드를 가진다:
 
 ```json
 {"ts":"2026-06-16T12:34:56Z","session":"2026-06-16T09-12-03Z-a3f9","event":"implementer-retry","severity":"high","feature":"F-12","detail":"타입 에러 3회 반복"}
@@ -69,7 +80,7 @@ echo "=== END ENV ==="
 
 ## 4. 패턴 분석
 
-추출한 이벤트를 분석하여 보고 대상 패턴을 식별한다:
+**cursor 이후(§1.1) 이벤트만** 분석한다. 추출한 이벤트를 분석하여 보고 대상 패턴을 식별한다:
 
 ### 보고 기준
 
@@ -122,6 +133,8 @@ echo "=== END ENV ==="
 ## 재현 맥락
 
 {이벤트의 detail 필드에서 공통 맥락 추출. 추출이 어려우면 "각 이벤트의 detail 필드를 참고하세요." 기재}
+
+<!-- harness-friction:fp=event:{event} -->
 ```
 
 ### detail escape (md 테이블 안전)
@@ -132,6 +145,17 @@ echo "=== END ENV ==="
 - 줄바꿈(LF/CR) → 공백 한 칸
 
 (오케스트레이터가 § 6.1 소독으로 1차 정리하지만, 소비 측에서도 방어적으로 escape한다.)
+
+### 5.1 중복 힌트 (열린 Issue fingerprint 대조 — 백스톱)
+
+cursor가 주 방어이나, cursor 분실·동시 실행 대비로 초안 표시 전 **열린 friction Issue의 fingerprint**를 조회해 같은 패턴이 이미 열려 있으면 §6 확인에 "⚠️ 유사 열린 Issue #N — 중복일 수 있음"을 함께 보여준다(하드 스킵 아님 — 사용자 판단). gh 실패 시 힌트 스킵 + 경고(degradation, 기존 동작 유지).
+
+```bash
+gh issue list --repo daehyunk1m/harness-setup-initializer --label friction --state open --json number,body 2>/dev/null \
+| node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{let a=[];try{a=JSON.parse(s)}catch{process.exit(0)}for(const it of a){const m=(it.body||"").match(/harness-friction:fp=([^\s]+)\s*-->/);if(m)console.log(m[1]+" #"+it.number)}})'
+```
+
+초안 패턴의 fp(`event:{event}`)가 위 목록에 있으면 해당 Issue 번호를 힌트로 표시한다.
 
 ---
 
@@ -147,16 +171,19 @@ echo "=== END ENV ==="
 
 2. ...
 
-이대로 GitHub Issue를 생성할까요? (y/수정사항 입력/n)
+이대로 GitHub Issue를 생성할까요? (y=생성 / d=무시(보고 불필요로 표시) / 수정사항 입력 / n=취소)
 ```
 
-- `y` → § 7 실행
-- 수정 요청 → 초안 수정 후 다시 확인
-- `n` → "Issue 생성을 취소합니다." 출력 후 종료
+- `y` → § 7 실행 (생성 + cursor 전진)
+- `d` → 생성 안 함 + **cursor만 전진**(검토했고 보고 불필요 — 재제안 침묵). "cursor를 현재까지 전진시켰습니다(보고 없음)." 출력
+- 수정 요청 → 초안 수정 후 재확인
+- `n` → "Issue 생성을 취소합니다 (cursor 미전진 — 다음에 재포착)." 출력 후 종료
 
 ---
 
 ## 7. Issue 생성
+
+`gh issue create` **직전** §5.1 fingerprint를 재조회해 같은 fp의 열린 Issue가 새로 생겼으면 사용자에게 알리고 생성 보류.
 
 사용자가 승인한 각 Issue에 대해:
 
@@ -179,10 +206,20 @@ gh issue create \
 `gh` CLI가 설치되지 않았거나 인증되지 않은 경우:
 "gh CLI가 필요합니다. `gh auth login`으로 인증 후 다시 시도하세요." 출력 후 종료.
 
+### 7.1 cursor 전진 (생성 또는 무시 후)
+
+생성(`y`) 또는 무시(`d`) 후, cursor를 현재 jsonl 물리 줄 수로 전진시킨다. 취소(`n`)면 전진하지 않는다.
+
+```bash
+LINES=$(grep -c '' .harness-friction.jsonl 2>/dev/null || echo 0)
+node -e 'const fs=require("fs");fs.writeFileSync(".harness-feedback-cursor",JSON.stringify({processedLines:parseInt(process.argv[1],10)||0,lastReportedAt:process.argv[2]})+"\n")' "$LINES" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "✅ cursor 전진: processedLines=$LINES"
+```
+
 ---
 
 ## 제약 사항
 
 - 마찰 로그의 기존 이벤트를 수정/삭제하지 않는다
 - Issue 생성 전 반드시 사용자 확인을 받는다
-- 동일한 패턴의 Issue가 이미 존재하는지는 확인하지 않는다 (중복은 수동 관리)
+- 보고 위치를 `.harness-feedback-cursor`로 추적해 재분석을 막는다(닫힌 Issue 재보고는 cursor 이후 재발 시에만). 열린 friction Issue fingerprint를 백스톱 힌트로 대조한다(하드 dedup 아님 — 최종 판단은 사용자).
