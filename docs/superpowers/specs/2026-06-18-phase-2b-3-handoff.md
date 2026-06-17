@@ -36,9 +36,9 @@ derive(2b-2)는 의도→PRD/E2E 커버리지를 *런타임 시맨틱*으로 판
 
 - **substrate 부재 ≠ missing** — `docs/product-specs/` 없으면 판정 보류(`blocked`), 위반 아님. 작성된 PRD 부재도 보류(E2E "판정 보류" 미러). 2b-1: managed substrate(README/_template)만 구조-필수(exit 1), 작성 PRD는 보류.
 - **whole-line `@feature` 바인딩** — `grep -Rl -Fx "@feature:{id}" docs/product-specs/`. 본문 인라인/코드블록 오탐 방지(2b-1 가드).
-- **`prd_section_body` awk 추출기 재사용** — 빈 섹션 경고는 2b-2의 검증된 awk(섹션 앵커 경계·HTML주석/헤딩 제외·멀티라인주석 stripping)를 그대로 쓴다. **이 awk는 `test/intent-prd-coverage-fixtures.sh`와 `skills/intent-distill/SKILL.md §4.1`에 byte-identical로 존재** — 2b-3가 harness-check.sh에 또 넣으면 **3곳 동기화** 필요(또는 공유 전략 고려).
+- **`prd_section_body` awk 추출기 재사용** — 빈 섹션 경고는 2b-2의 검증된 awk(섹션 앵커 경계·HTML주석/헤딩 제외·멀티라인주석 stripping)를 그대로 쓴다. **이 awk는 `test/intent-prd-coverage-fixtures.sh`와 `skills/intent-distill/SKILL.md §4.1`에 동일 로직(logic-identical — 들여쓰기만 다름)으로 존재** — 2b-3가 harness-check.sh에 또 넣으면 **3곳 동기화** 필요(또는 공유 헬퍼 전략 고려).
 - **오탐 보수성** — 역방향 "미검증 명세"를 노이즈로 뺀 것과 같은 원칙. 마커 검증·교차 검사는 **결정적·명확한** 위반만 경고(모호하면 침묵). codex 일관 테마.
-- **harness-check 경고-전용 분리** — 작성 PRD 위생은 **경고/보류**(exit 0 유지), 구조-필수 파일(README/_template) 부재만 exit 1. checklist §8 SSoT와 정합. (2b-1 D7: 빈섹션·교차·마커 검증은 2b-3 — check에 시맨틱 derive를 넣으면 "동작변경 0" 전제와 충돌하므로 **결정적 grep/awk만**.)
+- **harness-check 경고-전용 분리 (PRD 도메인 한정)** — 작성 PRD 위생은 **경고/보류**(exit 0 유지), managed substrate(README/_template) 부재만 exit 1. (harness-check.sh 전체엔 STRUCT_FAIL ①②③·QUALITY_FAIL ④⑤ 별도 exit 1 경로가 있다 — 이 분리는 PRD 항목 내부 정책이지 harness-check 전역 정책이 아님.) checklist §8 SSoT와 정합. (2b-1 D7: 빈섹션·교차·마커 검증은 2b-3 — check에 시맨틱 derive를 넣으면 "동작변경 0" 전제와 충돌하므로 **결정적 grep/awk만**.)
 - **always-on · 프로필 필드 0 · 신규 플레이스홀더 0 지향** · INTENT_BACKLOG/product-specs `data`/managed 카테고리 불변.
 - **멀티모델 자문 권장** — 2b-1/2b-2 모두 자문이 설계를 크게 개선(2b-2: 역방향 제외·보수적 derive). 2b-3도 상태 taxonomy·doc-freshness 노이즈 결정 전 자문 권장.
 
