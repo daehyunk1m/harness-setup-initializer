@@ -37,7 +37,7 @@
 | `kind` | `intended` \| `unintended` |
 | `surface` | 영역 태그 (소문자-kebab, 예: `progress`, `section-expand`) — 증류 grouping용 |
 | `feature` | 관련 feature ID 또는 `""` |
-| `statement` | 소독된 의도 한 줄 (≤200자) |
+| `statement` | 소독된 의도 한 줄 (≤200자). 소독 규칙은 session-routine § 의도 로그 참조 |
 | `encoded` | `{prd, e2e, test}` 승격 상태 — **현재 항상 all-false**. Phase 2 증류가 채운다 |
 
 오케스트레이터(`.claude/rules/session-routine.md § 의도 로그` 참조)가 세션 종료 시 그 세션의 `claude-progress.txt` `요구:` 줄 + 오작동 발화를 증류해 append한다. 의도 발화가 없는 세션은 0줄(정상).
