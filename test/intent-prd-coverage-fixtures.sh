@@ -25,7 +25,7 @@ prd_section_body() {
 echo "T1: 백로그 2차원 헤더"
 { grep -q "prd_state" "$BL" 2>/dev/null && ok "prd_state 컬럼"; } || no "prd_state 컬럼 없음"
 { grep -q "e2e_state" "$BL" 2>/dev/null && ok "e2e_state 컬럼"; } || no "e2e_state 컬럼 없음"
-{ grep -qv "| state |" "$BL" 2>/dev/null && ! grep -qE '\| *state *\|' "$BL" && ok "구 단일 state 컬럼 제거"; } || no "구 state 컬럼 잔존"
+{ ! grep -qE '\| *state *\|' "$BL" 2>/dev/null && ok "구 단일 state 컬럼 제거"; } || no "구 state 컬럼 잔존"
 { grep -q "priority/비고" "$BL" 2>/dev/null && ok "priority/비고 사용자 컬럼"; } || no "priority/비고 없음"
 { grep -q "derived" "$BL" 2>/dev/null && ok "derived/user 분리 노트"; } || no "derived 노트 없음"
 
