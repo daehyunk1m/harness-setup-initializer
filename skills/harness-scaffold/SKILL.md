@@ -854,7 +854,7 @@ git-workflow.md:
 ### 5.12.5 docs/INTENT_BACKLOG.md 생성 규칙
 
 - 이 스킬의 `templates/INTENT_BACKLOG.md`를 그대로 복사하여 **빈 백로그**로 생성한다 (플레이스홀더 없음).
-- `intent-distill` 스킬이 `.harness-intent.jsonl` ↔ `@feature` E2E 커버리지를 대조해 이 문서를 머지-싱크한다(미커버 갭 추가 / 커버됨 제거 / 사용자 주석·waiver 보존).
+- `intent-distill` 스킬이 `.harness-intent.jsonl` ↔ `@feature` PRD·E2E 2차원 커버리지를 대조해 이 문서를 머지-싱크한다(갭 추가 / 둘 다 covered 제거 / 사용자 주석·waiver 보존 / 구 E2E-only 백로그 one-way 승격).
 - manifest category는 **`data`**다 (§ 5.13·§ 10.1) — 런타임 축적, 해시 드리프트 검사 제외, 업그레이드 시 덮어쓰지 않음(TECH_DEBT.md와 동일 취급).
 - intent-distill 미실행 시 빈 채로 남는다(무해). E2E 미옵트인 프로젝트에선 distill이 "판정 보류"라 백로그가 비어 있다.
 
@@ -1431,8 +1431,8 @@ harness:check(6.13) 결과로 단계를 판정한다 (기준: `references/harnes
 - 피드백 분석 → "하네스 피드백 분석해줘" (상세: CLAUDE.md 하네스 이슈 보고 — 플러그인 번들 스킬)
 - 마찰 자동 기록 → TDD 마찰 이벤트(implementer-retry 등)가 발생 시 `.harness-friction.jsonl`에 자동 기록 (상세: .claude/rules/session-routine.md § 마찰 로그) — always-on
 - 의도 적재 → 세션 종료 시 제품 의도(intended/unintended)가 `.harness-intent.jsonl`에 적재 (상세: .claude/rules/session-routine.md § 의도 로그) — always-on
-- 의도 증류 → "의도 정리"로 `.harness-intent.jsonl`을 @feature E2E와 대조해 `docs/INTENT_BACKLOG.md` 커버리지 백로그 동기화 (상세: intent-distill 스킬 — 플러그인 번들)
-- PRD 명세 → 새 feature 작업 시 `docs/product-specs/{id}-{slug}.md`에 `@feature:{id}`로 작성 (양식: docs/product-specs/_template.md · 상세: docs/product-specs/README.md) — always-on, 작성 관례·템플릿 제공(커버리지 derive는 후속)
+- 의도 증류 → "의도 정리"로 `.harness-intent.jsonl`을 @feature PRD·E2E와 대조해 `docs/INTENT_BACKLOG.md` 2차원 커버리지 백로그 동기화 (상세: intent-distill 스킬 — 플러그인 번들)
+- PRD 명세 → 새 feature 작업 시 `docs/product-specs/{id}-{slug}.md`에 `@feature:{id}`로 작성 (양식: docs/product-specs/_template.md · 상세: docs/product-specs/README.md) — always-on, 작성 관례·템플릿 제공(의도↔PRD 커버리지는 "의도 정리"가 derive)
 - 멀티모델 자문 → `/consult` (상세: references/integrations/multi-model-consult-mapping.md) — multiModelConsult 옵트인 + 실존 검증 통과 시에만 표시
 - 보조 스킬(brainstorming 등) → 자연어 호출 (상세: AGENTS.md "## 보조 스킬") — 생존 linkedSkills 1개 이상일 때만 표시
 - 브라우저 E2E 회귀 작성 → `npm run test:e2e` (상세: e2e/README.md · playwright.config.ts) — e2e 옵트인 시에만 표시

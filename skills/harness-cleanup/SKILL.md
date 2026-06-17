@@ -101,7 +101,7 @@ echo "=== END STATE ==="
 - **재분류**: 심각도가 변한 항목 (예: 방치로 보통 → 높음) → 이동 제안
 - **신규**: W3에서 발견한 엔트로피 중 즉시 수정하지 않는 것 → 새 항목 추가 제안
 
-- `docs/INTENT_BACKLOG.md` 열린 백로그 검토 — 미커버 의도(missing/partial)를 `feature_list.json` 작업/E2E 스펙으로 승격 제안, invalid-feature/ambiguous는 triage. (동기화: "의도 정리" — intent-distill)
+- `docs/INTENT_BACKLOG.md` 열린 백로그 검토(2차원) — **tested-but-unspecced**(e2e covered·prd missing)는 PRD 작성, **specced-but-untested**(prd covered·e2e missing)는 E2E 스펙 작성으로 승격 제안, invalid-feature/ambiguous는 triage, blocked(substrate 부재)는 보류. (동기화: "의도 정리" — intent-distill)
 
 ### B2. 승격 대기 큐 점검
 
