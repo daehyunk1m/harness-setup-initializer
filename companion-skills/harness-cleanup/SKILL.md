@@ -131,6 +131,12 @@ echo "=== END STATE ==="
 
 W4의 harness:check 결과와 M1~M2를 종합해 하네스 단계(표준/MVH)를 판정하고, 다음 달까지의 개선 우선순위 1~3개를 제안한다.
 
+### M4. 피드백 보고 백업 (보조 net)
+
+세션 종료 트리거(session-routine § 피드백 보고 트리거)가 **주 그물망**이고, 월간은 보조다. `.harness-friction.jsonl`에 cursor(`.harness-feedback-cursor`) 이후 미보고 마찰이 남아 있으면(드물게 세션 종료에서 놓친 누적), harness-feedback 실행을 **제안**한다. cursor 기반이라 재실행이 중복 Issue를 만들지 않는다.
+
+> 정직 표기: 월간이 안 돌아도 세션 종료 트리거가 매 세션 미보고를 surface하므로 dead-letter 위험은 낮다. 월간은 belt-and-suspenders.
+
 ---
 
 ## 6. 보고 & 적용
