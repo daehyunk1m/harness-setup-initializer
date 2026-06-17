@@ -311,10 +311,41 @@ TDD 사이클이 성공적으로 완료되면:
    - TDD STATE 블록 저장
    - 마찰 이벤트 기록(session-incomplete) — § 마찰 로그 참조(.harness-friction.jsonl에 append)
      (사이클 미완료로 종료될 때의 안전망 기록 — 종료 시점에 반드시 1줄 append)
+4.5 피드백 보고 트리거 — cursor 이후 미보고 마찰을 평가해 충족 시 한 줄 제안 (§ 피드백 보고 트리거)
 5. 미커밋 변경이 있으면 git-workflow.md 규칙에 따라 커밋 (§ 자동 커밋 정책 모드: off=제안 / confirm=승인 후 / auto=자동):
    - TDD 사이클 완료: feat 커밋
    - 사이클 미완료: checkpoint 커밋 (chore({scope}): checkpoint — {상태})
    - 코드는 반드시 빌드 가능한 상태여야 한다
+```
+
+### 피드백 보고 트리거
+
+세션 종료 시 `.harness-friction.jsonl`의 **cursor(`.harness-feedback-cursor`) 이후** 이벤트를 보고 기준으로 평가해, 충족하면 **한 줄 제안만** 출력한다(자동 실행·gh 호출 없음 — 무-훅·승인 없이 실행 금지 원칙). 보고하면 cursor가 전진하므로 다음 세션엔 재제안되지 않는다(nagware 방지). `infra-track-entry`(감사 마커)·`session-incomplete`(루틴 기록)는 마찰 카운트·기준에서 제외한다. jsonl 부재 시 스킵, cursor 부재 시 전체를 미보고로 평가한다.
+
+기준은 harness-feedback 보고 기준과 **동일**(`critical≥1 OR 동일 event≥2 OR high≥2`)하되 **cursor 이후 누적 윈도우**에 적용한다 — 트리거↔보고 정합(제안=반드시 보고 가능). 누적 윈도우라 단일 세션 dedup 제약(같은 feature+event 1회)을 넘어 교차세션·다feature로 기준 달성이 가능하다.
+
+```sh
+node -e '
+const fs=require("fs"), JL=".harness-friction.jsonl", CUR=".harness-feedback-cursor";
+if(!fs.existsSync(JL)) process.exit(0);
+const lines=fs.readFileSync(JL,"utf8").split("\n");
+let processed=0;
+if(fs.existsSync(CUR)){try{processed=JSON.parse(fs.readFileSync(CUR,"utf8")).processedLines||0}catch{}}
+const SKIP=new Set(["infra-track-entry","session-incomplete"]);
+let crit=0,high=0,med=0;const ev={};
+for(let i=processed;i<lines.length;i++){
+  const r=lines[i].trim(); if(!r) continue;
+  let e; try{e=JSON.parse(r)}catch{continue}
+  if(!e||SKIP.has(e.event)) continue;
+  if(e.severity==="critical")crit++; else if(e.severity==="high")high++; else if(e.severity==="medium")med++;
+  ev[e.event]=(ev[e.event]||0)+1;
+}
+const sameGe2=Object.values(ev).some(c=>c>=2);
+if(crit>=1||sameGe2||high>=2){
+  const n=crit+high+med;
+  console.log("ℹ️ 미보고 마찰 "+n+"건 (critical "+crit+"·high "+high+"·medium "+med+") — \x27하네스 피드백 분석해줘\x27로 보고 권장 (글로벌 컴패니언)");
+}
+'
 ```
 
 ---
@@ -387,3 +418,4 @@ echo '{"ts":"2026-06-16T12:34:56Z","session":"<SESSION_ID>","event":"implementer
 - 같은 feature의 같은 이벤트가 같은 세션(동일 SESSION_ID)에서 반복되면 첫 번째만 기록한다
 - `detail`은 에러 메시지의 핵심 한 줄 또는 원인 요약을 위 소독 규칙으로 가공한 결과 (≤50자)
 - 한 이벤트 = `>>`로 정확히 한 줄만 append (여러 줄 금지 — 관용 파서가 줄 단위로 읽는다)
+- 보고 상태는 `.harness-feedback-cursor`(별도 파일, append-only jsonl 미변경)가 추적한다 — harness-feedback이 보고/무시 시 처리한 물리 줄 수까지 전진시키고, 세션 종료 트리거(§ 피드백 보고 트리거)가 그 이후만 평가한다.
