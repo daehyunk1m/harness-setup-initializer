@@ -106,7 +106,7 @@ OUT="$(run_in "$D")"
 echo "T8: slug-only 파일명 (progress-chart.md, 마커 유효) → mismatch 침묵"
 D="$TMP/t8"; mkproj "$D" "$FL"; printf '@feature:F001\n# P\n' > "$D/docs/product-specs/progress-chart.md"
 OUT="$(run_in "$D")"
-{ ! echo "$OUT" | grep -q "file-marker-mismatch"; } && ok "slug-only 침묵" || no "slug-only 오탐: $OUT"
+{ ! echo "$OUT" | grep -q "file-marker-mismatch" && ! echo "$OUT" | grep -q "⚠️"; } && ok "slug-only 침묵(경고 0)" || no "slug-only 오탐: $OUT"
 
 echo "T9: substrate 부재 → 보류"
 D="$TMP/t9"; mkdir -p "$D"; printf '%s' "$FL" > "$D/feature_list.json"
@@ -119,7 +119,7 @@ echo "$(run_in "$D")" | grep -q "⏸️ 작성된 PRD 없음" && ok "PRD 0개 �
 echo "T11: README/_template의 @feature:F000 → 검사 제외 (경고 0)"
 D="$TMP/t11"; mkproj "$D" "$FL"; printf '@feature:F001\n# P\n' > "$D/docs/product-specs/F001-ok.md"
 OUT="$(run_in "$D")"
-{ ! echo "$OUT" | grep -qE "F000|_template|README"; } && ok "substrate 파일 검사 제외" || no "substrate 파일 오탐: $OUT"
+{ ! echo "$OUT" | grep -qE "F000|_template|README" && ! echo "$OUT" | grep -q "⚠️"; } && ok "substrate 파일 검사 제외(경고 0)" || no "substrate 파일 오탐: $OUT"
 
 echo "T12: render-after 와이어링 (전체 스크립트 exit 0 + ⑩ 출력)"
 D="$TMP/t12"; mkproj "$D" "$FL"; printf '@feature:F001\n# P\n' > "$D/docs/product-specs/F001-ok.md"
@@ -131,6 +131,15 @@ sed -e 's#{{LINT_ARCH_COMMAND}}#true#g' -e 's#{{VALIDATE_COMMAND}}#true#g' \
 ( cd "$D" && bash hc.sh > out.txt 2>&1 ); CODE=$?
 { [ "$CODE" -eq 0 ] && grep -q "⑩ PRD 위생" "$D/out.txt" && grep -q "✅ PRD 마커 위생 정상" "$D/out.txt"; } \
   && ok "전체 실행 exit 0 + ⑩ 출력 + 정상 판정" || no "render-after 실패 (exit $CODE): $(cat "$D/out.txt")"
+
+echo "T13: feature_list 비어있음([]) + 유효형 마커 → invalid-feature/mismatch 보류 (오탐 방지)"
+D="$TMP/t13"; mkproj "$D" "[]"; printf '@feature:F001\n# P\n' > "$D/docs/product-specs/F001-x.md"
+OUT="$(run_in "$D")"
+{ ! echo "$OUT" | grep -q "⚠️ invalid-feature:" && ! echo "$OUT" | grep -q "⚠️ file-marker-mismatch:"; } && ok "빈 feature_list invalid/mismatch 보류" || no "빈 feature_list 오탐: $OUT"
+
+echo "T14: feature_list 비어있음([]) + 마커 없는 PRD → unbound는 계속 검출"
+D="$TMP/t14"; mkproj "$D" "[]"; printf '# 마커 없음\n' > "$D/docs/product-specs/F001-y.md"
+echo "$(run_in "$D")" | grep -q "⚠️ unbound-prd: F001-y.md" && ok "빈 feature_list에도 unbound 검출" || no "unbound 미검출"
 
 echo
 echo "결과: PASS=$PASS FAIL=$FAIL"
@@ -163,6 +172,9 @@ prd_marker_hygiene() {
   fi
   local ids
   ids=$(node -e "const a=require('./feature_list.json'); process.stdout.write((Array.isArray(a)?a:[]).map(function(f){return f&&f.id;}).filter(Boolean).join('\n'))" 2>/dev/null)
+  if [ -z "$ids" ]; then
+    echo "ℹ️ feature_list.json 비어있음/없음 — feature id 대조(invalid-feature/mismatch) 보류, 나머지 마커 위생은 계속"
+  fi
   local warn=0
   local -a seen=()
   local prd base mcount mid stem fileid dups d
@@ -178,18 +190,22 @@ prd_marker_hygiene() {
     fi
     mid=$(grep -oE '^@feature:[^[:space:]]+$' "$prd" 2>/dev/null | head -1 | sed 's/^@feature://')
     seen+=("$mid")
-    if ! printf '%s\n' "$ids" | grep -Fxq "$mid"; then
+    if [ -n "$ids" ] && ! printf '%s\n' "$ids" | grep -Fxq "$mid"; then
       echo "⚠️ invalid-feature: $base — @feature:$mid 가 feature_list.json에 없음 (오타/미등록)"; warn=1
     fi
     stem=${base%.md}
     if [ "$stem" = "$mid" ] || [ "${stem#"$mid"-}" != "$stem" ]; then
       :  # 파일명-마커 일치 — 무경고
     else
-      # 유효 id 중 stem의 접두인 가장 긴 id (하이픈 id 안전)
-      fileid=$(printf '%s\n' "$ids" | while IFS= read -r cand; do
-        [ -n "$cand" ] || continue
-        if [ "$stem" = "$cand" ] || [ "${stem#"$cand"-}" != "$stem" ]; then echo "$cand"; fi
-      done | awk '{ if (length($0) > length(longest)) longest=$0 } END { print longest }')
+      # 유효 id 중 stem의 접두인 가장 긴 id (하이픈 id 안전; awk·서브셸·중첩 heredoc 미사용)
+      fileid=""
+      set -f  # ids는 공백 없는 식별자 — 단어분할만 쓰고 glob 확장은 막는다
+      for cand in $ids; do
+        if [ "$stem" = "$cand" ] || [ "${stem#"$cand"-}" != "$stem" ]; then
+          [ ${#cand} -gt ${#fileid} ] && fileid="$cand"
+        fi
+      done
+      set +f
       if [ -n "$fileid" ] && [ "$fileid" != "$mid" ]; then
         echo "⚠️ file-marker-mismatch: $base — 파일명 id($fileid) ≠ 마커 id($mid)"; warn=1
       fi
@@ -221,7 +237,7 @@ prd_marker_hygiene
 - [ ] **Step 4: 픽스처 실행 → GREEN 확인**
 
 Run: `bash test/prd-marker-hygiene-fixtures.sh`
-Expected: PASS — "✅ 전부 통과" (T1~T12 PASS=12, exit 0)
+Expected: PASS — "✅ 전부 통과" (T1~T14, FAIL=0, exit 0)
 
 - [ ] **Step 5: 회귀 — 기존 PRD/structural 픽스처 통과 확인**
 

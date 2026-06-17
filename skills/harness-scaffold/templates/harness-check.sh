@@ -189,6 +189,82 @@ if [ -f .githooks/pre-push ] || [ -n "${HOOKS_PATH:-}" ]; then
   fi
 fi
 
+# ⑩ PRD 마커 위생 (경고 전용 — exit code 무영향; substrate 존재 시에만 실질 검사)
+# --- harness:prd-marker-hygiene:start (test/prd-marker-hygiene-fixtures.sh가 이 블록을 추출·source한다 — 단일 소스, 로직 복사 금지) ---
+prd_marker_hygiene() {
+  local specs="docs/product-specs"
+  if [ ! -f "$specs/README.md" ] || [ ! -f "$specs/_template.md" ]; then
+    echo "⏸️ product-specs substrate 부재 — PRD 위생 보류 (① 참조)"
+    return 0
+  fi
+  local prds
+  prds=$(ls "$specs"/*.md 2>/dev/null | grep -vE '/(README|_template)\.md$')
+  if [ -z "$prds" ]; then
+    echo "⏸️ 작성된 PRD 없음 — PRD 위생 보류 (온디맨드 작성, 정상)"
+    return 0
+  fi
+  local ids
+  ids=$(node -e "const a=require('./feature_list.json'); process.stdout.write((Array.isArray(a)?a:[]).map(function(f){return f&&f.id;}).filter(Boolean).join('\n'))" 2>/dev/null)
+  if [ -z "$ids" ]; then
+    echo "ℹ️ feature_list.json 비어있음/없음 — feature id 대조(invalid-feature/mismatch) 보류, 나머지 마커 위생은 계속"
+  fi
+  local warn=0
+  local -a seen=()
+  local prd base mcount mid stem fileid dups d
+  while IFS= read -r prd; do
+    [ -n "$prd" ] || continue
+    base=$(basename "$prd")
+    mcount=$(grep -cE '^@feature:[^[:space:]]+$' "$prd" 2>/dev/null); mcount=${mcount:-0}
+    if [ "$mcount" -eq 0 ]; then
+      echo "⚠️ unbound-prd: $base — 전체줄 @feature 마커 없음 (바인딩 누락)"; warn=1; continue
+    fi
+    if [ "$mcount" -gt 1 ]; then
+      echo "⚠️ multiple-markers: $base — 전체줄 @feature 마커 ${mcount}개 (1개만 두세요)"; warn=1; continue
+    fi
+    mid=$(grep -oE '^@feature:[^[:space:]]+$' "$prd" 2>/dev/null | head -1 | sed 's/^@feature://')
+    seen+=("$mid")
+    if [ -n "$ids" ] && ! printf '%s\n' "$ids" | grep -Fxq "$mid"; then
+      echo "⚠️ invalid-feature: $base — @feature:$mid 가 feature_list.json에 없음 (오타/미등록)"; warn=1
+    fi
+    stem=${base%.md}
+    if [ "$stem" = "$mid" ] || [ "${stem#"$mid"-}" != "$stem" ]; then
+      :  # 파일명-마커 일치 — 무경고
+    else
+      # 유효 id 중 stem의 접두인 가장 긴 id (하이픈 id 안전; awk·서브셸·중첩 heredoc 미사용)
+      fileid=""
+      set -f  # ids는 공백 없는 식별자 — 단어분할만 쓰고 glob 확장은 막는다
+      for cand in $ids; do
+        if [ "$stem" = "$cand" ] || [ "${stem#"$cand"-}" != "$stem" ]; then
+          [ ${#cand} -gt ${#fileid} ] && fileid="$cand"
+        fi
+      done
+      set +f
+      if [ -n "$fileid" ] && [ "$fileid" != "$mid" ]; then
+        echo "⚠️ file-marker-mismatch: $base — 파일명 id($fileid) ≠ 마커 id($mid)"; warn=1
+      fi
+    fi
+  done <<PRD_LIST
+$prds
+PRD_LIST
+  if [ ${#seen[@]} -gt 0 ]; then
+    dups=$(printf '%s\n' "${seen[@]}" | sort | uniq -d)
+    if [ -n "$dups" ]; then
+      while IFS= read -r d; do
+        [ -n "$d" ] || continue
+        echo "⚠️ duplicate-binding: feature $d 를 PRD 복수가 바인딩 (canonical 1개 권장)"; warn=1
+      done <<DUP_LIST
+$dups
+DUP_LIST
+    fi
+  fi
+  [ "$warn" -eq 0 ] && echo "✅ PRD 마커 위생 정상"
+  return 0
+}
+# --- harness:prd-marker-hygiene:end ---
+echo ""
+echo "── ⑩ PRD 위생 ──"
+prd_marker_hygiene
+
 # 종합 판정
 echo ""
 echo "═══ 판정 ═══"
