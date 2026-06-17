@@ -52,10 +52,52 @@ if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then
 
 `docs/product-specs/`에 `README.md`/`_template.md`만 있고 바인딩 PRD가 없어도 PRD_PRESENT다(개별 feature의 PRD 부재는 §4에서 `missing`으로 판정 — substrate 부재와 구분).
 
-## 4. 커버리지 파생 (feature-범위, 증거 필수)
+## 4. 커버리지 파생 (feature-범위, 증거 필수, 2차원)
 
-각 의도(intended+unintended)에 대해 5-상태를 산출한다:
+각 의도(intended+unintended)에 대해 **`prd_state`와 `e2e_state`를 각각** 산출한다. 두 차원은 독립이며 substrate 부재는 `blocked:no-*-substrate`로 기록한다(미커버 `missing`과 절대 혼동 금지). E2E 차원은 §4.2, PRD 차원은 §4.1.
 
+### 4.1 PRD 차원 (신규)
+
+각 의도의 `prd_state`:
+
+1. `feature`가 `""`이거나 `feature_list.json`에 없으면 → **`invalid-feature`** (증거: "feature 미지정/미존재"). 다음 차원으로.
+2. PRD substrate 부재(§3 PRD_ABSENT) → **`blocked:no-prd-substrate`** (증거: "docs/product-specs 없음 — 판정 불가"). **`missing` 아님.**
+3. 바인딩 PRD를 **whole-line 리터럴**로 찾는다(2b-1 규칙):
+   ```bash
+   grep -Rl -Fx "@feature:{feature}" docs/product-specs/ 2>/dev/null
+   ```
+   매칭 PRD 없으면 → **`missing`** (증거: "@feature:{feature} PRD 없음 — 작성 후보").
+4. 매칭 PRD 있으면 그 파일**만** 읽는다. kind에 맞는 섹션에서 근거 탐색:
+   - `intended` → `behavior`·`acceptance` 섹션
+   - `unintended` → `edge-cases`·`open-questions` 섹션
+   섹션 본문은 정적 추출기로 얻는다(앵커는 경계로만, HTML 주석·`_template.md`/`README.md`·헤딩 제외):
+   ```bash
+   prd_section_body() {
+     awk -v sec="$1" '
+       /<!--[[:space:]]*harness:section=/ { insec = ($0 ~ ("harness:section=" sec "[[:space:]]")); next }
+       !insec { next }
+       { l=$0; sub(/^[[:space:]]+/,"",l); sub(/[[:space:]]+$/,"",l) }
+       incmt { if (l ~ /-->/) incmt=0; next }
+       l ~ /^<!--/ && l !~ /-->/ { incmt=1; next }
+       l ~ /^<!--.*-->$/ { next }
+       l ~ /^#/ { next }
+       l == "" { next }
+       { print l }
+     ' "$2"
+   }
+   ```
+   - **빈 섹션 가드**: 기대 섹션의 `prd_section_body` 출력이 비어있으면 → **`missing`** (증거: "기대 섹션 비어있음 — 명세 누락"). **`covered` 절대 금지** (템플릿 안내 주석·빈 헤딩을 명세로 오인 방지).
+   - 본문이 있으면 의미 판정(**보수적** — PRD 산문은 약한 증거라 문턱 상향):
+     - **`covered`**: statement의 핵심 행위 + 대상 + 조건/예외가 본문에 **명시**됨 (증거: PRD 경로 + 섹션 앵커명 + 인용 요지).
+     - **`partial`**: feature PRD는 있으나 조건/예외/부정 방향 일부 누락 (증거: 경로 + 미커버 요지).
+     - **`ambiguous`**: 표현이 일반적/상위 개념뿐이거나 매칭 불확실 — **불확실하면 기본값**(증거: 사유).
+   - 동의어/동일 대상/동일 조건이 명확하지 않으면 `covered`로 올리지 말고 `ambiguous`/`partial`로 남긴다.
+
+**모든 판정 증거 필수.** (최적화: 백로그에 `covered` 증거로 기록됐고 그 PRD 파일이 안 바뀐 의도는 PRD 재판정 스킵 가능.)
+
+### 4.2 E2E 차원 (기존)
+
+0. E2E substrate 부재(§3 E2E_ABSENT) → **`blocked:no-e2e-substrate`**. 아니면 아래 판정.
 1. `feature`가 `""`이거나 `feature_list.json`에 없으면 → **`invalid-feature`** (증거: 사유 "feature 미지정/미존재"). 다음 의도로.
 2. 해당 feature의 E2E 스펙을 **feature-범위로만** 찾는다(전체 E2E를 올리지 않는다):
    ```bash
