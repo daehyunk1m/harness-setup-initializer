@@ -72,7 +72,7 @@
 ### 작업 환경
 
 - **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.25.0)
-- **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 5개 스킬 번들 자동 디스커버리
+- **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 6개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
 ---

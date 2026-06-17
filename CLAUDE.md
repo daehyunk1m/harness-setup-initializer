@@ -89,7 +89,7 @@
 
 ```bash
 # 실전 테스트 (실제 프로젝트에서 2단계 스킬 실행)
-# 스킬은 플러그인으로 설치: /plugin install harness-setup@harness-setup-initializer → 5스킬 번들 로딩
+# 스킬은 플러그인으로 설치: /plugin install harness-setup@harness-setup-initializer → 6스킬 번들 로딩
 # (개발 중 로컬 반영: /plugin marketplace add <이 repo 경로> 후 install + /reload-plugins)
 cd ~/Desktop/side-project/haja-web-fe && claude
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
