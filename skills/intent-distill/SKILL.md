@@ -123,6 +123,7 @@ if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then
 - **둘 다 `covered`**(또는 waiver) → 열린 백로그에서 **제거**(완전 추적).
 - 한 차원이라도 actionable 갭(`missing`/`partial`/`ambiguous`/`invalid-feature`) → 행 **유지/추가**, 두 상태 컬럼 + 통합 `evidence` 갱신.
 - 두 차원이 `blocked:*`만(substrate 부재) → "판정 불가" 행으로 유지(보류 — 갭으로 단정 안 함).
+- **한 차원 `covered` + 다른 차원 `blocked:*`**(예: PRD 있으나 E2E 계층 없음) → 행 **유지**(둘 다 covered가 아니므로 미해소 — 부재 substrate 도입 시 재판정. actionable 갭으로 단정 안 함).
 - **waiver 섹션에 키가 있으면 스킵**(재추가 안 함). 사용자가 `priority/비고`에 "PRD 불필요"/"E2E 불필요"를 적었으면 해당 차원 갭은 노이즈로 취급(행은 유지하되 재-제안 안 함).
 
 **evidence 컬럼**(통합): 두 차원 증거를 한 셀에 — 예 `prd: F007-progress.md#edge-cases (someday 제외 명시) · e2e: F007-progress.e2e.ts::"excludes someday"`.
