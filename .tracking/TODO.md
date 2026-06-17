@@ -833,3 +833,29 @@
 - **설계 결정(멀티모델 자문)**: 초안은 stateless gh-dedup(옵션 c). codex 결함 지적 + gemini 대안 자문이 stateless의 **3약점**(① 제목 매칭 취약성 ② 닫힌 Issue 재분석 루프 ③ 교차세션 drip)을 드러냄 → **cursor 북마크(상태) 결정**으로 전환해 셋 다 해소. 트리거 기준을 harness-feedback의 보고 기준과 **동일**하게 정렬(제안↔보고 정합 — mismatch 제거)
 - **해결(5부, 1.22.0)**: ① 신규 `data` 파일 `.harness-feedback-cursor`(1줄 JSON `{processedLines, lastReportedAt}` — 보고 위치 북마크·단일 상태원, `processedLines`=`grep -c ''` 물리 줄 수; harness-scaffold §5.12.2 생성, manifest category `data` §10.1 #22-c, 생성순서 17-c) ② templates/rules/session-routine.md § 세션 종료 트리거 — cursor 이후 미보고 마찰을 보고 기준(`critical≥1 OR 동일 event≥2 OR high≥2`, `infra-track-entry`·`session-incomplete` 제외)으로 평가해 충족 시 **한 줄 제안만**(무-훅·gh 무호출·자동 실행 없음, 보고 시 cursor 전진 → nagware 방지) ③ harness-feedback §1.1 cursor 이후만 분석 + 보고/무시 시 cursor EOF 전진(§6 3분기 y=생성+전진/d=무시+전진/n=취소+미전진) + fingerprint `<!-- harness-friction:fp=event:{event} -->` 백스톱 dedup(§5.1)·§7 race 재조회 ④ harness-cleanup §5 M4 월간 보조 net ⑤ graceful degradation(cursor 부재=`processedLines:0` 전체 미보고). 신규 플레이스홀더 0, **마이그레이션 불필요**(기존 하네스 첫 보고 시 자동 생성, 업그레이드 직후 첫 세션 종료에 누적 백로그 "미보고 N건" 노출=의도)
 - **검증 근거**: 골든 픽스처 `test/feedback-cursor-fixtures.sh` **12 케이스 통과**(T1~T12 — 트리거 평가·post-cursor 추출·cursor 전진·fingerprint 수집; T6 감사 마커 제외·T11 깨진 줄 스킵·물리 줄 수 포함 등 판별력 케이스 포함) + 태스크별 2단계 subagent 리뷰. **라이브 하네스 실주행은 미수행**(픽스처 + 리뷰 검증). 설계 정본 docs/superpowers/specs/2026-06-17-feedback-report-trigger-design.md, 계획 docs/superpowers/plans/2026-06-17-feedback-report-trigger.md. MINOR, 하위 호환. 이슈 #14 종결
+
+---
+
+## Intent Ledger Phase 2 백로그 (이슈 #15 후속 — 미착수)
+
+> Phase 1(1.24.0)은 수집 인프라만. Phase 2는 증류·분석·연결 레이어. spec §12 참조.
+
+### TODO-103: intent-distill 스킬 (Phase 2)
+- **상태**: [ ] 미착수
+- **내용**: `.harness-intent.jsonl`에서 패턴을 증류해 의미있는 시그널을 뽑아내는 스킬. intended/unintended 비율 분석, 반복 패턴 식별, friction과 교차 분석(intent-friction 매트릭스). spec §12 참조.
+
+### TODO-104: PRD diff 연계 (Phase 2)
+- **상태**: [ ] 미착수
+- **내용**: intent 스트림과 `docs/product-specs/`(현재 빈 디렉토리) PRD 사이의 갭 식별. feature_list.id → PRD 링크 필드 설계. `encoded.prd` 필드 실제 갱신(Phase 1에서 all-false로 초기화됨).
+
+### TODO-105: E2E 백로그 연계 (Phase 2)
+- **상태**: [ ] 미착수
+- **내용**: `encoded.e2e` 및 `encoded.test` 필드 갱신 로직. unintended intent 중 E2E로 커버되지 않은 항목을 feature_list에 자동 등록하는 파이프라인 설계.
+
+### TODO-106: encoded 갱신 로직 (Phase 2)
+- **상태**: [ ] 미착수
+- **내용**: Phase 1에서 `encoded: { prd: false, e2e: false, test: false }`로 고정된 필드를 실제 코드베이스 상태(PRD 존재 여부·E2E 스펙 존재 여부·테스트 존재 여부)와 연결해 동적으로 갱신하는 메커니즘.
+
+### TODO-107: intent↔PRD 바인딩 + PRD 출력단 갭 (Phase 2)
+- **상태**: [ ] 미착수
+- **내용**: `docs/product-specs/`가 현재 빈 디렉토리(`feature_list.id → PRD 링크 필드` 미존재). intent 원장과 PRD를 연결하는 바인딩 레이어 설계. spec §12 참조. 선결과제: TODO-104 PRD diff 기반.

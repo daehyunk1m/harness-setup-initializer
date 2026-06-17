@@ -71,7 +71,7 @@
 
 ### 작업 환경
 
-- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~ 플러그인 배포)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.24.0)
 - **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 5개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
@@ -127,6 +127,7 @@
 | E2E VERIFY 러너 정합 (1.13.0) | VERIFY(E2E) 실행 명령을 `{{TEST_COMMAND}}`(유닛 러너)→신규 `{{E2E_COMMAND}}`(E2E 러너, `<pm> run test:e2e`)로 교체. 새 프로필 필드 없이 `e2e.enabled`+`test:e2e` 스크립트에서 도출(29→30) | haja 1.9→1.12 파일럿 적대적 검증: 유닛 러너로는 `.e2e.ts`가 글롭에 미수집 → 0개 실행 후 exit 0(거짓 PASS)로 게이트 무력화. "계열" 헷지는 하드 치환 토큰 앞에서 무의미(§6.11이 이미 치환). 동반 수정: seed.ts `void payload`(F1, no-unused-vars), harness-check ⑧ references 위임루트 short-circuit(F2). harness:check가 런타임 Phase 4.7을 안 거쳐 못 잡음 → 실전 기능 주행이 검증에 필수임을 입증 |
 | 이슈 #12 증분 2b 게이트 (1.14.0) | 활성화 수동(D1 — git config 비실행, "승인 없이 git 실행 금지" 정합), 게이팅 `validate`→`@critical`(D2), 옵트인 `e2e.prePush`(D3), eslint override 드롭(D4 — e2e/는 srcRoot 밖이라 assist 규칙 미도달, 승격 조건만 보존), 신규 플레이스홀더 0(D5). 공존성 4-환경 분기(그린필드/기존 hooksPath·Husky/기본 hooks/폴백) + 적응형 마커 주입. harness-check ⑨ 경고 전용(판정 분리) | 설계 정본: `docs/superpowers/specs/2026-06-16-e2e-prepush-2b-design.md` |
 | 이슈 #12 증분 3 MCP 진단 (1.15.0) | 배치 = e2e 모듈 확장(integrations 규약 비사용 — debugger가 코어 SoT라 통합 규약 #3 "코어 충돌 영역 제외"와 충돌). 산출물 = 공유 `.mcp.json` 비커밋(Claude Code 승인 nagware·머지 지옥·관심사 분리 회피) → debugger.md 지침 + 개발자 로컬 `claude mcp add`. 분리 옵트인 `e2e.mcp`(`enabled`/`version`, `e2e.enabled`와 독립). 공식 `@playwright/mcp` exact 핀 `0.0.76`. `{{MCP_DEBUG_PROTOCOL}}`(30→31) | 멀티모델 자문(codex·gemini)이 비커밋 B안 권고 — 공유 .mcp.json 미생성. gemini의 "ad-hoc npx" 오류는 MCP 등록 메커니즘 오해라 합성자가 교정. 설계 정본: `docs/superpowers/specs/2026-06-16-e2e-mcp-incr3-design.md` |
+| 의도 원장 (1.24.0, 이슈 #15) | 의도 원장은 friction 자매 채널 — 세션 종료 배치 적재, always-on, encoded 선반영(Phase 1 all-false), unintended↔friction 직교. 증류는 Phase 2. | 프로필 변경 0, 신규 플레이스홀더 0. friction이 "실제로 마찰을 겪었는가"를 기록하면, intent는 "무엇을 의도했는가"를 기록 — 두 채널이 교차해야 패턴이 의미를 가진다. Phase 1은 수집 인프라만. 증류(distill·PRD diff)·인코딩 갱신·바인딩은 Phase 2 비-스코프. |
 
 ---
 
@@ -324,6 +325,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.24.0 (Intent Ledger Phase 1 — 이슈 #15)
+- **1.24.0** (2026-06-17) — Intent Ledger Phase 1 수집 인프라(이슈 #15). friction 자매 채널. 세션 종료 시 제품 의도(intended/unintended)를 `.harness-intent.jsonl`(append-only, git 추적, manifest `data`, always-on)에 배치 적재. 스키마 `{ts, session, kind, surface, feature, statement(≤200), encoded:{prd,e2e,test}}`. `encoded`는 Phase 1 항상 all-false. SESSION_ID는 friction과 공유. `templates/INTENT_LEDGER.md` 정적 참조 문서(스키마·kind·surface·friction 경계) 추가. session-routine `§ 의도 로그` + 세션 종료 Step 4.2 적재 규칙. scaffold 생성순서 17-d/17-e, §5.12.3/5.12.4, manifest §5.13·§10.1, doc-freshness 제외, §6.2 검증. Phase 4 능력 카탈로그 의도 적재 줄(수집만 — 증류·승격은 미배선). harness-check.sh·harness-checklist.md 싱크 검증. 프로필 변경 0, 신규 플레이스홀더 0. 증류·추적·PRD 바인딩은 Phase 2 비-스코프. MINOR, 하위 호환.
 
 ### 1.23.0 (Claude Code 플러그인 전환)
 - **1.23.0** (2026-06-17) — 배포 방식을 "git clone + install.sh 심볼릭 링크"에서 정식 **Claude Code 플러그인 + 셀프 호스팅 마켓플레이스**로 전환. **구조**: `.claude-plugin/{plugin.json,marketplace.json}` 신설(단일 repo = 마켓플레이스 = 플러그인, `source:"./"`), 5개 스킬을 `skills/<name>/`로 `git mv` 재구성(루트 SKILL.md→skills/harness-setup/, presets·references→skills/harness-setup/, templates→skills/harness-scaffold/, companion-skills/*→skills/*). references는 harness-setup·harness-scaffold 양쪽 런타임 의존이라 **SSoT 심링크**(`skills/harness-scaffold/references → ../harness-setup/references`)로 공유(중복 복제 회피 — 발견: 구 harness-scaffold/도 이미 templates·references를 루트로 심링크하고 있었음, 옛 설계도 심링크 사용). **클린 컷오버**: install.sh를 마이그레이션 스크립트로 전환 — 구 심링크를 `test -L` 가드로만 정리(실제 디렉토리 미삭제) + 플러그인 안내 출력(듀얼 배포 폐기). **multiModelConsult 결합 분리**: run-advisor.js 호출을 `${CLAUDE_PLUGIN_ROOT}/skills/...`(본문 선치환)로, §1.6 감지를 CLI-only(번들이라 스킬 존재 보장)로, 프로필 source `companion`→`bundled`·installPath→null, §5.16 실존검증을 번들 전제로. **설계 검증(Spike)**: 구현 전 throwaway 플러그인으로 런타임 5종 실측 — ① `${CLAUDE_PLUGIN_ROOT}`는 SKILL.md 본문에서만 선치환(모델이 조합한 셸엔 부재) ② 하네스가 Base directory 제공 → co-located 자연어 상대 해석 ③ 내부 상대 심링크 캐시 생존 + 형제 스킬 reach ④ 짧은 이름 `Skill()` 체이닝 작동 ⑤ `source:"./"` 마켓플레이스 + 중첩 skills 발견. Spike 결과가 references 전략(중복→심링크)·변수 사용을 **결정**(추측 설계 금지 원칙). **멀티모델 자문 반영**: 초안의 듀얼 배포·references 중복(A1)·`:-` 폴백을 codex(폴백 경로 이중 `skills/` 버그·git-pull 호환 갭)·gemini(중복 안티패턴·클린 컷오버 권고)가 지적 → 클린 컷오버 + 심링크 + Spike 선검증으로 전환해 셋 다 해소. **MINOR**(배포/발견은 Public API 아님 §1, 프로필 integrations 선택 필드 값 변경). 골든 픽스처 5종 통과. 메모리: claude-code-plugin-runtime-behavior. 플랜: ~/.claude/plans/harness-setup-bright-turtle.md

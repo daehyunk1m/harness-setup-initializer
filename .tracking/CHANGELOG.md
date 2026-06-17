@@ -5,6 +5,20 @@
 
 ---
 
+## [1.24.0] — 2026-06-17
+
+### 추가 (Added)
+- **Intent Ledger — Phase 1 수집 인프라 (이슈 #15)**: friction 자매 채널. 세션 종료 시 제품 의도(intended/unintended)를 `.harness-intent.jsonl`(append-only, git 추적, manifest `data`, always-on)에 증류 적재.
+  - `templates/INTENT_LEDGER.md` 정적 참조 문서(스키마·kind·surface·friction 경계).
+  - session-routine `§ 의도 로그` + 세션 종료 Step 4.2 적재 규칙.
+  - scaffold 생성순서 17-d/17-e, §5.12.3/5.12.4, manifest §5.13·§10.1, doc-freshness 제외, §6.2 검증.
+  - Phase 4 능력 카탈로그 의도 적재 줄(수집만 — 증류·승격은 미배선).
+  - harness-check.sh·harness-checklist.md 싱크 검증.
+- 스키마: `{ts, session, kind, surface, feature, statement(≤200), encoded:{prd,e2e,test}}`. `encoded`는 Phase 1 항상 all-false. SESSION_ID는 friction과 공유.
+- 프로필 변경 0, 신규 플레이스홀더 0. 증류·추적·PRD 바인딩은 Phase 2(비-스코프).
+
+---
+
 ## [1.23.0] — 2026-06-17 (Claude Code 플러그인 전환)
 
 ### 추가 (Added)
