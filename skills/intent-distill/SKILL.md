@@ -72,7 +72,7 @@ if [ -d docs/product-specs ] && ls docs/product-specs/*.md >/dev/null 2>&1; then
 4. 매칭 PRD 있으면 그 파일**만** 읽는다. kind에 맞는 섹션에서 근거 탐색:
    - `intended` → `behavior`·`acceptance` 섹션
    - `unintended` → `edge-cases`·`open-questions` 섹션
-   섹션 본문은 정적 추출기로 얻는다(앵커는 경계로만, HTML 주석·`_template.md`/`README.md`·헤딩 제외):
+   섹션 본문은 정적 추출기로 얻는다(앵커는 경계로만, HTML 주석·`_template.md`/`README.md`·헤딩 제외). 아래 `prd_section_body`는 **실행 정본이 `scripts/harness-check.sh`의 동명 함수**이며 이 doc 사본과 로직 동일하다 — 스킬 저장소의 `test/prd-section-body-drift.sh`가 동기를 강제한다(수정 시 양쪽 함께):
    ```bash
    prd_section_body() {
      awk -v sec="$1" '

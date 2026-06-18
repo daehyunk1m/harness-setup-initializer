@@ -38,6 +38,7 @@
 - [ ] `docs/product-specs/_template.md` — PRD 작성 템플릿 (managed substrate, 부재=구조 실패)
   > 작성된 PRD(`docs/product-specs/{id}-{slug}.md`) 부재는 **보류** — 새 프로젝트는 PRD 0개가 정상 (E2E "판정 보류"·Q2 미강제와 평행, 실패 아님)
   > 작성된 PRD의 **마커 위생**(전체줄 `@feature` 1개·유효 feature·파일명 일치·중복 없음)은 harness-check ⑩이 검사한다 — **경고 전용(exit 0)**, 위반이 하네스를 깨지 않는다.
+  > 작성된 PRD의 **내용 위생**(필수 `Edge Cases` 섹션이 비어있지 않음 — 헤딩/주석/공백/단독 placeholder만이면 경고)도 harness-check ⑩이 검사한다 — **경고 전용(exit 0)**, 앵커 부재 PRD는 침묵.
 
 **검증 방법**: `ls AGENTS.md ARCHITECTURE.md claude-progress.txt feature_list.json .harness-friction.jsonl .harness-intent.jsonl init.sh docs/ docs/product-specs/README.md docs/product-specs/_template.md`
 
@@ -247,5 +248,6 @@ npx tsx scripts/doc-freshness.ts
 > (품질 실패가 아니라 전이적 상태 — `npm install` 후 재실행하면 표준 판정). 자동 설치는 하지 않는다.
 
 > 생성된 하네스에서는 위 6개 명령이 `npm run harness:check` 하나로 통합되어 있다
-> (`scripts/harness-check.sh` — tsconfig paths(⑦)·E2E 스캐폴드 구조(⑧)·pre-push(⑨)·PRD 마커 위생(⑩) 포함).
+> (`scripts/harness-check.sh` — tsconfig paths(⑦)·E2E 스캐폴드 구조(⑧)·pre-push(⑨)·PRD 위생(⑩: 마커+내용) 포함).
 > ⑩ PRD 마커 위생은 **경고 전용(exit 0)** — substrate 존재 시 작성 PRD의 마커 위반 5종(unbound/multiple/invalid-feature/file-marker-mismatch/duplicate-binding)을 검출하며, 위반은 판정에 영향을 주지 않는다(managed substrate 부재만 ①에서 exit 1).
+> ⑩ PRD 내용 위생은 작성 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(`empty-edge-cases`) 경고한다 — edge-cases 앵커 존재 시에만, 단독 placeholder(TBD/N/A/없음 등)는 빈 것으로 취급하되 이유-동반 문장은 침묵. 역시 exit 0 경고-전용.

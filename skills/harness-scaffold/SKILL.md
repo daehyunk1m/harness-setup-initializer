@@ -1004,6 +1004,7 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
   - ⑥ doc:check 실행, ⑦ tsconfig paths에 pathAlias 존재, ⑧ E2E 스캐폴드 구조(playwright.config.ts 존재 시) — **경고 전용**. exit code에 영향 없음
 - 전체 통과 시 "✅ 표준 하네스 가동"을 출력한다 (harness-checklist.md § 7의 단계 판정)
 - 템플릿에는 ⑩ PRD 마커 위생 검사(`prd_marker_hygiene` 함수, 경고 전용·exit 0)가 포함된다 — substrate 존재 시 작성 PRD의 전체줄 `@feature` 마커 위생(unbound/multiple/invalid-feature/file-marker-mismatch/duplicate-binding)을 검출한다. 신규 플레이스홀더 없음(경로·패턴 하드코딩). 판정 기준: `references/harness-checklist.md` § 8.
+- 템플릿에는 ⑩ PRD 내용 위생 검사(`prd_content_hygiene` 함수, `prd_section_body` awk 의존, 경고 전용·exit 0)도 포함된다 — substrate 존재 시 작성 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(`empty-edge-cases`) 검출한다. 앵커 부재 PRD는 침묵, 단독 placeholder만 "빈"으로 취급. 신규 플레이스홀더 없음(경로·앵커·placeholder 집합 하드코딩). 판정 기준: `references/harness-checklist.md` § 8.
 - **skipFiles 주의**: 사용자가 skipFiles로 생성을 건너뛴 필수 파일은 ① 검사에서 실패로 잡힌다. Phase 3 (6.13)과 Phase 4 보고에서 해당 실패가 skipFiles에 의한 의도적 부재임을 구분하여 안내한다
 
 ### 5.15 ESLint 보조 규칙 추가 (옵트인)
