@@ -276,9 +276,52 @@ prd_section_body() {
   ' "$2"
 }
 # --- harness:prd-section-body:end ---
+# --- harness:prd-content-hygiene:start (test/prd-content-hygiene-fixtures.sh가 추출·source — prd_section_body 의존; 로직 복사 금지) ---
+prd_content_hygiene() {
+  local specs="docs/product-specs"
+  if [ ! -f "$specs/README.md" ] || [ ! -f "$specs/_template.md" ]; then
+    echo "⏸️ product-specs substrate 부재 — PRD 내용 위생 보류 (① 참조)"; return 0
+  fi
+  local prds
+  prds=$(ls "$specs"/*.md 2>/dev/null | grep -vE '/(README|_template)\.md$')
+  if [ -z "$prds" ]; then
+    echo "⏸️ 작성된 PRD 없음 — PRD 내용 위생 보류 (온디맨드 작성, 정상)"; return 0
+  fi
+  local warn=0 prd base tmp line t hasreal
+  while IFS= read -r prd; do
+    [ -n "$prd" ] || continue
+    base=$(basename "$prd")
+    # 앵커 게이트: edge-cases 앵커 없으면 침묵 (pre-template/수작성 PRD 미벌)
+    grep -qE '^[[:space:]]*<!--[[:space:]]*harness:section=edge-cases([[:space:]]|-->)' "$prd" 2>/dev/null || continue
+    # CRLF 정규화 후 섹션 본문 추출
+    tmp=$(mktemp); tr -d '\r' < "$prd" > "$tmp"
+    hasreal=0
+    while IFS= read -r line; do
+      # 리스트마커(-,*,>)·따옴표·둘러싼 구두점 트림
+      t=$(printf '%s' "$line" | sed -E 's/^[[:space:]>*-]+//; s/^["'"'"']+//; s/[[:space:]"'"'"'.)]+$//')
+      [ -z "$t" ] && continue
+      # 단독 placeholder 토큰이면 비실질 (ASCII 대소문자 무시 + 한국어; C 로케일로 안전 lowercase)
+      case "$(printf '%s' "$t" | LC_ALL=C tr '[:upper:]' '[:lower:]')" in
+        tbd|todo|tba|n/a|na|n.a|none|없음|미정|"해당 없음"|해당없음) ;;
+        *) hasreal=1; break ;;
+      esac
+    done < <(prd_section_body edge-cases "$tmp")
+    rm -f "$tmp"
+    if [ "$hasreal" -eq 0 ]; then
+      echo "⚠️ empty-edge-cases: $base — Edge Cases 섹션이 비어있음. 제외할 사항이 없다면 그 이유를 한 문장으로 명시하세요."
+      warn=1
+    fi
+  done <<PRD_LIST
+$prds
+PRD_LIST
+  [ "$warn" -eq 0 ] && echo "✅ PRD 내용 위생 정상"
+  return 0
+}
+# --- harness:prd-content-hygiene:end ---
 echo ""
 echo "── ⑩ PRD 위생 ──"
 prd_marker_hygiene
+prd_content_hygiene
 
 # 종합 판정
 echo ""
