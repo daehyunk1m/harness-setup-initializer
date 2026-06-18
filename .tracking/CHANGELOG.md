@@ -5,6 +5,19 @@
 
 ---
 
+## [1.29.0] — 2026-06-18 (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2)
+
+### 추가 (Added)
+- **harness-check ⑩ PRD 내용 위생** (이슈 #15 Phase 2b-3 Increment 2): `prd_content_hygiene` — 작성 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(헤딩/주석/공백/단독 placeholder만) `empty-edge-cases` 경고. **exit 0 경고-전용**, edge-cases 앵커 존재 시에만(부재→침묵), 단독 placeholder(TBD/N/A/없음/미정/해당없음 등)만 빈 취급·이유-동반 문장은 침묵. CRLF 정규화. 골든 픽스처 `test/prd-content-hygiene-fixtures.sh`(C1~C16).
+- **공유 awk 헬퍼 수렴**: `prd_section_body`를 harness-check.sh의 canonical 실행 소스로(추출 마커), coverage 픽스처(`test/intent-prd-coverage-fixtures.sh`)를 source로 전환해 실행 awk 사본 2→1. intent-distill SKILL.md doc 사본은 `test/prd-section-body-drift.sh`(drift-guard, 정규화 비교)로 동기 강제.
+- harness-checklist §1.1/§8 + harness-scaffold §5.14 ⑩ 내용 위생 동기화.
+
+### 설계 (Design)
+- 멀티모델 자문(codex 결함·gemini 단순화): awk 정당성, 검사 edge-cases 한정, 별도 함수, DX 메시지 합의. 공유 헬퍼는 (c)+(e) 합성(신규 managed 파일 0·standalone 유지·마이그레이션 불필요). 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`.
+- 신규 플레이스홀더·프로필 필드·managed 파일 0, MINOR. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연. subagent-driven 실행(5태스크 각 2단계 리뷰, 전부 Approved).
+
+---
+
 ## [1.28.0] — 2026-06-18
 
 ### 추가 (Added)

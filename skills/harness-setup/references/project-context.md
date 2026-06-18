@@ -3,7 +3,7 @@
 > 이 문서는 하네스 셋업 스킬의 설계 결정 기록이다.
 > 스킬 개선 작업 시 배경 맥락으로 참조한다.
 >
-> 마지막 업데이트: 2026-06-18 (1.28.0 — PRD 마커 정적 위생 검사, 이슈 #15 Phase 2b-3 Increment 1)
+> 마지막 업데이트: 2026-06-18 (1.29.0 — PRD 빈 섹션 정적 검사, 이슈 #15 Phase 2b-3 Increment 2)
 
 ---
 
@@ -71,7 +71,7 @@
 
 ### 작업 환경
 
-- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.28.0)
+- **개발**: 이 repo에서 작업. 로컬 반영은 `/plugin marketplace add <repo 경로>` → `/plugin install harness-setup@harness-setup-initializer` → `/reload-plugins` (1.23.0~, 현재 1.29.0)
 - **테스트**: 테스트 프로젝트에서 플러그인 설치 후 `claude` — 6개 스킬 번들 자동 디스커버리
 - **호출**: 프로젝트에서 "하네스 셋업해줘" 또는 `/harness-setup`
 
@@ -329,6 +329,9 @@
 
 ### 1.11.0 (E2E 스캐폴드 모듈 — 이슈 #12 증분 1)
 - **1.11.0** (2026-06-15) — E2E 스캐폴드 모듈 (이슈 #12 증분 1). 프론트엔드 옵트인으로 Playwright 기반 E2E 셋업(playwright.config.ts + e2e/ + test:e2e + @playwright/test devDep) 생성. Vitest 충돌은 `*.e2e.ts` 네이밍으로 회피(vitest.config 미수정), tsconfig 절대 비수정(e2e/tsconfig.json 자체 경계), config=managed/스타터=custom. harness-check ⑧ 구조 검사. 신규 플레이스홀더 0개, 마이그레이션 불필요(옵트인·생략 기본). 설계 정본: docs/superpowers/specs/2026-06-15-e2e-scaffold-module-design.md
+
+### 1.29.0 (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2)
+- **1.29.0** (2026-06-18): Phase 2b-3 Increment 2 — PRD 빈 섹션 정적 검사. harness-check ⑩에 `prd_content_hygiene` 추가(경고 전용·exit 0) — 작성된 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(헤딩/주석/공백/단독 placeholder만) `empty-edge-cases` 경고. 앵커 게이트(edge-cases 앵커 부재→침묵)·CRLF 정규화·placeholder 필터(TBD/N/A/없음/미정/해당없음 등 단독 줄만 빈 취급, 이유-동반 문장 생존). **공유 awk 헬퍼 (c)+(e) 합성**(멀티모델 자문 codex (d)+gemini (e) 교집합): `prd_section_body` awk를 harness-check.sh canonical 실행 소스로(추출 마커), coverage 픽스처를 source로 전환해 실행 awk 사본 2→1, intent-distill SKILL.md doc 사본은 `test/prd-section-body-drift.sh`(정규화 비교)로 동기 강제. 골든 픽스처 `test/prd-content-hygiene-fixtures.sh`(C1~C16). subagent-driven 실행(5태스크 각 2단계 리뷰). 신규 플레이스홀더·프로필 필드·managed 파일 0, 마이그레이션 불필요. MINOR. 설계 정본 `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연.
 
 ### 1.28.0 (PRD 마커 정적 위생 검사 — 이슈 #15 Phase 2b-3 Increment 1)
 - **1.28.0** (2026-06-18): Phase 2b-3 Increment 1 — PRD 마커 정적 위생 검사. harness-check ⑩(경고 전용·exit 0) — 작성된 PRD의 마커 위반 5종(unbound-prd/multiple-markers/invalid-feature/file-marker-mismatch/duplicate-binding)을 grep+node -e로 검출. substrate/PRD 부재 보류. 골든 픽스처가 템플릿에서 `prd_marker_hygiene` 함수를 추출·source(단일 소스). 멀티모델 자문 반영: exit 0 경고-전용, 8-상태 라벨 축소(ambiguous-marker·stub-only 시맨틱 기각), awk-free(내용 파싱·교차검사·doc-freshness 글로빙은 Inc2/기각). 신규 플레이스홀더·프로필 필드 0, 마이그레이션 불필요. MINOR.

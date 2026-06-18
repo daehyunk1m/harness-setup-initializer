@@ -838,7 +838,7 @@
 
 ## Intent Ledger Phase 2 백로그 (이슈 #15 후속)
 
-> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2(1.27.0): intent→PRD forward derive·2차원 백로그·blocked≠missing·one-way 마이그레이션 — **완료**. Phase 2b-3 Increment 1(1.28.0): PRD 마커 위생 5종 검사 — **완료**. Phase 2b-3 Increment 2: 빈 섹션 경고·feature↔PRD 교차·공유 awk 헬퍼 결정 — 미착수. 설계 진입점: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md` §9.
+> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2(1.27.0): intent→PRD forward derive·2차원 백로그·blocked≠missing·one-way 마이그레이션 — **완료**. Phase 2b-3 Increment 1(1.28.0): PRD 마커 위생 5종 검사 — **완료**. Phase 2b-3 Increment 2(1.29.0): PRD 빈 섹션 검사 + 공유 awk 헬퍼 (c)+(e) 수렴 — **완료**. Phase 2b-4: feature↔PRD 교차·역방향 미검증 명세 — 미착수(보수성 입증 게이트). 설계 진입점: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md` §3.2.
 
 ### TODO-103: intent-distill 스킬 (Phase 2a)
 - **상태**: [x] 완료 (Session 50, 2026-06-17, 1.25.0)
@@ -860,9 +860,13 @@
 - **상태**: [x] 완료 (2026-06-18, 1.28.0)
 - **내용**: 마커 위반 5종(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding) grep+node -e 검출, exit 0 경고-전용, substrate/PRD 부재 보류. `prd_marker_hygiene` 함수 추출 마커 감싸기 + 골든 픽스처 `test/prd-marker-hygiene-fixtures.sh`(T1~T12) 단일 소스 source. checklist §1.1/§8 + scaffold §5.14 ⑩ SSoT 동기화. **멀티모델 자문**: exit 0 경고-전용 확정, 8-상태 라벨 축소(ambiguous-marker·stub-only 시맨틱 기각), awk-free 순수 grep 한정. 신규 플레이스홀더·프로필 필드 0, 마이그레이션 불필요. 설계 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md`.
 
-### TODO-106b: harness-check 빈 섹션 경고 + feature↔PRD 교차 (Phase 2b-3 Increment 2)
-- **상태**: [ ] 미착수
-- **내용**: 빈 섹션 경고(`<!-- harness:section=edge-cases -->` 이후 실질 내용 없음 → `prd_section_body` awk 필요), feature↔PRD 교차 derive(PRD 없는 feature 경고 — "온디맨드" 원칙과 충돌 주의), **공유 awk 헬퍼 결정**(awk 3중화 부채 회피). **설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md` §9.
+### TODO-106b: harness-check 빈 섹션 검사 (Phase 2b-3 Increment 2)
+- **상태**: [x] 완료 (Session 54, 2026-06-18, 1.29.0)
+- **내용**: `prd_content_hygiene` — 작성 PRD의 필수 `Edge Cases` 섹션이 비면(헤딩/주석/공백/단독 placeholder만) `empty-edge-cases` 경고, exit 0. 앵커 게이트·CRLF 정규화·placeholder 필터(단독 줄만, 이유-동반 문장 생존). **공유 awk 헬퍼 결정 = (c)+(e) 합성**(멀티모델 자문 codex (d)+gemini (e) 교집합): `prd_section_body`를 harness-check canonical 실행 소스로(추출 마커) + coverage 픽스처 source 전환(awk 사본 2→1) + intent-distill doc 사본은 `test/prd-section-body-drift.sh`로 동기 강제. 골든 픽스처 `test/prd-content-hygiene-fixtures.sh`(C1~C16). subagent-driven 실행. 설계 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`.
+
+### TODO-106c: feature↔PRD 교차 + 역방향 미검증 명세 (Phase 2b-4)
+- **상태**: [ ] 미착수 (보수성 입증 게이트 — codex 일관 테마)
+- **내용**: feature↔PRD 교차(PRD 없는 feature 표면화 — README "온디맨드=정상"과 충돌, 새 프로젝트 경고 폭탄 위험; 보수 옵션: 요약 정보줄만 / 고신뢰 `passes:true`만 / 가치 입증 후), 역방향 "미검증 명세"(PRD claim 후보 + 저신뢰 리포트, codex 보수안 — 노이즈 폭탄). 둘 묶어 재설계, 교차가 역방향으로 흡수될 수도. **설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md` §3.2 + inc2-handoff §7.
 
 ### TODO-107: doc-freshness 글로빙 + binding index (Phase 2b-3/잔여)
 - **상태**: [ ] 미착수 (doc-freshness 글로빙은 mtime 노이즈로 Inc1에서 기각 — Inc2 재검토 대상)
