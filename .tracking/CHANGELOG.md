@@ -24,7 +24,9 @@
 - **harness-scaffold §5.14 harness-check 항목 수 동기**: "검사 8항목"→"10항목", 경고-전용 인라인 목록에 누락됐던 ⑨ pre-push·⑩ PRD 위생 추가(checklist §8과 정합). §6.13 보고 행 "(8항목…)"→"(10항목…)".
 - **drift-guard 조기-절단 방어 (Inc2 잔여 Minor)**: `test/prd-section-body-drift.sh`의 잠재 취약점(`norm()` 함수경계 추출이 awk 내부 단독 `}`에서 조기 절단되면 두 사본이 똑같이 잘려 tail diff를 놓친 채 false-sync)을 종단 awk 액션(`print l`) 존재 단언으로 방어. 들여쓴 SKILL.md 사본 때문에 regex 협소화(`/^}/`)는 불가 → 테스트-사이드 방어로 대체(managed 템플릿·런타임 무변경).
 - 검증: drift-guard 통과 + 음성 테스트(절단 시 실패) + PRD 내용/마커 위생 픽스처 17/17·14/14. 신규 플레이스홀더·프로필 필드·managed 파일·Public API 계약 변경 0 → **버전 무변경**.
-- **이슈 #15 현 상황 반영**: GitHub #15(OPEN)에 파이프라인 구현 완료(수용 기준 4/4)·릴리스 매핑(1.24.0~1.29.0)·2b-4 이연 결정 코멘트 게시. 닫기는 사용자 판단 대기.
+- **이슈 #15 종결**: GitHub #15에 파이프라인 구현 완료(수용 기준 4/4)·릴리스 매핑(1.24.0~1.29.0)·2b-4 이연 결정 코멘트 게시 후 **completed로 닫음**(2b-4 트리거 시 재오픈/신규 이슈).
+- **루트 배치 계약 문서 신설**: `references/root-placement-contract.md` — 생성 산출물의 루트 고정(🔒 디스커버리/훅·📁 관례)/이동 가능(📦 보류) 등급 + 재배치 결정·트리거·강행 시 절차. 멀티모델 자문(codex 결함·gemini 대안) 근거. 전체 `.harness/` 이동은 보류(정돈 이득 < 마이그레이션 비용·블래스트 반경, pull 수요 0). CLAUDE.md 파일맵·SKILL.md §11·project-context 설계결정 등록. references는 Public API 아님 → 버전 무변경.
+- **README 최신화**: 6번째 스킬 `intent-distill` 반영("5개"→"6개 스킬", 컴패니언 표·디렉토리 구조·하네스란 불릿), harness-check 그룹핑 정정(품질 ④⑤⑥·경고 ⑦⑧⑨ → 품질 ④⑤·경고 ⑥⑦⑧⑨⑩, 10항목), intent ledger 산출물 4행(INTENT_LEDGER·INTENT_BACKLOG·.harness-intent.jsonl·.harness-feedback-cursor), references 목록에 root-placement-contract·model-selection-guide 추가, 설계 결정 2건(제품 의도 파이프라인 1.24~1.29·루트 배치 계약).
 
 ---
 

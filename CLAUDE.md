@@ -34,6 +34,7 @@
 | `skills/harness-setup/references/integrations/_protocol.md` | 외부 통합 규약 (integrations.<name> 메커니즘 정본 — 통합 추가 4단계 절차) | 낮음 |
 | `skills/harness-setup/references/integrations/*-mapping.md` | 통합별 연계 매핑 정본 (superpowers, multi-model-consult — 분기 리뷰) | 가끔 |
 | `skills/harness-setup/references/versioning-policy.md` | semver 기반 버전 관리 정책 — Public API 정의, 범프 기준 | 낮음 |
+| `skills/harness-setup/references/root-placement-contract.md` | 루트 배치 계약 — 생성 산출물의 루트 고정/이동 가능 등급 + 재배치 결정·트리거 (멀티모델 자문 근거) | 낮음 |
 | `skills/harness-setup/references/project-context.md` | 설계 결정, 버전 히스토리, 다음 단계 | 작업 후 |
 | (참고) `skills/harness-scaffold/references` | → `../harness-setup/references` 심링크 (SSoT 단일본, scaffold 런타임이 읽음 — 중복 금지) | — |
 | `.tracking/HANDOFF.md` | 세션 간 핸드오프 — 현재 상태 + 남은 작업 | 작업 후 |
