@@ -8,19 +8,14 @@ PASS=0; FAIL=0
 ok(){ echo "  ✅ $1"; PASS=$((PASS+1)); }
 no(){ echo "  ❌ $1"; FAIL=$((FAIL+1)); }
 
-prd_section_body() {
-  awk -v sec="$1" '
-    /<!--[[:space:]]*harness:section=/ { insec = ($0 ~ ("harness:section=" sec "[[:space:]]")); next }
-    !insec { next }
-    { l=$0; sub(/^[[:space:]]+/,"",l); sub(/[[:space:]]+$/,"",l) }
-    incmt { if (l ~ /-->/) incmt=0; next }
-    l ~ /^<!--/ && l !~ /-->/ { incmt=1; next }
-    l ~ /^<!--.*-->$/ { next }
-    l ~ /^#/ { next }
-    l == "" { next }
-    { print l }
-  ' "$2"
-}
+# prd_section_body는 harness-check.sh(canonical 실행 소스)에서 추출·source — 로직 복사 없음
+# (동기 보장: test/prd-section-body-drift.sh)
+HC="$ROOT/skills/harness-scaffold/templates/harness-check.sh"
+FN="$(mktemp)"
+sed -n '/# --- harness:prd-section-body:start/,/# --- harness:prd-section-body:end/p' "$HC" > "$FN"
+grep -q 'prd_section_body()' "$FN" || { echo "❌ harness-check.sh에서 prd_section_body 추출 실패"; rm -f "$FN"; exit 1; }
+# shellcheck disable=SC1090
+. "$FN"
 
 echo "T1: 백로그 2차원 헤더"
 { grep -q "prd_state" "$BL" 2>/dev/null && ok "prd_state 컬럼"; } || no "prd_state 컬럼 없음"
@@ -30,7 +25,7 @@ echo "T1: 백로그 2차원 헤더"
 { grep -q "derived" "$BL" 2>/dev/null && ok "derived/user 분리 노트"; } || no "derived 노트 없음"
 
 echo "T2: PRD 바인딩 grep (whole-line -Fx)"
-TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+TMP="$(mktemp -d)"; trap 'rm -f "$FN"; rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/docs/product-specs"
 printf '@feature:F007\n\n# Progress\n' > "$TMP/docs/product-specs/F007-progress.md"
 printf '# Note\n\n`@feature:F007` 참고\n' > "$TMP/docs/product-specs/inline.md"
