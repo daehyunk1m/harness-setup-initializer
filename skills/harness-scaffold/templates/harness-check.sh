@@ -261,6 +261,21 @@ DUP_LIST
   return 0
 }
 # --- harness:prd-marker-hygiene:end ---
+# --- harness:prd-section-body:start (canonical 실행 소스 — test/prd-content-hygiene-fixtures.sh·test/intent-prd-coverage-fixtures.sh가 추출·source. intent-distill SKILL.md §4.1은 동일 로직 doc 사본이며 test/prd-section-body-drift.sh가 동기 보장 — 로직 복사 금지) ---
+prd_section_body() {
+  awk -v sec="$1" '
+    /<!--[[:space:]]*harness:section=/ { insec = ($0 ~ ("harness:section=" sec "[[:space:]]")); next }
+    !insec { next }
+    { l=$0; sub(/^[[:space:]]+/,"",l); sub(/[[:space:]]+$/,"",l) }
+    incmt { if (l ~ /-->/) incmt=0; next }
+    l ~ /^<!--/ && l !~ /-->/ { incmt=1; next }
+    l ~ /^<!--.*-->$/ { next }
+    l ~ /^#/ { next }
+    l == "" { next }
+    { print l }
+  ' "$2"
+}
+# --- harness:prd-section-body:end ---
 echo ""
 echo "── ⑩ PRD 위생 ──"
 prd_marker_hygiene
