@@ -173,7 +173,7 @@
 **열린 이슈: 0건** (#15 Phase 2b-3 Increment 1 종결 — harness-check ⑩ PRD 마커 위생 5종 검사(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding), exit 0 경고-전용, 골든 픽스처 T1~T12, SSoT 동기화(checklist §1.1/§8·scaffold §5.14). Increment 2(빈 섹션 경고·feature↔PRD 교차·공유 awk 헬퍼 결정) 미착수.)
 
 ### ▶ 다음 작업: Phase 2b-3 Increment 2 — 빈 섹션 경고 + feature↔PRD 교차 검사
-**설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md` §9 — Inc2 스코프·공유 헬퍼 결정·진입점. 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작.
+**설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-handoff.md` — Inc2 스코프·상속 결정·핵심 미결정(★awk 공유 헬퍼 a/b/c·★교차 노이즈)·앵커·선행 읽기. 다음 세션은 이 문서 → brainstorming(멀티모델 자문 권장)으로 시작. (Inc1 설계 정본: `…-phase-2b-3-prd-hygiene-design.md` §9.)
 - **Inc2 스코프** (§9에서 확정):
   - harness-check **빈 섹션 경고**(anti-blank 가이드 기계 검사 — `<!-- harness:section=edge-cases -->` 이후 실질 내용 없음, `prd_section_body` awk 필요)
   - harness-check **feature↔PRD 교차 derive**(PRD 없는 feature 경고 — "온디맨드" 원칙과 충돌 주의)
