@@ -12,6 +12,9 @@
 - **공유 awk 헬퍼 수렴**: `prd_section_body`를 harness-check.sh의 canonical 실행 소스로(추출 마커), coverage 픽스처(`test/intent-prd-coverage-fixtures.sh`)를 source로 전환해 실행 awk 사본 2→1. intent-distill SKILL.md doc 사본은 `test/prd-section-body-drift.sh`(drift-guard, 정규화 비교)로 동기 강제.
 - harness-checklist §1.1/§8 + harness-scaffold §5.14 ⑩ 내용 위생 동기화.
 
+### 수정 (Fixed)
+- `prd_content_hygiene` 앵커 게이트를 `[[:space:]]`로 좁혀 `prd_section_body` awk·설계 §5와 정합 — 공백없는 수작성 앵커(`edge-cases-->`)에서 내용 있는 PRD에 발생하던 false-positive 제거. 최종 whole-branch 리뷰(opus) 반영, 픽스처 C17 회귀.
+
 ### 설계 (Design)
 - 멀티모델 자문(codex 결함·gemini 단순화): awk 정당성, 검사 edge-cases 한정, 별도 함수, DX 메시지 합의. 공유 헬퍼는 (c)+(e) 합성(신규 managed 파일 0·standalone 유지·마이그레이션 불필요). 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`.
 - 신규 플레이스홀더·프로필 필드·managed 파일 0, MINOR. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연. subagent-driven 실행(5태스크 각 2단계 리뷰, 전부 Approved).
