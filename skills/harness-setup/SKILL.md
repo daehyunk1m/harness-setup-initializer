@@ -40,7 +40,7 @@ echo "=== END STATE ==="
 하네스 셋업은 두 단계로 나뉜다:
 
 1. **`/harness-setup` (이 스킬)** — 프로젝트 분석 + Q&A → `.harness-profile.json` 저장
-2. **`/harness-scaffold`** — 프로필을 읽어 19개 파일 생성 + 검증 + 보고
+2. **`/harness-scaffold`** — 프로필을 읽어 하네스 파일 생성 + 검증 + 보고
 
 이 스킬은 Phase 1(분석)만 담당한다. 파일 생성은 `/harness-scaffold`가 수행한다.
 

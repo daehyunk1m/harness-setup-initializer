@@ -33,8 +33,8 @@ fi
 이 스킬은 `/harness-setup`이 생성한 **프로젝트 프로필**(`.harness-profile.json`)을 읽어 하네스 파일을 생성한다.
 
 - § 0에서 프로필이 프롬프트에 이미 주입되었으므로, 별도로 파일을 읽을 필요 없이 위 데이터를 사용한다
-- 프로필 데이터를 기반으로 24개 파일을 의존 순서대로 생성한다 (+ package.json scripts 수정, 옵트인 시 ESLint 설정 수정·외부 통합 연계 렌더링)
-- 생성 후 15항목 검증 체크리스트를 자동 실행한다
+- 프로필 데이터를 기반으로 **생성 순서**(아래)대로 모든 하네스 파일을 생성한다 — 생성 파일의 전체 목록·카테고리는 § 10.1 인벤토리가 정본이다 (+ package.json scripts 수정, 옵트인 시 ESLint 설정 수정·외부 통합 연계 렌더링)
+- 생성 후 검증 체크리스트(§ 6)를 자동 실행한다
 - 최종 결과를 사용자에게 보고한다
 
 ### 이 스킬이 하지 않는 일
@@ -998,10 +998,10 @@ Phase 2의 **마지막 단계**로, 모든 파일 생성이 완료된 후 `.harn
 | `{{DOC_CHECK_COMMAND}}` | 고정 규칙 (§ 5.5에서 추가한 스크립트 호출) | `npm run doc:check` |
 | `{{PATH_ALIAS_LIST}}` | 프로필 pathAlias — 문자열이면 단일(`"@/"`), 배열이면 공백 구분(`"@/" "~/"`)으로 렌더 (bash for-in용) | `"@/"` |
 
-- 검사 8항목과 exit 규칙:
+- 검사 10항목과 exit 규칙:
   - ① 필수 파일 존재, ② AGENTS.md 100줄 이내, ③ feature_list.json 유효 JSON — **하네스 구조** 항목. 실패 시 exit 1
   - ④ lint:arch 실행, ⑤ validate 실행 — **프로젝트 품질** 항목. 실패 시 exit 1 (exit code 전파)
-  - ⑥ doc:check 실행, ⑦ tsconfig paths에 pathAlias 존재, ⑧ E2E 스캐폴드 구조(playwright.config.ts 존재 시) — **경고 전용**. exit code에 영향 없음
+  - ⑥ doc:check 실행, ⑦ tsconfig paths에 pathAlias 존재, ⑧ E2E 스캐폴드 구조(playwright.config.ts 존재 시), ⑨ pre-push 게이트 활성 여부(.githooks/pre-push 또는 core.hooksPath 설정 시), ⑩ PRD 위생(substrate 존재 시 — 마커 위생 + 빈 Edge Cases 내용 위생) — **경고 전용**. exit code에 영향 없음
 - 전체 통과 시 "✅ 표준 하네스 가동"을 출력한다 (harness-checklist.md § 7의 단계 판정)
 - 템플릿에는 ⑩ PRD 마커 위생 검사(`prd_marker_hygiene` 함수, 경고 전용·exit 0)가 포함된다 — substrate 존재 시 작성 PRD의 전체줄 `@feature` 마커 위생(unbound/multiple/invalid-feature/file-marker-mismatch/duplicate-binding)을 검출한다. 신규 플레이스홀더 없음(경로·패턴 하드코딩). 판정 기준: `references/harness-checklist.md` § 8.
 - 템플릿에는 ⑩ PRD 내용 위생 검사(`prd_content_hygiene` 함수, `prd_section_body` awk 의존, 경고 전용·exit 0)도 포함된다 — substrate 존재 시 작성 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(`empty-edge-cases`) 검출한다. 앵커 부재 PRD는 침묵, 단독 placeholder만 "빈"으로 취급. 신규 플레이스홀더 없음(경로·앵커·placeholder 집합 하드코딩). 판정 기준: `references/harness-checklist.md` § 8.
@@ -1390,7 +1390,7 @@ fi
 - ✅ .claude/rules/ 파일 (3개): 정상
 - ✅ 플레이스홀더 치환: 완료
 - ✅ .harness-manifest.json: 정상
-- ✅ harness:check: 통과 (8항목 — ⑧ E2E 스캐폴드는 playwright.config.ts 존재 시에만 검사)
+- ✅ harness:check: 통과 (10항목 — ⑧ E2E 스캐폴드·⑨ pre-push·⑩ PRD 위생은 해당 조건 존재 시에만 실질 검사)
 - ✅ 보조 스킬 연계: {N}종 렌더링 (드롭 {M}종 — 실존 검증 실패 시 스킬명과 함께 표시. integrations 옵트인 시에만 이 행 표시)
 
 ### 하네스 단계 판정

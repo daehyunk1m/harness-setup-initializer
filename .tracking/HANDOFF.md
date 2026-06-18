@@ -1,6 +1,6 @@
 # harness-setup 스킬 개선 핸드오프 문서
 
-> 작성일: 2026-06-10 (갱신 2026-06-18 — 1.28.0 PRD 마커 정적 위생 검사, 이슈 #15 Phase 2b-3 Increment 1 종결)
+> 작성일: 2026-06-10 (갱신 2026-06-18 — 1.29.0 후속 docs-hygiene: 카운트 SSoT 참조 전환 + §5.14 harness-check 항목 동기 + drift-guard 조기절단 방어, 이슈 #15 GitHub 현 상황 반영)
 > 목적: 다음 세션에서 남은 개선 작업을 이어받기 위한 컨텍스트 전달
 
 ---
@@ -145,6 +145,7 @@
   - **멀티모델 적대적 검증**(codex 결함/gemini 운영): 게이트를 LLM 기억 → 명시적 판정+TDD STATE+`@feature:` grep 키로 결정화, VERIFY 범위 축소(feature 스펙만), 증분 2 → 2a/2b 분할. 도그푸딩 6회차
   - 전부 managed 템플릿 편집 → §12.6 자동 감지 전파, **신규 파일·git config·플레이스홀더 0(29 불변)**, 마이그레이션 불필요. 골든 픽스처 회귀 통과
 
+- **Session 55 (06-18)**: 1.29.0 후속 docs-hygiene (**버전 무변경** — 동작/계약/스키마 무변경) + 이슈 #15 GitHub 현 상황 반영. 핸드오프 §비차단 2건 해소. ① **카운트 SSoT 참조 전환**: 현재시제 "파일 N개" 표기(README ×2·CLAUDE.md·harness-setup/SKILL.md·versioning-policy·scaffold §36)의 하드코딩 정수 제거 → §10.1 인벤토리/생성 순서를 정본으로 참조. 조사 중 **핸드오프 목표값 "24"도 stale 확인**(실제 ≈30 — 파일이 §10.1에 `22-b…22-h` 서브번호로 삽입되며 헤드라인 정수가 미추종한 구조적 드리프트) → 사용자 결정으로 "SSoT 참조 전환"(정수 재발 차단, 핵심원칙 #5). scaffold §36 "15항목 검증"도 §6 참조로. ② **§5.14 harness-check 항목 동기**: "검사 8항목"→"10항목" + 경고-전용 인라인 목록에 누락됐던 ⑨ pre-push·⑩ PRD 위생 추가(checklist §8과 정합), §6.13 보고 행 동기. ③ **drift-guard 조기-절단 방어**(Inc2 잔여 Minor): `test/prd-section-body-drift.sh`에 종단 awk 액션(`print l`) 존재 단언 추가 — `norm()` 함수경계 추출이 awk 내부 단독 `}`에서 조기 절단돼 false-sync 나는 잠재 취약점 방어(테스트-사이드 전용, 들여쓴 SKILL.md 사본 때문에 regex 협소화 불가). ④ **이슈 #15**: 구현 완료(수용 기준 4/4, 1.24.0~1.29.0)·릴리스 매핑·2b-4 이연 결정 코멘트 게시 → 사용자 승인으로 **completed 닫음**(2b-4 트리거 시 재오픈/신규 이슈). 검증: PRD 내용/마커 위생 픽스처 17/17·14/14 + drift-guard 통과 + 음성 테스트. 신규 플레이스홀더·프로필 필드·managed 파일·Public API 계약 변경 0.
 - **Session 54 (06-18)**: 1.29.0 — PRD 빈 섹션 정적 검사 (이슈 #15 Phase 2b-3 Increment 2 종결). harness-check ⑩에 `prd_content_hygiene` 추가 — 작성 PRD의 필수 `Edge Cases` 섹션이 비어 있으면(헤딩/주석/공백/단독 placeholder만) `empty-edge-cases` 경고, exit 0 경고-전용. **앵커 게이트**(edge-cases 앵커 부재→침묵, pre-template/수작성 PRD 미벌)·**CRLF 정규화**·**placeholder 필터**(TBD/N/A/없음/미정/해당없음 등 단독 줄만 빈 취급, 이유-동반 문장 생존). **공유 awk 헬퍼 (c)+(e) 합성**(멀티모델 자문 codex (d)+gemini (e) 교집합 — intent-distill 마크다운 doc은 런타임 source 불가라는 gemini 제약 반영): `prd_section_body`를 harness-check.sh canonical 실행 소스로(추출 마커), coverage 픽스처(`intent-prd-coverage-fixtures.sh`)를 source로 전환해 실행 awk 사본 2→1, intent-distill SKILL.md doc 사본은 `test/prd-section-body-drift.sh`(정규화 비교)로 동기 강제. 골든 픽스처 `test/prd-content-hygiene-fixtures.sh`(C1~C16) + 핵심 로직 15케이스 사전 스모크 실측. checklist §1.1/§8 + scaffold §5.14 동기화. **subagent-driven 실행**(5태스크 각 2단계 리뷰, 전부 Approved). 신규 플레이스홀더·프로필 필드·managed 파일 0, 마이그레이션 불필요. MINOR. 설계 `…-inc2-design.md`, 계획 `…-inc2-empty-section.md`. **feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연**. **최종 whole-branch 리뷰(opus): Critical/Important 0, Ready to merge.** T2(앵커 게이트 false-positive — 게이트 grep이 awk trailing-space 요구보다 넓어 공백없는 수작성 앵커에서 오탐)는 **59f1163으로 수정**(게이트를 `[[:space:]]`로 좁혀 awk·설계 §5와 정합, 픽스처 C17 회귀). T1(drift-guard norm 함수경계 추출)만 acceptable-Minor 잔존.
 - **Session 53 (06-18)**: 1.28.0 — PRD 마커 정적 위생 검사 (이슈 #15 Phase 2b-3 Increment 1 종결). harness-check ⑩ 추가 — 작성된 PRD 파일의 마커 위반 5종(unbound-prd·multiple-markers·invalid-feature·file-marker-mismatch·duplicate-binding) grep+node -e 검출, exit 0 경고-전용, substrate/PRD 부재 보류. `prd_marker_hygiene` 함수를 추출 마커로 감싸 골든 픽스처(`test/prd-marker-hygiene-fixtures.sh`, T1~T12)가 템플릿에서 source(단일 소스). checklist §1.1/§8 + scaffold §5.14 ⑩ SSoT 동기화. **멀티모델 자문 반영**: exit 0 경고-전용 확정, 8-상태 라벨 축소(ambiguous-marker·stub-only 시맨틱 기각), awk-free(내용 파싱·교차검사·doc-freshness 글로빙은 Inc2/기각). 신규 플레이스홀더·프로필 필드 0, 마이그레이션 불필요. **Inc2(빈 섹션·교차·awk 공유 헬퍼 결정) 미착수**. MINOR. 설계 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-prd-hygiene-design.md`.
 - **Session 52 (06-18)**: 1.27.0 — Intent→PRD Coverage Derive (이슈 #15 Phase 2b-2 종결). intent-distill에 forward PRD 커버리지 derive 추가. §3 차원별 독립 게이팅(4조합 매트릭스, blocked≠missing). §4.1 PRD derive(whole-line @feature, kind↔섹션, 보수적 5-상태, 빈 섹션 가드). §2+§5 2차원 백로그 머지 + one-way 마이그레이션(E2E-only→2차원, 미지 컬럼·waiver 보존, idempotent). §6 2차원 리포트(비대칭 하이라이트·보류 구분). INTENT_BACKLOG 2차원 헤더 템플릿. §7 capability·B1·§5.12.5 동기화. 골든 픽스처 `test/intent-prd-coverage-fixtures.sh`. **역방향 "미검증 명세" 제외(멀티모델 자문: 노이즈 폭탄, 2b-4 후보)**. **2b-3(정적 harness-check 검증)** 미착수. MINOR, 하위 호환.
@@ -170,8 +171,8 @@
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
   - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.29.0** (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2, 2026-06-18) — **main 머지 완료** (2026-06-18: 2b-1~2b-3 일괄 머지 + 누락 태그 v1.26.0~v1.29.0 보정 + stale 브랜치 5개 정리)
-**열린 이슈: 0건** (#15 Phase 2b-3 Increment 2 종결 — harness-check ⑩ PRD 내용 위생(`prd_content_hygiene`, 빈 Edge Cases 섹션 `empty-edge-cases` 경고), 공유 awk 헬퍼 canonical+drift-guard 수렴, 골든 픽스처 C1~C16, SSoT 동기화. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연.)
+**현재 버전: 1.29.0** (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2, 2026-06-18) — **main 머지 완료** (2026-06-18: 2b-1~2b-3 일괄 머지 + 누락 태그 v1.26.0~v1.29.0 보정 + stale 브랜치 5개 정리). 이후 docs-hygiene 후속(버전 무변경, 아래 Session 55)
+**구현 미완 이슈: 0건. 열린 GitHub 이슈: 0건** — **#15 CLOSED**(completed): intent ledger 파이프라인 구현 완료(수용 기준 4/4, 1.24.0~1.29.0), 상태/이연 코멘트 게시 후 닫음. 남은 Phase 2b-4는 조건부 이연이라 트리거 발동 시 재오픈/신규 이슈.
 
 ### ▶ 다음 작업: Phase 2b-4 = **이연 결정** (조건부 — 트리거 충족 시 재검토)
 **Phase 2b-4 이연** (2026-06-18 brainstorming + 멀티모델 자문 결론). feature↔PRD 교차·역방향 "미검증 명세" 둘 다 보수성 게이트("입증 못하면 뺀다") 통과 실패 — ① 게이트로 쓰려던 `passes`가 약함(진행 상태 ≠ 품질 보증) ② 역방향은 기존 `@feature`/INTENT_BACKLOG 커버리지 추적과 중복 ③ 교차는 README "PRD 없음=온디맨드 정상" 정책과 충돌 ④ pull 수요 없음(사용자 본인 "가치 불확실"). **codex·gemini 모두 (c) 이연 수렴**, per-item 경고는 양치기 소년이라 공통 기각. **결정 기록 정본**: `docs/superpowers/specs/2026-06-18-phase-2b-4-defer-decision.md` — 4사분면 프레이밍(검증-게이팅)·재검토 트리거·미래 시작점(INFO 요약줄 우선·`passes` 강 게이트 금지)을 박제. **재검토 트리거**(decision record §5): 구체적 pull 수요 / `passes` 강화 / README 정책 변경 / forward derive 운영 데이터 중 하나.
@@ -179,8 +180,8 @@
   - binding index 파일(중복 PRD canonical override) — YAGNI, 중복이 실제 문제 될 때.
   - Architect PRE-RED **강제** PRD 작성(게이트 — 현재는 소프트 트리거만). gemini 경고: 검증 도구 없이 PRD 양산=환각. 신중히.
   - doc-freshness 글로빙(`product-specs/**`) — mtime 노이즈로 Inc1·Inc2에서 기각, 가치 입증 시 PRD 전용 별도 출력으로 재검토.
-- **Inc2 잔여 Minor**(비차단, 최종 리뷰 acceptable): drift-guard `test/prd-section-body-drift.sh` `norm()`이 함수경계 regex로 awk 추출 — SKILL.md는 마커 없어 불가피, awk에 bare `}` 없어 robust. (T2 앵커 게이트 false-positive는 59f1163으로 해결.)
-- 별개 cleanup(비차단, docs-hygiene): `harness-setup/SKILL.md`·`CLAUDE.md` "19개 파일" → 실제 24개 드리프트 정정 + scaffold §5.14 "8항목"·⑨ 인라인 갭.
+- ~~**Inc2 잔여 Minor**: drift-guard `norm()` 함수경계 추출~~ — **해결 (Session 55)**: 종단 awk 액션(`print l`) 존재 단언으로 조기-절단 방어(테스트-사이드 전용). regex 협소화는 들여쓴 SKILL.md 사본 때문에 불가하므로 방어로 대체.
+- ~~별개 cleanup(docs-hygiene): "19개 파일" 드리프트 + scaffold §5.14 "8항목"·⑨ 갭~~ — **해결 (Session 55)**: 카운트는 SSoT(§10.1) 참조로 전환(하드코딩 정수 제거 — "24"도 stale였음, 실제 ≈30). §5.14 "8항목"→"10항목" + ⑨⑩ 인라인 추가.
 
 상세 변경 이력: `.tracking/CHANGELOG.md` 참조
 투두 상태: `.tracking/TODO.md` 참조

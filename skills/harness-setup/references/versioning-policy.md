@@ -14,7 +14,7 @@ semver는 "Public API를 선언하라"고 요구한다. 이 스킬의 Public API
 | **프로필 스키마** | `.harness-profile.json` | harness-scaffold | 높음 (31개 플레이스홀더의 원천) |
 | **매니페스트 스키마** | `.harness-manifest.json` | 업그레이드 시스템 | 높음 (마이그레이션 키) |
 | **프리셋 스키마** | `presets/*.json` | 프리셋 매칭 로직 | 보통 |
-| **생성 파일 구조** | 템플릿 → 생성된 19개 파일 (+ 옵트인 시 ESLint·E2E) | AI 에이전트, 사용자 | 보통 |
+| **생성 파일 구조** | 템플릿 → 생성 파일 일습 (전체 목록·카테고리: `harness-scaffold/SKILL.md` § 10.1; 옵트인 시 ESLint·E2E 추가) | AI 에이전트, 사용자 | 보통 |
 
 Public API에 포함되지 **않는** 것:
 - SKILL.md 내부 로직 (소크라테스 문답 순서, 스캔 알고리즘)

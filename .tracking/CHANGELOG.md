@@ -19,6 +19,13 @@
 - 멀티모델 자문(codex 결함·gemini 단순화): awk 정당성, 검사 edge-cases 한정, 별도 함수, DX 메시지 합의. 공유 헬퍼는 (c)+(e) 합성(신규 managed 파일 0·standalone 유지·마이그레이션 불필요). 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`.
 - 신규 플레이스홀더·프로필 필드·managed 파일 0, MINOR. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연. subagent-driven 실행(5태스크 각 2단계 리뷰, 전부 Approved).
 
+### 유지보수 (Maintenance) — 1.29.0 후속 (버전 무변경)
+- **docs-hygiene 카운트 드리프트 정정 (SSoT 참조 전환)**: 현재시제 "파일 N개" 표기(README ×2·`CLAUDE.md`·`harness-setup/SKILL.md`·`versioning-policy.md`·`harness-scaffold/SKILL.md` §36)의 하드코딩 정수(stale "19"/"24" — 실제 ≈30, 파일이 §10.1에 `22-b…22-h` 서브번호로 삽입되며 헤드라인이 미추종한 구조적 드리프트)를 제거하고 **§10.1 인벤토리/생성 순서를 정본으로 가리키게** 전환. 정수 드리프트의 구조적 재발을 차단(핵심원칙 #5와 정합). scaffold §36 "15항목 검증"도 §6 참조로 전환.
+- **harness-scaffold §5.14 harness-check 항목 수 동기**: "검사 8항목"→"10항목", 경고-전용 인라인 목록에 누락됐던 ⑨ pre-push·⑩ PRD 위생 추가(checklist §8과 정합). §6.13 보고 행 "(8항목…)"→"(10항목…)".
+- **drift-guard 조기-절단 방어 (Inc2 잔여 Minor)**: `test/prd-section-body-drift.sh`의 잠재 취약점(`norm()` 함수경계 추출이 awk 내부 단독 `}`에서 조기 절단되면 두 사본이 똑같이 잘려 tail diff를 놓친 채 false-sync)을 종단 awk 액션(`print l`) 존재 단언으로 방어. 들여쓴 SKILL.md 사본 때문에 regex 협소화(`/^}/`)는 불가 → 테스트-사이드 방어로 대체(managed 템플릿·런타임 무변경).
+- 검증: drift-guard 통과 + 음성 테스트(절단 시 실패) + PRD 내용/마커 위생 픽스처 17/17·14/14. 신규 플레이스홀더·프로필 필드·managed 파일·Public API 계약 변경 0 → **버전 무변경**.
+- **이슈 #15 현 상황 반영**: GitHub #15(OPEN)에 파이프라인 구현 완료(수용 기준 4/4)·릴리스 매핑(1.24.0~1.29.0)·2b-4 이연 결정 코멘트 게시. 닫기는 사용자 판단 대기.
+
 ---
 
 ## [1.28.0] — 2026-06-18

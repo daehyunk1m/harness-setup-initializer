@@ -93,7 +93,7 @@
 # (개발 중 로컬 반영: /plugin marketplace add <이 repo 경로> 후 install + /reload-plugins)
 cd ~/Desktop/side-project/haja-web-fe && claude
 # 1단계: "하네스 셋업해줘" 또는 "/harness-setup" → .harness-profile.json 생성 확인
-# 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 19개 파일 생성 확인 (생성 순서 20단계)
+# 2단계: Stop hook에 의해 자동 체이닝 → /harness-scaffold 실행 → 하네스 파일 생성 확인 (생성 순서·카테고리: harness-scaffold/SKILL.md § 생성 순서 + § 10.1)
 # 3단계: .harness-manifest.json 생성 확인 → Stop hook이 allow 반환 → 정상 종료
 # 4단계: npm run harness:check 실행 → "표준 하네스 가동" 판정 확인
 
