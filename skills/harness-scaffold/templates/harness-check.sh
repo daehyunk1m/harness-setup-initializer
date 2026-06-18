@@ -292,7 +292,7 @@ prd_content_hygiene() {
     [ -n "$prd" ] || continue
     base=$(basename "$prd")
     # 앵커 게이트: edge-cases 앵커 없으면 침묵 (pre-template/수작성 PRD 미벌)
-    grep -qE '^[[:space:]]*<!--[[:space:]]*harness:section=edge-cases([[:space:]]|-->)' "$prd" 2>/dev/null || continue
+    grep -qE '^[[:space:]]*<!--[[:space:]]*harness:section=edge-cases[[:space:]]' "$prd" 2>/dev/null || continue
     # CRLF 정규화 후 섹션 본문 추출
     tmp=$(mktemp); tr -d '\r' < "$prd" > "$tmp"
     hasreal=0

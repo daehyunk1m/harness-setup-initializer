@@ -99,6 +99,11 @@ sed -e 's#{{LINT_ARCH_COMMAND}}#true#g' -e 's#{{VALIDATE_COMMAND}}#true#g' \
 { [ "$CODE" -eq 0 ] && grep -q "⑩ PRD 위생" "$D/out.txt" && grep -q "✅ PRD 내용 위생 정상" "$D/out.txt"; } \
   && ok "전체 실행 exit 0 + ⑩ 내용 위생 출력" || no "render-after 실패 (exit $CODE): $(cat "$D/out.txt")"
 
+echo "C17: 공백없는 앵커(edge-cases-->) + 내용 → 침묵 (게이트↔awk 정합, false-positive 방지)"
+D="$TMP/c17"; mkproj "$D"
+printf '@feature:F001\n<!-- harness:section=edge-cases-->\n## Edge\n실제 제외 규칙 명시\n<!-- harness:section=acceptance -->\n## A\n본문\n' > "$D/docs/product-specs/F001-a.md"
+OUT="$(run_in "$D")"; { ! echo "$OUT" | grep -q "⚠️"; } && ok "공백없는 앵커 침묵(false-positive 방지)" || no "공백없는 앵커 오탐: $OUT"
+
 echo
 echo "결과: PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ] && { echo "✅ 전부 통과"; exit 0; } || { echo "❌ 실패 있음"; exit 1; }
