@@ -838,7 +838,7 @@
 
 ## Intent Ledger Phase 2 백로그 (이슈 #15 후속)
 
-> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2(1.27.0): intent→PRD forward derive·2차원 백로그·blocked≠missing·one-way 마이그레이션 — **완료**. Phase 2b-3 Increment 1(1.28.0): PRD 마커 위생 5종 검사 — **완료**. Phase 2b-3 Increment 2(1.29.0): PRD 빈 섹션 검사 + 공유 awk 헬퍼 (c)+(e) 수렴 — **완료**. Phase 2b-4: feature↔PRD 교차·역방향 미검증 명세 — 미착수(보수성 입증 게이트). 설계 진입점: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md` §3.2.
+> Phase 1(1.24.0): 수집 인프라. Phase 2a(1.25.0): intent-distill 스킬(증류·백로그·nudge). Phase 2b-1(1.26.0): PRD substrate — **완료**. Phase 2b-2(1.27.0): intent→PRD forward derive·2차원 백로그·blocked≠missing·one-way 마이그레이션 — **완료**. Phase 2b-3 Increment 1(1.28.0): PRD 마커 위생 5종 검사 — **완료**. Phase 2b-3 Increment 2(1.29.0): PRD 빈 섹션 검사 + 공유 awk 헬퍼 (c)+(e) 수렴 — **완료**. Phase 2b-4: feature↔PRD 교차·역방향 미검증 명세 — **이연(brainstorming+자문 결론, 코드 변경 0)**. 결정 기록: `docs/superpowers/specs/2026-06-18-phase-2b-4-defer-decision.md`.
 
 ### TODO-103: intent-distill 스킬 (Phase 2a)
 - **상태**: [x] 완료 (Session 50, 2026-06-17, 1.25.0)
@@ -865,8 +865,9 @@
 - **내용**: `prd_content_hygiene` — 작성 PRD의 필수 `Edge Cases` 섹션이 비면(헤딩/주석/공백/단독 placeholder만) `empty-edge-cases` 경고, exit 0. 앵커 게이트·CRLF 정규화·placeholder 필터(단독 줄만, 이유-동반 문장 생존). **공유 awk 헬퍼 결정 = (c)+(e) 합성**(멀티모델 자문 codex (d)+gemini (e) 교집합): `prd_section_body`를 harness-check canonical 실행 소스로(추출 마커) + coverage 픽스처 source 전환(awk 사본 2→1) + intent-distill doc 사본은 `test/prd-section-body-drift.sh`로 동기 강제. 골든 픽스처 `test/prd-content-hygiene-fixtures.sh`(C1~C16). subagent-driven 실행. 설계 정본: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md`.
 
 ### TODO-106c: feature↔PRD 교차 + 역방향 미검증 명세 (Phase 2b-4)
-- **상태**: [ ] 미착수 (보수성 입증 게이트 — codex 일관 테마)
-- **내용**: feature↔PRD 교차(PRD 없는 feature 표면화 — README "온디맨드=정상"과 충돌, 새 프로젝트 경고 폭탄 위험; 보수 옵션: 요약 정보줄만 / 고신뢰 `passes:true`만 / 가치 입증 후), 역방향 "미검증 명세"(PRD claim 후보 + 저신뢰 리포트, codex 보수안 — 노이즈 폭탄). 둘 묶어 재설계, 교차가 역방향으로 흡수될 수도. **설계 진입점**: `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md` §3.2 + inc2-handoff §7.
+- **상태**: [ ] **이연** (2026-06-18 brainstorming + 멀티모델 자문 결론 — 보수성 게이트 미통과)
+- **내용**: feature↔PRD 교차(PRD 없는 feature 표면화 — README "온디맨드=정상"과 충돌, 새 프로젝트 경고 폭탄 위험; 보수 옵션: 요약 정보줄만 / 고신뢰 `passes:true`만 / 가치 입증 후), 역방향 "미검증 명세"(PRD claim 후보 + 저신뢰 리포트, codex 보수안 — 노이즈 폭탄). 둘 묶어 재설계, 교차가 역방향으로 흡수될 수도.
+- **결정(이연)**: brainstorming + codex·gemini 자문 모두 **(c) 이연** 수렴. 근거 — ① `passes`가 약한 게이트(진행 상태 ≠ 품질 보증 → ③ 오탐) ② 역방향은 기존 `@feature`/INTENT_BACKLOG 커버리지 추적 중복 ③ 교차는 README 온디맨드 정책 충돌 ④ pull 수요 없음. per-item 경고는 양치기 소년이라 공통 기각, 최소 형태는 INFO 요약줄. **결정 기록 정본**: `docs/superpowers/specs/2026-06-18-phase-2b-4-defer-decision.md`(4사분면 프레이밍·재검토 트리거 §5·미래 시작점 §6 박제). 코드 변경 0, 버전 범프 없음. **재검토 트리거**: 구체적 pull 수요 / `passes` 강화 / README 정책 변경 / forward derive 운영 데이터 중 하나. (역방향 단독은 TODO-108.)
 
 ### TODO-107: doc-freshness 글로빙 + binding index (Phase 2b-3/잔여)
 - **상태**: [ ] 미착수 (doc-freshness 글로빙은 mtime 노이즈로 Inc1에서 기각 — Inc2 재검토 대상)

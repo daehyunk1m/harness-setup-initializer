@@ -170,14 +170,11 @@
   - **증분 2b(TODO-95b) 타깃 1.13.0→1.14.0 재지정**(1.13.0이 본 릴리스에 소비됨)
   - **1.13.1**: haja TaskItem 레이아웃 수정 도그푸딩 발견 — 에이전트가 `@critical`로 E2E 판정 도출 + `not_applicable` 즉흥 분류. test-engineer.md §3.5에 3 status 기준 명시(not_applicable=UI 표면 전무 시만, UI 있는데 미작성=skipped) + @critical은 verdict와 무관(2b 전용) 명기. PATCH. **보류 TODO-99**: 시각/레이아웃 회귀 사각(jsdom 검증 불가) — E2E 스코프 확장은 데이터 더 모은 뒤
 
-**현재 버전: 1.29.0** (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2, 2026-06-18) — **feature/phase-2b-3-prd-hygiene 브랜치**
+**현재 버전: 1.29.0** (PRD 빈 섹션 정적 검사 — 이슈 #15 Phase 2b-3 Increment 2, 2026-06-18) — **main 머지 완료** (2026-06-18: 2b-1~2b-3 일괄 머지 + 누락 태그 v1.26.0~v1.29.0 보정 + stale 브랜치 5개 정리)
 **열린 이슈: 0건** (#15 Phase 2b-3 Increment 2 종결 — harness-check ⑩ PRD 내용 위생(`prd_content_hygiene`, 빈 Edge Cases 섹션 `empty-edge-cases` 경고), 공유 awk 헬퍼 canonical+drift-guard 수렴, 골든 픽스처 C1~C16, SSoT 동기화. feature↔PRD 교차·역방향 미검증 명세는 2b-4 이연.)
 
-### ▶ 다음 작업: Phase 2b-4 — feature↔PRD 교차 + 역방향 "미검증 명세" (보수성 입증 후)
-**진입점**: Inc2 설계 정본 `docs/superpowers/specs/2026-06-18-phase-2b-3-inc2-design.md` §3.2(비-스코프) + Inc2 핸드오프 `…-inc2-handoff.md` §7(잔여). 2b-3에서 노이즈 위험으로 이연한 두 검사를 묶어 재설계한다. 다음 세션은 brainstorming(멀티모델 자문 권장)으로 시작 — **둘 다 "보수성 입증 못하면 뺀다"(codex 일관 테마)가 게이트**.
-- **2b-4 후보 스코프**:
-  - **feature↔PRD 교차**(PRD 없는 feature 표면화) — README "PRD 없음=정상(온디맨드)"과 충돌해 새 프로젝트 경고 폭탄 위험. 보수 옵션: 개별 경고 금지·요약 정보줄(`ℹ️ N/M`)만 / 고신뢰(`passes:true`인데 PRD 없음)만 / 가치 입증 후 착수.
-  - **역방향 "미검증 명세"**(PRD claim 후보 + 저신뢰 리포트, codex 보수안) — 노이즈 폭탄 위험. 교차가 이쪽으로 흡수될 수도(brainstorming 판단).
+### ▶ 다음 작업: Phase 2b-4 = **이연 결정** (조건부 — 트리거 충족 시 재검토)
+**Phase 2b-4 이연** (2026-06-18 brainstorming + 멀티모델 자문 결론). feature↔PRD 교차·역방향 "미검증 명세" 둘 다 보수성 게이트("입증 못하면 뺀다") 통과 실패 — ① 게이트로 쓰려던 `passes`가 약함(진행 상태 ≠ 품질 보증) ② 역방향은 기존 `@feature`/INTENT_BACKLOG 커버리지 추적과 중복 ③ 교차는 README "PRD 없음=온디맨드 정상" 정책과 충돌 ④ pull 수요 없음(사용자 본인 "가치 불확실"). **codex·gemini 모두 (c) 이연 수렴**, per-item 경고는 양치기 소년이라 공통 기각. **결정 기록 정본**: `docs/superpowers/specs/2026-06-18-phase-2b-4-defer-decision.md` — 4사분면 프레이밍(검증-게이팅)·재검토 트리거·미래 시작점(INFO 요약줄 우선·`passes` 강 게이트 금지)을 박제. **재검토 트리거**(decision record §5): 구체적 pull 수요 / `passes` 강화 / README 정책 변경 / forward derive 운영 데이터 중 하나.
 - **잔여 이연 항목** (별도 증분):
   - binding index 파일(중복 PRD canonical override) — YAGNI, 중복이 실제 문제 될 때.
   - Architect PRE-RED **강제** PRD 작성(게이트 — 현재는 소프트 트리거만). gemini 경고: 검증 도구 없이 PRD 양산=환각. 신중히.
